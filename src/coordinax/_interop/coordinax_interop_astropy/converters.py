@@ -478,8 +478,8 @@ def difflonlatsph_to_apysph(
     >>> import coordinax as cx
 
     >>> dif = cx.LonLatSphericalVelocity(d_distance=Quantity(1, unit="km/s"),
-    ...                                      d_lat=Quantity(2, unit="mas/yr"),
-    ...                                      d_lon=Quantity(3, unit="mas/yr"))
+    ...                                  d_lat=Quantity(2, unit="mas/yr"),
+    ...                                   d_lon=Quantity(3, unit="mas/yr"))
     >>> convert(dif, apyc.SphericalDifferential)
     <SphericalDifferential (d_lon, d_lat, d_distance) in (mas / yr, mas / yr, km / s)
         (3., 2., 1.)>
@@ -540,8 +540,8 @@ def diffloncoslatsph_to_apysph(
     >>> import coordinax as cx
 
     >>> dif = cx.LonCosLatSphericalVelocity(d_distance=Quantity(1, unit="km/s"),
-    ...                                         d_lat=Quantity(2, unit="mas/yr"),
-    ...                                         d_lon_coslat=Quantity(3, unit="mas/yr"))
+    ...                                     d_lat=Quantity(2, unit="mas/yr"),
+    ...                                     d_lon_coslat=Quantity(3, unit="mas/yr"))
     >>> convert(dif, apyc.SphericalCosLatDifferential)
     <SphericalCosLatDifferential (d_lon_coslat, d_lat, d_distance) in (mas / yr, mas / yr, km / s)
         (3., 2., 1.)>

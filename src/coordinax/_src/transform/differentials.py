@@ -12,12 +12,13 @@ from plum import dispatch
 
 import quaxed.numpy as jnp
 from dataclassish import field_items
-from unxt import AbstractDistance, Quantity
+from unxt import Quantity
 
 from coordinax._src.base import AbstractPosition, AbstractVelocity
 from coordinax._src.d1.base import AbstractVelocity1D
 from coordinax._src.d2.base import AbstractVelocity2D
 from coordinax._src.d3.base import AbstractVelocity3D
+from coordinax._src.distance.base import AbstractDistance
 
 
 # TODO: implement for cross-representations
