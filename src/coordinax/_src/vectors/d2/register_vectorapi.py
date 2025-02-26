@@ -2,8 +2,10 @@
 
 __all__: list[str] = []
 
+from functools import partial
 from typing import Any
 
+import jax
 from plum import dispatch
 
 import quaxed.numpy as jnp
@@ -12,132 +14,144 @@ from .base import AbstractAcc2D, AbstractPos2D, AbstractVel2D
 from .cartesian import CartesianAcc2D, CartesianPos2D, CartesianVel2D
 from .polar import PolarAcc, PolarPos, PolarVel
 from .spherical import TwoSphereAcc, TwoSpherePos, TwoSphereVel
-from coordinax._src.vectors.base_pos import AbstractPos
-
-
-@dispatch
-def vconvert(
-    current: AbstractPos2D, target: type[AbstractPos2D], /, **kwargs: Any
-) -> AbstractPos2D:
-    """AbstractPos2D -> Cartesian2D -> AbstractPos2D.
-
-    This is the base case for the transformation of 2D vectors.
-    """
-    return vconvert(target, vconvert(CartesianPos2D, current))
-
-
-@dispatch.multi(
-    (type[CartesianPos2D], CartesianPos2D),
-    (type[PolarPos], PolarPos),
+from coordinax._src.vectors.api import AuxDict, OptAuxDict, OptUSys, ParamsDict
+from coordinax._src.vectors.base import AbstractVector
+from coordinax._src.vectors.private_api import (
+    combine_aux,
+    vconvert_parse_input,
+    vconvert_parse_output,
 )
-def vconvert(
-    target: type[AbstractPos2D], current: AbstractPos2D, /, **kwargs: Any
-) -> AbstractPos2D:
-    """Self transform of 2D vectors."""
-    return current
 
-
-@dispatch.multi(
-    (type[CartesianVel2D], CartesianVel2D, AbstractPos),
-    (type[PolarVel], PolarVel, AbstractPos),
-)
-def vconvert(
-    target: type[AbstractVel2D],
-    current: AbstractVel2D,
-    position: AbstractPos,
-    /,
-    **kwargs: Any,
-) -> AbstractVel2D:
-    """Self transform of 2D Differentials."""
-    return current
-
+###############################################################################
+# Vector Transformation
 
 # =============================================================================
-# CartesianPos2D
+# `vconvert_impl`
 
 
 @dispatch
-def vconvert(
-    target: type[PolarPos], current: CartesianPos2D, /, **kwargs: Any
-) -> PolarPos:
+@partial(jax.jit, static_argnums=(0, 1), static_argnames=("units",))
+def vconvert_impl(
+    to_vector: type[AbstractPos2D],
+    from_vector: type[AbstractPos2D],
+    params: ParamsDict,
+    /,
+    *,
+    in_aux: OptAuxDict = None,
+    out_aux: OptAuxDict = None,
+    units: OptUSys = None,
+) -> tuple[ParamsDict, AuxDict]:
+    """AbstractPos -> CartesianPos1D -> AbstractPos."""
+    params, aux = vconvert_impl(
+        CartesianPos2D, from_vector, params, in_aux=in_aux, out_aux=None, units=units
+    )
+    params, aux = vconvert_impl(
+        to_vector, CartesianPos2D, params, in_aux=aux, out_aux=out_aux, units=units
+    )
+    return params, aux
+
+
+@dispatch.multi(
+    # Positions
+    (type[CartesianPos2D], type[CartesianPos2D], ParamsDict),
+    (type[PolarPos], type[PolarPos], ParamsDict),
+    (type[TwoSpherePos], type[TwoSpherePos], ParamsDict),
+    # Velocities
+    (type[CartesianVel2D], type[CartesianVel2D], ParamsDict),
+    (type[PolarVel], type[PolarVel], ParamsDict),
+    (type[TwoSphereVel], type[TwoSphereVel], ParamsDict),
+    # Accelerations
+    (type[CartesianAcc2D], type[CartesianAcc2D], ParamsDict),
+    (type[PolarAcc], type[PolarAcc], ParamsDict),
+    (type[TwoSphereAcc], type[TwoSphereAcc], ParamsDict),
+)
+@partial(jax.jit, static_argnums=(0, 1), static_argnames=("units",), inline=True)
+def vconvert_impl(
+    to_vector: type[AbstractVector],
+    from_vector: type[AbstractVector],
+    params: ParamsDict,
+    /,
+    *,
+    in_aux: OptAuxDict = None,
+    out_aux: OptAuxDict = None,
+    units: OptUSys = None,
+) -> tuple[ParamsDict, AuxDict]:
+    """Self transform."""
+    return params, combine_aux(in_aux, out_aux)
+
+
+@dispatch
+@partial(jax.jit, static_argnums=(0, 1), static_argnames=("units",))
+def vconvert_impl(
+    to_vector: type[PolarPos],
+    from_vector: type[CartesianPos2D],
+    p: ParamsDict,
+    /,
+    *,
+    in_aux: OptAuxDict = None,
+    out_aux: OptAuxDict = None,
+    units: OptUSys = None,
+) -> tuple[ParamsDict, OptAuxDict]:
     """CartesianPos2D -> PolarPos.
 
     The `x` and `y` coordinates are converted to the radial coordinate `r` and
     the angular coordinate `phi`.
+
     """
-    r = jnp.hypot(current.x, current.y)
-    phi = jnp.atan2(current.y, current.x)
-    return target(r=r, phi=phi)
-
-
-# =============================================================================
-# PolarPos
+    p = vconvert_parse_input(p, from_vector.dimensions, units)
+    r = jnp.hypot(p["x"], p["y"])
+    phi = jnp.atan2(p["y"], p["x"])
+    outp = {"r": r, "phi": phi}
+    outp = vconvert_parse_output(outp, to_vector.dimensions, units)
+    return outp, combine_aux(in_aux, out_aux)
 
 
 @dispatch
-def vconvert(
-    target: type[CartesianPos2D], current: PolarPos, /, **kwargs: Any
-) -> CartesianPos2D:
-    """PolarPos -> CartesianPos2D."""
-    d = current.r.distance
-    x = d * jnp.cos(current.phi)
-    y = d * jnp.sin(current.phi)
-    return target(x=x, y=y)
+@partial(jax.jit, static_argnums=(0, 1), static_argnames=("units",))
+def vconvert_impl(
+    to_vector: type[CartesianPos2D],
+    from_vector: type[PolarPos],
+    p: ParamsDict,
+    /,
+    *,
+    in_aux: OptAuxDict = None,
+    out_aux: OptAuxDict = None,
+    units: OptUSys = None,
+) -> tuple[ParamsDict, OptAuxDict]:
+    """PolarPos -> CartesianPos2D.
+
+    The `r` and `phi` coordinates are converted to the `x` and `y` coordinates.
+
+    """
+    p = vconvert_parse_input(p, from_vector.dimensions, units)
+    x = p["r"] * jnp.cos(p["phi"])
+    y = p["r"] * jnp.sin(p["phi"])
+    outp = {"x": x, "y": y}
+    outp = vconvert_parse_output(outp, to_vector.dimensions, units)
+    return outp, combine_aux(in_aux, out_aux)
 
 
 # =============================================================================
-# CartesianVel2D
+# `vconvert`
 
 
-@dispatch
+@dispatch.multi(
+    # Positions
+    (type[CartesianPos2D], CartesianPos2D),
+    (type[PolarPos], PolarPos),
+    (type[TwoSpherePos], TwoSpherePos),
+    # Velocities
+    (type[CartesianVel2D], CartesianVel2D, AbstractPos2D),
+    (type[CartesianVel2D], CartesianVel2D),  # q not needed
+    (type[PolarVel], PolarVel, AbstractPos2D),
+    # Accelerations
+    (type[CartesianAcc2D], CartesianAcc2D, AbstractVel2D, AbstractPos2D),
+    (type[CartesianAcc2D], CartesianAcc2D),  # q,p not needed
+)
 def vconvert(
-    target: type[CartesianVel2D], current: CartesianVel2D, /
-) -> CartesianVel2D:
-    """CartesianVel2D -> CartesianVel2D with no position.
-
-    Cartesian coordinates are an affine coordinate system and so the
-    transformation of an n-th order derivative vector in this system do not
-    require lower-order derivatives to be specified. See
-    https://en.wikipedia.org/wiki/Tensors_in_curvilinear_coordinates for more
-    information. This mixin provides a corresponding implementation of the
-    `coordinax.vconvert` method for Cartesian velocities.
-
-    Examples
-    --------
-    >>> import coordinax as cx
-    >>> v = cx.vecs.CartesianVel2D.from_([1, 1], "m/s")
-    >>> cx.vconvert(cx.vecs.CartesianVel2D, v) is v
-    True
-
-    """
-    return current
-
-
-# =============================================================================
-# CartesianAcc2D
-
-
-@dispatch
-def vconvert(
-    target: type[CartesianAcc2D], current: CartesianAcc2D, /
-) -> CartesianAcc2D:
-    """CartesianAcc2D -> CartesianAcc2D with no position.
-
-    Cartesian coordinates are an affine coordinate system and so the
-    transformation of an n-th order derivative vector in this system do not
-    require lower-order derivatives to be specified. See
-    https://en.wikipedia.org/wiki/Tensors_in_curvilinear_coordinates for more
-    information. This mixin provides a corresponding implementation of the
-    `coordinax.vconvert` method for Cartesian vectors.
-
-    Examples
-    --------
-    >>> import coordinax as cx
-    >>> a = cx.vecs.CartesianAcc2D.from_([1, 1], "m/s2")
-    >>> cx.vconvert(cx.vecs.CartesianAcc2D, a) is a
-    True
-
-    """
+    target: type[AbstractVector], current: AbstractVector, /, *args: Any, **kwargs: Any
+) -> AbstractVector:
+    """Self transform of 2D vectors."""
     return current
 
 

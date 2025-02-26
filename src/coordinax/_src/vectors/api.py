@@ -2,6 +2,7 @@
 
 __all__ = [
     "vector",
+    "vconvert_impl",
     "vconvert",
     "normalize_vector",
     "cartesian_vector_type",
@@ -10,12 +11,41 @@ __all__ = [
     "time_nth_derivative_vector_type",
 ]
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, TypeAlias
 
 from plum import dispatch
 
+import unxt as u
+
 if TYPE_CHECKING:
     import coordinax.vecs
+
+
+@dispatch.abstract
+def vector(*args: Any, **kwargs: Any) -> Any:
+    """Construct a vector given the arguments."""
+    raise NotImplementedError  # pragma: no cover
+
+
+ParamsDict: TypeAlias = dict[str, Any]
+AuxDict: TypeAlias = dict[str, Any]
+OptAuxDict: TypeAlias = AuxDict | None
+OptUSys: TypeAlias = u.AbstractUnitSystem | None
+
+
+@dispatch.abstract
+def vconvert_impl(
+    to_vector: "type[coordinax.vecs.AbstractVector]",
+    from_vector: "type[coordinax.vecs.AbstractVector]",
+    /,
+    params: ParamsDict,
+    *,
+    in_aux: OptAuxDict = None,
+    out_aux: OptAuxDict = None,
+    units: OptUSys = None,
+) -> tuple[ParamsDict, AuxDict]:
+    """Implement the vector conversion."""
+    raise NotImplementedError  # pragma: no cover
 
 
 @dispatch.abstract
@@ -37,12 +67,6 @@ def vconvert(target: type[Any], /, *args: Any, **kwargs: Any) -> Any:
 @dispatch.abstract
 def normalize_vector(x: Any, /) -> Any:
     """Return the unit vector."""
-    raise NotImplementedError  # pragma: no cover
-
-
-@dispatch.abstract
-def vector(*args: Any, **kwargs: Any) -> Any:
-    """Construct a vector given the arguments."""
     raise NotImplementedError  # pragma: no cover
 
 
