@@ -77,7 +77,7 @@ maintainers.md
 - auto-differentiation ({func}`~jax.grad`, {func}`~jax.jacobian`, {func}`jax.hessian`)
 - GPU/TPU/multi-host acceleration
 
-And best of all, `coordinax` doesn't force you to use special unit-compatible re-exports of JAX libraries. You can use `coordinax` with existing JAX code, and with one simple decorator ({func}`quax.quaxify`), JAX will work with `coordinax` objects.
+And best of all, `coordinax` doesn't force you to use special unit-compatible re-exports of JAX libraries. You can use `coordinax` with existing JAX code, and with one simple decorator ([`quax.quaxify`](https://docs.kidger.site/quax/)), JAX will work with `coordinax` objects.
 
 ---
 

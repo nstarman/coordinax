@@ -102,6 +102,7 @@ def doc_patch_public_api(names: "set[str] | frozenset[str]", /) -> None:
         mod = getattr(obj, "__module__", None)
         if mod is None or "._src." not in mod:
             continue
-        obj.__module__ = module  # type: ignore[union-attr]
+        with contextlib.suppress(AttributeError):
+            obj.__module__ = module  # type: ignore[union-attr]
         if isinstance(obj, type):
             _patch_orig_bases(obj, mod, module)

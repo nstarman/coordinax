@@ -105,6 +105,7 @@ nitpick_ignore = [
     ("py:class", "ArrayLike"),
     ("py:class", "jax.typing.ArrayLike"),
     ("py:class", "unxt.Angle"),
+    ("py:class", "unxt.quantity.Quantity"),
     ("py:class", "coordinax.distances._src.base.AbstractDistance"),
     # Private internal helper class from unxt with no public docs
     ("py:class", "unxt._src.quantity.base._QuantityIndexUpdateHelper"),
