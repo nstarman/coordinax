@@ -12,10 +12,8 @@ import contextlib
 import inspect
 import os
 
-from typing import TYPE_CHECKING, Any
-
-if TYPE_CHECKING:
-    from collections.abc import Callable
+from collections.abc import Callable
+from typing import Any
 
 _BUILDING_DOCS: bool = os.environ.get("COORDINAX_BUILDING_DOCS", "0") == "1"
 
@@ -30,7 +28,7 @@ def _patch_orig_bases(cls: type, old_mod: str, new_mod: str) -> None:
         _patch_orig_bases(subclass, old_mod, new_mod)
 
 
-def doc_public_api(path: str, /) -> "Callable[[Any], Any]":
+def doc_public_api(path: str, /) -> Callable[[Any], Any]:
     """Outermost decorator: rewrite ``__module__`` to *path* when building docs.
 
     No-op unless ``COORDINAX_BUILDING_DOCS=1``. Apply to public re-exports
