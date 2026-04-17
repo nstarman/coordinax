@@ -11,6 +11,15 @@
 
 Contents:
 
+- ``doc_public_api``
+    Outermost decorator that rewrites ``__module__`` on the decorated object
+    to the given public export path when ``COORDINAX_BUILDING_DOCS=1``.
+    No-op during normal code execution.
+
+- ``doc_patch_public_api``
+    Patches ``__module__`` on all named exports of the calling module to its
+    public path when ``COORDINAX_BUILDING_DOCS=1``. No-op otherwise.
+
 - ``QuantityMatrix``
     An N-D quantity matrix/vector where every element carries its own unit.
     Supports both 1-D (vector) and 2-D (matrix) cases.
@@ -31,6 +40,8 @@ Contents:
 """
 
 __all__ = (
+    "doc_public_api",
+    "doc_patch_public_api",
     "QuantityMatrix",
     "UnitsMatrix",
     "pack_uniform_unit",
@@ -43,6 +54,7 @@ __all__ = (
 from ._setup_package import install_import_hook
 
 with install_import_hook("coordinax.internal"):
+    from coordinax.internal._api_compat import doc_patch_public_api, doc_public_api
     from coordinax.internal._pack_utils import (
         pack_nonuniform_unit,
         pack_to_qmatrix,

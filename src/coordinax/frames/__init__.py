@@ -150,6 +150,10 @@ def _load_optional_frame_exports() -> None:
 
 _load_optional_frame_exports()
 
+from coordinax.internal import doc_patch_public_api
+
+doc_patch_public_api(set(__all__))
+del doc_patch_public_api
 
 # clean up namespace
 del (

@@ -9,3 +9,8 @@ with install_import_hook("coordinax.distances"):
 
 
 del install_import_hook
+
+from coordinax.internal import doc_patch_public_api
+
+doc_patch_public_api(set(__all__))
+del doc_patch_public_api
