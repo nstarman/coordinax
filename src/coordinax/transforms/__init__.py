@@ -17,6 +17,7 @@ from collections.abc import Mapping
 from typing import Final
 
 from ._setup_package import install_import_hook
+from coordinax.internal import doc_patch_public_api
 
 __all__: tuple[str, ...] = (
     # API
@@ -138,8 +139,6 @@ def _load_optional_transform_exports() -> None:
 
 
 _load_optional_transform_exports()
-
-from coordinax.internal import doc_patch_public_api  # noqa: E402
 
 doc_patch_public_api(set(__all__))
 del doc_patch_public_api

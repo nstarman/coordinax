@@ -54,6 +54,7 @@ from collections.abc import Mapping
 from typing import Final
 
 from ._setup_package import install_import_hook
+from coordinax.internal import doc_patch_public_api
 
 # Defined here b/c it's mutated by optional imports
 __all__: tuple[str, ...] = (
@@ -149,8 +150,6 @@ def _load_optional_frame_exports() -> None:
 
 
 _load_optional_frame_exports()
-
-from coordinax.internal import doc_patch_public_api  # noqa: E402
 
 doc_patch_public_api(set(__all__))
 del doc_patch_public_api
