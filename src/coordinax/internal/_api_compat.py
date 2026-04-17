@@ -8,8 +8,10 @@ autodoc reports public paths rather than private ``._src.`` paths when
 
 __all__ = ["doc_public_api", "doc_patch_public_api"]
 
+import contextlib
 import inspect
 import os
+
 from collections.abc import Callable
 from typing import TypeVar
 
@@ -23,10 +25,8 @@ def _patch_orig_bases(cls: type, old_mod: str, new_mod: str) -> None:
     for subclass in cls.__subclasses__():
         for base in getattr(subclass, "__orig_bases__", ()):
             if getattr(base, "__module__", None) == old_mod:
-                try:
+                with contextlib.suppress(AttributeError):
                     base.__module__ = new_mod  # type: ignore[union-attr]
-                except AttributeError:
-                    pass
         _patch_orig_bases(subclass, old_mod, new_mod)
 
 

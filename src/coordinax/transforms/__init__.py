@@ -139,7 +139,7 @@ def _load_optional_transform_exports() -> None:
 
 _load_optional_transform_exports()
 
-from coordinax.internal import doc_patch_public_api
+from coordinax.internal import doc_patch_public_api  # noqa: E402
 
 doc_patch_public_api(set(__all__))
 del doc_patch_public_api
