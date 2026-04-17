@@ -12,12 +12,12 @@ import contextlib
 import inspect
 import os
 
-from collections.abc import Callable
-from typing import TypeVar
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 _BUILDING_DOCS: bool = os.environ.get("COORDINAX_BUILDING_DOCS", "0") == "1"
-
-_T = TypeVar("_T")
 
 
 def _patch_orig_bases(cls: type, old_mod: str, new_mod: str) -> None:
@@ -30,7 +30,7 @@ def _patch_orig_bases(cls: type, old_mod: str, new_mod: str) -> None:
         _patch_orig_bases(subclass, old_mod, new_mod)
 
 
-def doc_public_api(path: str, /) -> Callable[[_T], _T]:
+def doc_public_api(path: str, /) -> "Callable[[Any], Any]":
     """Outermost decorator: rewrite ``__module__`` to *path* when building docs.
 
     No-op unless ``COORDINAX_BUILDING_DOCS=1``. Apply to public re-exports
@@ -54,7 +54,7 @@ def doc_public_api(path: str, /) -> Callable[[_T], _T]:
 
     """
 
-    def decorator(obj: _T) -> _T:
+    def decorator(obj: Any) -> Any:
         if _BUILDING_DOCS:
             obj.__module__ = path  # type: ignore[union-attr]
         return obj
@@ -72,7 +72,7 @@ def doc_patch_public_api(names: "set[str] | frozenset[str]", /) -> None:
     packages are left unchanged.
 
     Also patches ``__module__`` on generic aliases stored in ``__orig_bases__``
-    of every subclass of each patched class (see :func:`_patch_orig_bases`).
+    of every subclass of each patched class.
 
     Parameters
     ----------
