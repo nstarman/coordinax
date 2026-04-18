@@ -81,7 +81,9 @@ intersphinx_mapping = {
 # Silence import failures for optional extension packages that are not
 # installed in the docs build environment (coordinax.astro,
 # coordinax.interop.astropy are optional extras).
-suppress_warnings = ["autodoc.import_object"]
+# Silence notebook execution failures: perf.ipynb runs JAX benchmarks that
+# may time out in CI (no cache, nb_execution_timeout=100s).
+suppress_warnings = ["autodoc.import_object", "mystnb.exec"]
 
 autodoc_typehints = "description"
 autodoc_typehints_format = "short"
