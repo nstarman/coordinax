@@ -140,10 +140,22 @@ nitpick_ignore = [
     ("py:class", "astropy.units.quantity.Quantity"),
     ("py:class", "astropy.coordinates.builtin_frames.icrs.ICRS"),
     ("py:class", "astropy.coordinates.builtin_frames.galactocentric.Galactocentric"),
-    ("py:class", "astropy.coordinates.representation.cartesian.CartesianRepresentation"),
-    ("py:class", "astropy.coordinates.representation.cylindrical.CylindricalRepresentation"),
-    ("py:class", "astropy.coordinates.representation.spherical.SphericalRepresentation"),
-    ("py:class", "astropy.coordinates.representation.spherical.PhysicsSphericalRepresentation"),
+    (
+        "py:class",
+        "astropy.coordinates.representation.cartesian.CartesianRepresentation",
+    ),
+    (
+        "py:class",
+        "astropy.coordinates.representation.cylindrical.CylindricalRepresentation",
+    ),
+    (
+        "py:class",
+        "astropy.coordinates.representation.spherical.SphericalRepresentation",
+    ),
+    (
+        "py:class",
+        "astropy.coordinates.representation.spherical.PhysicsSphericalRepresentation",
+    ),
     # collections.abc — Python docs inventory uses py:class for these but
     # sphinx_autodoc_typehints sometimes resolves them as bare names.
     ("py:class", "collections.abc.Callable"),
@@ -217,8 +229,8 @@ nitpick_ignore_regex = [
     (r"py:class", r"^[a-zA-Z0-9]$"),        # Single character (TypeVars)
     (r"py:class", r"^'.*'$"),               # Quoted shape annotations (e.g. 'N N')
     (r"py:class", r"^[a-z][a-z ]+$"),       # lowercase words/phrases (no dots/caps)
-    (r"py:class", r".*\s.*"),               # contains whitespace — not a valid class name
-    (r"py:class", r"^[A-Z][a-z]+ [a-z].*"), # Sentence-case phrases (redundant but clear)
+    (r"py:class", r".*\s.*"),  # whitespace → not a valid class name
+    (r"py:class", r"^[A-Z][a-z]+ [a-z].*"),  # Sentence-case phrases
     (r"py:class", r"^\d"),                  # Leading digit (e.g. '4')
     (r"py:class", r"^[A-Z][a-z]{1,4}$"),   # Short TypeVar names (e.g. Rep, Tau)
     (r"py:obj", r"typing\.Annotated\[.*"),  # Complex Annotated types
