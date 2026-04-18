@@ -2,6 +2,7 @@
 
 import contextlib
 import importlib
+import os
 import pathlib
 from doctest import ELLIPSIS, NORMALIZE_WHITESPACE
 
@@ -9,31 +10,36 @@ from collections.abc import Callable, Iterable, Sequence
 from types import ModuleType
 
 import _pytest.pathlib as pytest_pathlib
-import sybil.document as sybil_document
-import sybil.python as sybil_python
-from hypothesis import HealthCheck, Phase, settings
-from sybil import Document, Lexeme, Region, Sybil, document as sybil_document
+import hypothesis
+import sybil
 from sybil.evaluators.doctest import DocTestEvaluator
 from sybil.evaluators.python import PythonEvaluator
 from sybil.parsers import myst, rest
 from sybil.parsers.abstract.doctest import DocTestStringParser
-from sybil.python import import_path as sybil_import_path
+
+os.environ.setdefault("COORDINAX_BUILDING_DOCS", "1")
 
 # =========================================================
 # Hypothesis settings
 
 # Quick smoke test profile to check the test infrastructure is working.
-settings.register_profile(
-    "smoke", max_examples=5, phases=[Phase.explicit, Phase.reuse, Phase.generate]
+hypothesis.settings.register_profile(
+    "smoke",
+    max_examples=5,
+    phases=[
+        hypothesis.Phase.explicit,
+        hypothesis.Phase.reuse,
+        hypothesis.Phase.generate,
+    ],
 )
 
 # Default profile for development: more examples and allow slow tests.
-settings.register_profile(
-    "dev", max_examples=50, suppress_health_check=[HealthCheck.too_slow]
+hypothesis.settings.register_profile(
+    "dev", max_examples=50, suppress_health_check=[hypothesis.HealthCheck.too_slow]
 )
 
 # Thorough profile for CI: many examples and all health checks.
-settings.register_profile("thorough", max_examples=500)
+hypothesis.settings.register_profile("thorough", max_examples=500)
 
 
 # =========================================================
@@ -171,11 +177,11 @@ def _import_path_with_namespace(path: pathlib.Path) -> ModuleType:
                 _path_to_module(resolved_path, root, namespace)
             )
 
-    return sybil_import_path(path)
+    return sybil.python.import_path(path)
 
 
-sybil_document.import_path = _import_path_with_namespace  # type: ignore[attr-defined]
-sybil_python.import_path = _import_path_with_namespace  # ty: ignore[invalid-assignment]
+sybil.document.import_path = _import_path_with_namespace  # type: ignore[attr-defined]
+sybil.python.import_path = _import_path_with_namespace
 
 
 # =========================================================
@@ -231,7 +237,7 @@ class PyconCodeBlockParser:
         self.doctest_parser = DocTestStringParser(DocTestEvaluator(doctest_optionflags))
         self.codeblock_parser = myst.CodeBlockParser(language="pycon")
 
-    def __call__(self, document: Document) -> Iterable[Region]:
+    def __call__(self, document: sybil.Document) -> Iterable[sybil.Region]:
         """Parse pycon code blocks and yield doctest regions.
 
         Parameters
@@ -273,14 +279,14 @@ class CodeCellParser:
         )
 
     @staticmethod
-    def _strip_magics(source: Lexeme) -> Lexeme:
+    def _strip_magics(source: sybil.Lexeme) -> sybil.Lexeme:
         """Remove IPython line-magic lines (``%…``) from *source*."""
         cleaned = "\n".join(
             line for line in source.splitlines() if not line.lstrip().startswith("%")
         )
-        return Lexeme(cleaned, source.offset, source.line_offset)
+        return sybil.Lexeme(cleaned, source.offset, source.line_offset)
 
-    def __call__(self, document: Document) -> Iterable[Region]:  # noqa: D102
+    def __call__(self, document: sybil.Document) -> Iterable[sybil.Region]:  # noqa: D102
         for region in self.codeblock_parser(document):
             source = region.parsed
             if isinstance(source, str) and source.startswith(">>>"):
@@ -294,7 +300,7 @@ class CodeCellParser:
 
 optionflags = ELLIPSIS | NORMALIZE_WHITESPACE
 
-parsers: Sequence[Callable[[Document], Iterable[Region]]] = [
+parsers: Sequence[Callable[[sybil.Document], Iterable[sybil.Region]]] = [
     myst.DocTestDirectiveParser(optionflags=optionflags),
     myst.PythonCodeBlockParser(doctest_optionflags=optionflags),
     PyconCodeBlockParser(doctest_optionflags=optionflags),
@@ -302,8 +308,8 @@ parsers: Sequence[Callable[[Document], Iterable[Region]]] = [
     myst.SkipParser(),
 ]
 
-docs = Sybil(parsers=parsers, patterns=["*.md"])
-python = Sybil(
+docs = sybil.Sybil(parsers=parsers, patterns=["*.md"])
+python = sybil.Sybil(
     parsers=[*parsers, rest.DocTestParser(optionflags=optionflags), rest.SkipParser()],
     patterns=["*.py"],
 )

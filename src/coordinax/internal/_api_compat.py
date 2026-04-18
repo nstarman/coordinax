@@ -23,8 +23,8 @@ def _patch_orig_bases(cls: type, old_mod: str, new_mod: str) -> None:
     for subclass in cls.__subclasses__():
         for base in getattr(subclass, "__orig_bases__", ()):
             if getattr(base, "__module__", None) == old_mod:
-                with contextlib.suppress(AttributeError):
-                    base.__module__ = new_mod  # type: ignore[union-attr]
+                with contextlib.suppress(AttributeError, TypeError):
+                    base.__module__ = new_mod
         _patch_orig_bases(subclass, old_mod, new_mod)
 
 
@@ -54,7 +54,8 @@ def doc_public_api(path: str, /) -> Callable[[Any], Any]:
 
     def decorator(obj: Any) -> Any:
         if _BUILDING_DOCS:
-            obj.__module__ = path  # type: ignore[union-attr]
+            with contextlib.suppress(AttributeError, TypeError):
+                obj.__module__ = path
         return obj
 
     return decorator
@@ -102,7 +103,7 @@ def doc_patch_public_api(names: "set[str] | frozenset[str]", /) -> None:
         mod = getattr(obj, "__module__", None)
         if mod is None or "._src." not in mod:
             continue
-        with contextlib.suppress(AttributeError):
-            obj.__module__ = module  # type: ignore[union-attr]
+        with contextlib.suppress(AttributeError, TypeError):
+            obj.__module__ = module
         if isinstance(obj, type):
             _patch_orig_bases(obj, mod, module)
