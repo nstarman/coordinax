@@ -226,13 +226,13 @@ nitpick_ignore_regex = [
     (r"py:class", r"coordinax\.internal\.custom_types\..*"),
     (r"py:obj", r"coordinax\.internal\.custom_types\..*"),
     # Bare names and garbage emitted by Plum dispatch auto-docstrings
-    (r"py:class", r"^[a-zA-Z0-9]$"),        # Single character (TypeVars)
-    (r"py:class", r"^'.*'$"),               # Quoted shape annotations (e.g. 'N N')
-    (r"py:class", r"^[a-z][a-z ]+$"),       # lowercase words/phrases (no dots/caps)
+    (r"py:class", r"^[a-zA-Z0-9]$"),  # Single character (TypeVars)
+    (r"py:class", r"^'.*'$"),  # Quoted shape annotations (e.g. 'N N')
+    (r"py:class", r"^[a-z][a-z ]+$"),  # lowercase words/phrases (no dots/caps)
     (r"py:class", r".*\s.*"),  # whitespace → not a valid class name
     (r"py:class", r"^[A-Z][a-z]+ [a-z].*"),  # Sentence-case phrases
-    (r"py:class", r"^\d"),                  # Leading digit (e.g. '4')
-    (r"py:class", r"^[A-Z][a-z]{1,4}$"),   # Short TypeVar names (e.g. Rep, Tau)
+    (r"py:class", r"^\d"),  # Leading digit (e.g. '4')
+    (r"py:class", r"^[A-Z][a-z]{1,4}$"),  # Short TypeVar names (e.g. Rep, Tau)
     (r"py:obj", r"typing\.Annotated\[.*"),  # Complex Annotated types
 ]
 

@@ -379,13 +379,14 @@ ignore = [
   "FBT001",
   "INP001",
   "N803",
+  "PLW0108", # Lambda may be unnecessary
   "RUF002",
   "S101",
   "T20",
 ]
 "__init__.py" = ["F403"]
 "docs/conf.py" = ["A001", "INP001"]
-"noxfile.py" = ["T20"]
+"noxfile.py" = ["EXE001", "T20"]
 "scripts/**" = ["INP001"]
 
 [tool.ruff.lint.flake8-import-conventions.aliases]
