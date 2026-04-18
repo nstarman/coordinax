@@ -379,7 +379,7 @@ ignore = [
   "FBT001",
   "INP001",
   "N803",
-  "PLW0108", # Lambda may be unnecessary
+  "PLW0108",
   "RUF002",
   "S101",
   "T20",
