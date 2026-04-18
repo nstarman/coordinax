@@ -78,6 +78,11 @@ intersphinx_mapping = {
 
 # -- Autodoc settings ---------------------------------------------------
 
+# Silence import failures for optional extension packages that are not
+# installed in the docs build environment (coordinax.astro,
+# coordinax.interop.astropy are optional extras).
+suppress_warnings = ["autodoc.import_object"]
+
 autodoc_typehints = "description"
 autodoc_typehints_format = "short"
 
@@ -94,20 +99,88 @@ typehints_use_signature = True
 
 
 nitpick_ignore = [
-    # Keep this ignore: Sphinx emits unresolved typing.Union references from
-    # generated type signatures with <unknown> source locations, so there is no
-    # stable doc target to fix directly yet.
+    # typing module — sphinx_autodoc_typehints emits these from generated
+    # signatures but they have no stable inventory target yet.
     # TODO: Revisit after upgrading Sphinx and/or sphinx-autodoc-typehints.
     ("py:data", "typing.Union"),
-    # ArrayLike is documented as py:data in JAX (it's a type alias), but
-    # sphinx_autodoc_typehints emits it as py:class — the mismatch cannot be
-    # resolved via intersphinx regardless of URL.
+    ("py:data", "typing.Any"),
+    ("py:data", "typing.ClassVar"),
+    ("py:data", "typing.NoReturn"),
+    ("py:data", "Ellipsis"),
+    # ArrayLike is py:data in JAX but sphinx_autodoc_typehints emits py:class.
     ("py:class", "ArrayLike"),
     ("py:class", "jax.typing.ArrayLike"),
+    # jax.Array is a type alias (py:data in JAX), not a class.
+    ("py:class", "jax.Array"),
+    ("py:class", "jax.lax.GatherScatterMode"),
+    # JAX functions: intersphinx resolves these when network is available;
+    # kept here as a fallback for restricted build environments.
+    ("py:func", "jax.jit"),
+    ("py:func", "jax.vmap"),
+    ("py:func", "jax.grad"),
+    ("py:func", "jax.jacobian"),
+    ("py:func", "jax.hessian"),
+    # unxt public API not exposed in unxt's Sphinx inventory
     ("py:class", "unxt.Angle"),
     ("py:class", "unxt.quantity.Quantity"),
+    ("py:class", "AbstractQuantity"),
+    ("py:class", "u.AbstractDimension"),
+    ("py:class", "u.AbstractUnit"),
+    # numpy types not in the numpy intersphinx inventory
+    ("py:class", "numpy.bool"),
+    ("py:class", "numpy.dtype"),
+    ("py:class", "numpy.ndarray"),
+    ("py:class", "numpy.number"),
+    ("py:class", "jnp.ndarray"),
+    # astropy internal paths not exposed in astropy's intersphinx
+    ("py:class", "astropy.units.core.CompositeUnit"),
+    ("py:class", "astropy.units.core.Unit"),
+    ("py:class", "astropy.units.core.UnitBase"),
+    ("py:class", "astropy.units.physical.PhysicalType"),
+    ("py:class", "astropy.units.quantity.Quantity"),
+    ("py:class", "astropy.coordinates.builtin_frames.icrs.ICRS"),
+    ("py:class", "astropy.coordinates.builtin_frames.galactocentric.Galactocentric"),
+    ("py:class", "astropy.coordinates.representation.cartesian.CartesianRepresentation"),
+    ("py:class", "astropy.coordinates.representation.cylindrical.CylindricalRepresentation"),
+    ("py:class", "astropy.coordinates.representation.spherical.SphericalRepresentation"),
+    ("py:class", "astropy.coordinates.representation.spherical.PhysicsSphericalRepresentation"),
+    # collections.abc — Python docs inventory uses py:class for these but
+    # sphinx_autodoc_typehints sometimes resolves them as bare names.
+    ("py:class", "collections.abc.Callable"),
+    ("py:class", "collections.abc.Mapping"),
+    ("py:class", "collections.abc.Sequence"),
+    # equinox private types
+    ("py:class", "equinox._module._better_abstract.AbstractVar"),
+    ("py:class", "equinox._module._module.Module"),
+    # quax — no Sphinx inventory (MkDocs)
+    ("py:class", "quax.ArrayValue"),
+    ("py:class", "quax._core.Value"),
+    # plum
+    ("py:exc", "plum.NotFoundLookupError"),
+    # unxt_hypothesis — separate optional package
+    ("py:func", "unxt_hypothesis.quantities"),
+    # coordinax-astro (optional extension package, not always installed)
+    ("py:class", "coordinax.astro.DistanceModulus"),
+    ("py:class", "coordinax.astro.Parallax"),
+    # coordinax internal public API re-exported via coordinax.api.frames
+    ("py:obj", "coordinax.frames.act"),
+    ("py:obj", "coordinax.frames.compose"),
+    ("py:obj", "coordinax.frames.simplify"),
+    # coordinax convenience singletons referenced in docstrings
+    ("py:obj", "minkowski4d"),
+    ("py:obj", "embed_tangent"),
+    ("py:obj", "project_tangent"),
+    ("py:obj", "same"),
+    # coordinax internal private paths (via sphinx_autodoc_typehints)
+    ("py:class", "CDict"),
+    ("py:class", "OptUSys"),
+    ("py:class", "coordinax.charts._src.base.CDictT"),
     ("py:class", "coordinax.distances._src.base.AbstractDistance"),
-    # Private internal helper class from unxt with no public docs
+    ("py:class", "coordinax.internal.custom_types.Ks"),
+    ("py:class", "coordinax.internal.custom_types.Ds"),
+    ("py:obj", "coordinax.internal.custom_types.Ks"),
+    ("py:obj", "coordinax.internal.custom_types.Ds"),
+    # Private internal helpers from dependencies with no public docs
     ("py:class", "unxt._src.quantity.base._QuantityIndexUpdateHelper"),
     ("py:class", "dataclassish._src.converters.PassThroughTs"),
     ("py:class", "dataclassish._src.converters.ArgT"),
@@ -125,6 +198,30 @@ nitpick_ignore_regex = [
     (r"py:class", r"jaxtyping\..*"),  # TODO: remove
     (r"py:class", r".*TypedNdArray.*"),
     (r"py:class", r"jax\._src\..*"),
+    # Private implementation paths from unxt and coordinax itself
+    (r"py:class", r"unxt\._src\..*"),
+    (r"py:class", r"coordinax\..*\._src\..*"),
+    (r"py:obj", r"coordinax\..*\._src\..*"),
+    # Private equinox internals
+    (r"py:class", r"equinox\._.*"),
+    # Private jaxlib internals (e.g., jaxlib._jax.Device)
+    (r"py:class", r"jaxlib\..*"),
+    # quax private internals
+    (r"py:class", r"quax\._.*"),
+    # astropy internal representation paths
+    (r"py:class", r"astropy\.coordinates\.representation\..*"),
+    # coordinax internal custom types (not under ._src.)
+    (r"py:class", r"coordinax\.internal\.custom_types\..*"),
+    (r"py:obj", r"coordinax\.internal\.custom_types\..*"),
+    # Bare names and garbage emitted by Plum dispatch auto-docstrings
+    (r"py:class", r"^[a-zA-Z0-9]$"),        # Single character (TypeVars)
+    (r"py:class", r"^'.*'$"),               # Quoted shape annotations (e.g. 'N N')
+    (r"py:class", r"^[a-z][a-z ]+$"),       # lowercase words/phrases (no dots/caps)
+    (r"py:class", r".*\s.*"),               # contains whitespace — not a valid class name
+    (r"py:class", r"^[A-Z][a-z]+ [a-z].*"), # Sentence-case phrases (redundant but clear)
+    (r"py:class", r"^\d"),                  # Leading digit (e.g. '4')
+    (r"py:class", r"^[A-Z][a-z]{1,4}$"),   # Short TypeVar names (e.g. Rep, Tau)
+    (r"py:obj", r"typing\.Annotated\[.*"),  # Complex Annotated types
 ]
 
 # -- MyST Setting -------------------------------------------------
