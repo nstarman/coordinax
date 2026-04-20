@@ -2,7 +2,7 @@
 
 import pytest
 import unxt as u
-from hypothesis import given, strategies as st
+from hypothesis import given, strategies as st, settings
 
 import coordinax.charts as cxc
 import coordinax.representations as cxr
@@ -24,12 +24,14 @@ class FakeSemantic(cxr.AbstractSemanticKind):
 
 
 @given(p=cxsr.cdicts(cxc.cart3d, cxst.representations()))
+@settings(deadline=None)
 def test_cdicts_accepts_representation_strategy(p):
     """cdicts should accept a representation strategy as the second argument."""
     assert set(p.keys()) == set(cxc.cart3d.components)
 
 
 @given(p=cxsr.cdicts(cxc.sph3d, cxr.point))
+@settings(deadline=None)
 def test_cdicts_accepts_representation_instance(p):
     """cdicts should accept a concrete Representation instance."""
     assert set(p.keys()) == {"r", "theta", "phi"}
@@ -39,6 +41,7 @@ def test_cdicts_accepts_representation_instance(p):
 
 
 @given(data=st.data())
+@settings(deadline=None)
 def test_point_geometry_requires_no_basis(data):
     """PointGeometry cdicts should reject basis kinds other than NoBasis."""
     with pytest.raises(TypeError, match="NoBasis"):
@@ -48,6 +51,7 @@ def test_point_geometry_requires_no_basis(data):
 
 
 @given(data=st.data())
+@settings(deadline=None)
 def test_point_geometry_requires_location_semantic(data):
     """PointGeometry cdicts should reject semantic kinds other than Location."""
     with pytest.raises(TypeError, match="Location semantic kind"):

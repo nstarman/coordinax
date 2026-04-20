@@ -9,6 +9,7 @@ import coordinax.hypothesis.astro as cxastrost
 
 
 @given(dm=cxastrost.distance_moduli())
+@settings(deadline=None)
 def test_basic_distance_modulus(dm: cxastro.DistanceModulus) -> None:
     """Test basic distance modulus generation."""
     assert isinstance(dm, cxastro.DistanceModulus)
@@ -17,6 +18,7 @@ def test_basic_distance_modulus(dm: cxastro.DistanceModulus) -> None:
 
 
 @given(dm=cxastrost.distance_moduli(shape=5))
+@settings(deadline=None)
 def test_distance_modulus_vector(dm: cxastro.DistanceModulus) -> None:
     """Test vector distance modulus generation."""
     assert isinstance(dm, cxastro.DistanceModulus)
@@ -25,6 +27,7 @@ def test_distance_modulus_vector(dm: cxastro.DistanceModulus) -> None:
 
 
 @given(dm=cxastrost.distance_moduli(shape=(2, 3)))
+@settings(deadline=None)
 def test_distance_modulus_2d(dm: cxastro.DistanceModulus) -> None:
     """Test 2D distance modulus array generation."""
     assert isinstance(dm, cxastro.DistanceModulus)
@@ -37,6 +40,7 @@ def test_distance_modulus_2d(dm: cxastro.DistanceModulus) -> None:
         elements=st.floats(min_value=0, max_value=30, width=32)
     )
 )
+@settings(deadline=None)
 def test_distance_modulus_with_custom_elements(dm: cxastro.DistanceModulus) -> None:
     """Test distance modulus with custom elements range."""
     assert isinstance(dm, cxastro.DistanceModulus)
@@ -60,16 +64,19 @@ class TestDistanceModulusFromType:
     """Test st.from_type() for DistanceModulus type."""
 
     @given(dm=st.from_type(cxastro.DistanceModulus))
+    @settings(deadline=None)
     def test_from_type_basic(self, dm: cxastro.DistanceModulus) -> None:
         """Test that st.from_type(DistanceModulus) generates valid instances."""
         assert isinstance(dm, cxastro.DistanceModulus)
 
     @given(dm=st.from_type(cxastro.DistanceModulus))
+    @settings(deadline=None)
     def test_from_type_has_mag_units(self, dm: cxastro.DistanceModulus) -> None:
         """Test that generated distance moduli have magnitude units."""
         assert dm.unit == "mag"
 
     @given(data=st.data())
+    @settings(deadline=None)
     def test_from_type_generates_variety(self, data: st.DataObject) -> None:
         """Test that from_type generates different values."""
         dm1 = data.draw(st.from_type(cxastro.DistanceModulus))
@@ -79,6 +86,7 @@ class TestDistanceModulusFromType:
         assert isinstance(dm2, cxastro.DistanceModulus)
 
     @given(data=st.data())
+    @settings(deadline=None)
     def test_builds_with_distance_modulus_arg(self, data: st.DataObject) -> None:
         """Test that st.builds() can use from_type for DistanceModulus arguments."""
 

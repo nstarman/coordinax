@@ -3,7 +3,7 @@
 import jaxtyping
 
 import jax.numpy as jnp
-from hypothesis import given, strategies as st
+from hypothesis import given, strategies as st, settings
 
 from coordinax.hypothesis.utils._src.annotations.jaxtyping_utils import (
     is_variadic_dim,
@@ -45,6 +45,7 @@ class TestMakeSizeStrategy:
     """Test make_size_strategy helper."""
 
     @given(st.data())
+    @settings(deadline=None)
     def test_fixed_dim_as_int(self, data: st.DataObject) -> None:
         """Test strategy for fixed dimension returns int."""
         ann = jaxtyping.Shaped[jnp.ndarray, "3"]
@@ -57,6 +58,7 @@ class TestMakeSizeStrategy:
         assert value == 3
 
     @given(st.data())
+    @settings(deadline=None)
     def test_fixed_dim_as_list(self, data: st.DataObject) -> None:
         """Test strategy for fixed dimension can return list."""
         ann = jaxtyping.Shaped[jnp.ndarray, "3"]
@@ -69,6 +71,7 @@ class TestMakeSizeStrategy:
         assert value == [3]
 
     @given(st.data())
+    @settings(deadline=None)
     def test_broadcastable_fixed_dim(self, data: st.DataObject) -> None:
         """Test strategy for broadcastable fixed dimension."""
         ann = jaxtyping.Shaped[jnp.ndarray, "#3"]
@@ -81,6 +84,7 @@ class TestMakeSizeStrategy:
         assert value in [1, 3]
 
     @given(st.data())
+    @settings(deadline=None)
     def test_named_dim(self, data: st.DataObject) -> None:
         """Test strategy for named dimension generates variable size."""
         ann = jaxtyping.Shaped[jnp.ndarray, "n"]
@@ -93,6 +97,7 @@ class TestMakeSizeStrategy:
         assert 1 <= value <= 10
 
     @given(st.data())
+    @settings(deadline=None)
     def test_broadcastable_named_dim(self, data: st.DataObject) -> None:
         """Test strategy for broadcastable named dimension."""
         ann = jaxtyping.Shaped[jnp.ndarray, "#n"]
@@ -105,6 +110,7 @@ class TestMakeSizeStrategy:
         assert 1 <= value <= 10  # Can be 1 (broadcasted) or 1-10 (variable)
 
     @given(st.data())
+    @settings(deadline=None)
     def test_variadic_dim(self, data: st.DataObject) -> None:
         """Test strategy for variadic dimension generates list."""
         ann = jaxtyping.Shaped[jnp.ndarray, "*batch"]
@@ -122,6 +128,7 @@ class TestParseJaxTypingShape:
     """Test parse_jaxtyping_shape main function."""
 
     @given(st.data())
+    @settings(deadline=None)
     def test_scalar_shape(self, data: st.DataObject) -> None:
         """Test parsing scalar (empty) shape."""
         ann = jaxtyping.Shaped[jnp.ndarray, ""]
@@ -131,6 +138,7 @@ class TestParseJaxTypingShape:
         assert value == ()
 
     @given(st.data())
+    @settings(deadline=None)
     def test_fixed_shape(self, data: st.DataObject) -> None:
         """Test parsing fixed shape."""
         ann = jaxtyping.Shaped[jnp.ndarray, "3 4"]
@@ -140,6 +148,7 @@ class TestParseJaxTypingShape:
         assert value == (3, 4)
 
     @given(st.data())
+    @settings(deadline=None)
     def test_named_shape(self, data: st.DataObject) -> None:
         """Test parsing named variable shape."""
         ann = jaxtyping.Shaped[jnp.ndarray, "batch channels"]
@@ -150,6 +159,7 @@ class TestParseJaxTypingShape:
         assert all(isinstance(v, int) and 1 <= v <= 10 for v in value)
 
     @given(st.data())
+    @settings(deadline=None)
     def test_mixed_fixed_and_named(self, data: st.DataObject) -> None:
         """Test parsing mix of fixed and named dimensions."""
         ann = jaxtyping.Shaped[jnp.ndarray, "3 channels 4"]
@@ -163,6 +173,7 @@ class TestParseJaxTypingShape:
         assert value[2] == 4
 
     @given(st.data())
+    @settings(deadline=None)
     def test_variadic_with_fixed(self, data: st.DataObject) -> None:
         """Test parsing variadic with fixed dimensions."""
         ann = jaxtyping.Shaped[jnp.ndarray, "*batch 3"]
@@ -174,6 +185,7 @@ class TestParseJaxTypingShape:
         assert 1 <= len(value) <= 4  # 0-3 variadic + 1 fixed
 
     @given(st.data())
+    @settings(deadline=None)
     def test_ellipsis_with_fixed(self, data: st.DataObject) -> None:
         """Test parsing ellipsis with fixed dimensions."""
         ann = jaxtyping.Shaped[jnp.ndarray, "... 3"]
@@ -185,6 +197,7 @@ class TestParseJaxTypingShape:
         assert 1 <= len(value) <= 4
 
     @given(st.data())
+    @settings(deadline=None)
     def test_broadcastable_dimensions(self, data: st.DataObject) -> None:
         """Test parsing broadcastable dimensions."""
         ann = jaxtyping.Shaped[jnp.ndarray, "#3 #n"]

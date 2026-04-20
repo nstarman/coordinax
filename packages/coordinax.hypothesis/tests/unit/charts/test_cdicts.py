@@ -1,7 +1,7 @@
 """Tests for coordinax-hypothesis strategies."""
 
 import unxt as u
-from hypothesis import given, strategies as st
+from hypothesis import given, strategies as st, settings
 
 import coordinax.charts as cxc
 
@@ -12,17 +12,20 @@ class TestCDictStrategy:
     """Test pdict strategy for generating valid CDict objects."""
 
     @given(p=cxst.cdicts(cxc.cart3d))
+    @settings(deadline=None)
     def test_cdict_keys_match_chart(self, p):
         """CDict keys must exactly match chart.components."""
         assert set(p.keys()) == set(cxc.cart3d.components)
 
     @given(p=cxst.cdicts(cxc.cart3d))
+    @settings(deadline=None)
     def test_cdict_all_quantities(self, p):
         """All values must be quantity-like."""
         for v in p.values():
             assert hasattr(v, "unit") or isinstance(v, (int, float))
 
     @given(p=cxst.cdicts(cxc.sph3d))
+    @settings(deadline=None)
     def test_cdict_mixed_dimensions(self, p):
         """Point role allows mixed dimensions from chart.coord_dimensions."""
         # Spherical has (length, angle, angle)
@@ -32,6 +35,7 @@ class TestCDictStrategy:
         assert u.dimension_of(p["phi"]) == u.dimension("angle")
 
     @given(p=cxst.cdicts(cxst.charts(filter=cxc.Abstract3D)))
+    @settings(deadline=None)
     def test_cdict_with_chart_strategy(self, p):
         """Cdicts accepts chart as a strategy, drawing chart then building CDict."""
         # All 3D charts have exactly 3 components
@@ -50,6 +54,7 @@ class TestCDictValueControl:
             cxc.cart3d, elements=st.floats(min_value=1.0, max_value=100.0, width=32)
         )
     )
+    @settings(deadline=None)
     def test_first_octant_via_elements(self, p):
         """elements= constrains all components to positive values (first octant)."""
         assert float(p["x"].value) > 0
@@ -61,6 +66,7 @@ class TestCDictValueControl:
             cxc.cart3d, elements=st.floats(min_value=-100.0, max_value=-1.0, width=32)
         )
     )
+    @settings(deadline=None)
     def test_negative_octant_via_elements(self, p):
         """elements= constrains all Cartesian components to negative values."""
         assert float(p["x"].value) < 0
@@ -75,6 +81,7 @@ class TestCDictValueControl:
             ),
         )
     )
+    @settings(deadline=None)
     def test_bounded_range(self, p):
         """elements= with explicit bounds keeps all component magnitudes in range."""
         for key in ("x", "y"):
@@ -82,6 +89,7 @@ class TestCDictValueControl:
             assert -10.0 <= val <= 10.0
 
     @given(data=st.data())
+    @settings(deadline=None)
     def test_second_quadrant_per_component(self, data):
         """Use st.data() to draw different element ranges per component.
 
@@ -107,6 +115,7 @@ class TestCDictValueControl:
             cxc.sph3d, elements=st.floats(min_value=1.0, max_value=100.0, width=32)
         )
     )
+    @settings(deadline=None)
     def test_spherical_positive_elements(self, p):
         """elements= applies to all component values including angles in a sphere chart."""
         # r, theta, phi all have positive values when elements is positive

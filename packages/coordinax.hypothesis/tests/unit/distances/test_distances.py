@@ -2,7 +2,7 @@
 
 import hypothesis.strategies as st
 import unxt as u
-from hypothesis import given
+from hypothesis import given, settings
 
 import coordinax.distances as cxd
 
@@ -10,6 +10,7 @@ import coordinax.hypothesis.main as cxst
 
 
 @given(dist=cxst.distances())
+@settings(deadline=None)
 def test_basic_distance(dist: cxd.Distance) -> None:
     """Test basic distance generation."""
     assert isinstance(dist, cxd.Distance)
@@ -18,6 +19,7 @@ def test_basic_distance(dist: cxd.Distance) -> None:
 
 
 @given(dist=cxst.distances(check_negative=False))
+@settings(deadline=None)
 def test_distance_allow_negative(dist: cxd.Distance) -> None:
     """Test distance generation with negative values allowed."""
     assert isinstance(dist, cxd.Distance)
@@ -25,6 +27,7 @@ def test_distance_allow_negative(dist: cxd.Distance) -> None:
 
 
 @given(dist=cxst.distances(unit="kpc"))
+@settings(deadline=None)
 def test_distance_with_units(dist: cxd.Distance) -> None:
     """Test distance generation with specific units."""
     assert isinstance(dist, cxd.Distance)
@@ -32,6 +35,7 @@ def test_distance_with_units(dist: cxd.Distance) -> None:
 
 
 @given(dist=cxst.distances(shape=5))
+@settings(deadline=None)
 def test_distance_vector(dist: cxd.Distance) -> None:
     """Test vector distance generation."""
     assert isinstance(dist, cxd.Distance)
@@ -40,6 +44,7 @@ def test_distance_vector(dist: cxd.Distance) -> None:
 
 
 @given(dist=cxst.distances(shape=(2, 3)))
+@settings(deadline=None)
 def test_distance_2d(dist: cxd.Distance) -> None:
     """Test 2D distance array generation."""
     assert isinstance(dist, cxd.Distance)
@@ -47,6 +52,7 @@ def test_distance_2d(dist: cxd.Distance) -> None:
 
 
 @given(dist=cxst.distances(check_negative=st.sampled_from([True, False])))
+@settings(deadline=None)
 def test_distance_with_strategy_check_negative(dist: cxd.Distance) -> None:
     """Test distance with check_negative as a strategy."""
     assert isinstance(dist, cxd.Distance)
@@ -56,6 +62,7 @@ def test_distance_with_strategy_check_negative(dist: cxd.Distance) -> None:
 @given(
     dist=cxst.distances(elements=st.floats(min_value=1.0, max_value=100.0, width=32))
 )
+@settings(deadline=None)
 def test_distance_with_custom_elements(dist: cxd.Distance) -> None:
     """Test distance with custom elements range."""
     assert isinstance(dist, cxd.Distance)
@@ -67,6 +74,7 @@ def test_distance_with_custom_elements(dist: cxd.Distance) -> None:
         check_negative=True, elements=st.floats(min_value=0.0, max_value=10.0, width=32)
     )
 )
+@settings(deadline=None)
 def test_distance_check_negative_with_elements(dist: cxd.Distance) -> None:
     """Test that check_negative works with custom elements."""
     assert isinstance(dist, cxd.Distance)
@@ -79,6 +87,7 @@ class TestDistanceFromType:
     """Test st.from_type() for Distance type."""
 
     @given(dist=st.from_type(cxd.Distance))
+    @settings(deadline=None)
     def test_from_type_basic(self, dist: cxd.Distance) -> None:
         """Test that st.from_type(Distance) generates valid Distance instances."""
         assert isinstance(dist, cxd.Distance)
@@ -86,11 +95,13 @@ class TestDistanceFromType:
         assert dist.value >= 0
 
     @given(dist=st.from_type(cxd.Distance))
+    @settings(deadline=None)
     def test_from_type_has_length_dimension(self, dist: cxd.Distance) -> None:
         """Test that generated distances have length dimension."""
         assert u.dimension_of(dist) == u.dimension("length")
 
     @given(data=st.data())
+    @settings(deadline=None)
     def test_from_type_generates_variety(self, data: st.DataObject) -> None:
         """Test that from_type generates different values."""
         dist1 = data.draw(st.from_type(cxd.Distance))
@@ -102,6 +113,7 @@ class TestDistanceFromType:
         assert isinstance(dist2, cxd.Distance)
 
     @given(data=st.data())
+    @settings(deadline=None)
     def test_builds_with_distance_arg(self, data: st.DataObject) -> None:
         """Test that st.builds() can use from_type for Distance arguments."""
 

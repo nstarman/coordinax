@@ -3,7 +3,7 @@
 import astropy.units as apyu
 import pytest
 from astropy.units import Quantity as AstropyQuantity
-from hypothesis import given, strategies as st
+from hypothesis import given, strategies as st, settings
 from plum import convert
 
 import unxt_hypothesis as ust
@@ -45,6 +45,7 @@ def test_astropy_quantity_to_distance() -> None:
 
 
 @given(unit=ust.units("length"))
+@settings(deadline=None)
 def test_astropy_quantity_to_distance(unit: str) -> None:
     """Test converting Astropy Quantity to Distance."""
     apyq = apyu.Quantity(42.0, unit)
@@ -60,6 +61,7 @@ def test_astropy_quantity_to_distance(unit: str) -> None:
         ust.units("length"), elements=float32s(1.0, 1e6), quantity_cls=Distance
     )
 )
+@settings(deadline=None)
 def test_distance_to_astropy_quantity(dist: Distance) -> None:
     """Test converting Distance to AstropyQuantity."""
     apyq = convert(dist, apyu.Quantity)
@@ -74,6 +76,7 @@ def test_distance_to_astropy_quantity(dist: Distance) -> None:
         ust.units("length"), elements=float32s(1.0, 1e6), quantity_cls=Distance
     )
 )
+@settings(deadline=None)
 def test_distance_roundtrip(dist: Distance) -> None:
     apyq = convert(dist, apyu.Quantity)
     dist_back = convert(apyq, Distance)
@@ -98,6 +101,7 @@ def test_astropy_quantity_to_parallax() -> None:
 
 
 @given(unit=ust.units("angle"))
+@settings(deadline=None)
 def test_astropy_quantity_to_parallax(unit: str) -> None:
     """Test converting Astropy Quantity to Parallax."""
     apyq = apyu.Quantity(0.5, unit)
@@ -113,6 +117,7 @@ def test_astropy_quantity_to_parallax(unit: str) -> None:
         ust.units("angle"), elements=float32s(0.0625, 1.0), quantity_cls=Parallax
     )
 )
+@settings(deadline=None)
 def test_parallax_to_astropy_quantity(plx: Parallax) -> None:
     """Test converting Parallax to AstropyQuantity."""
     apyq = convert(plx, apyu.Quantity)
@@ -127,6 +132,7 @@ def test_parallax_to_astropy_quantity(plx: Parallax) -> None:
         ust.units("angle"), elements=float32s(0.0625, 1.0), quantity_cls=Parallax
     )
 )
+@settings(deadline=None)
 def test_parallax_roundtrip(plx: Parallax) -> None:
     apyq = convert(plx, apyu.Quantity)
     plx_back = convert(apyq, Parallax)

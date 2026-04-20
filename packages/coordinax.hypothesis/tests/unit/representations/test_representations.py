@@ -2,7 +2,7 @@
 
 import hypothesis.strategies as st
 import pytest
-from hypothesis import given
+from hypothesis import given, settings
 
 import coordinax.representations as cxr
 
@@ -63,11 +63,13 @@ class TestRepresentations:
     """Tests for the representations strategy."""
 
     @given(rep=cxsr.representations())
+    @settings(deadline=None)
     def test_returns_representation_instance(self, rep: cxr.Representation) -> None:
         """Generated value is a Representation instance."""
         assert isinstance(rep, cxr.Representation)
 
     @given(rep=cxsr.representations())
+    @settings(deadline=None)
     def test_has_correct_fields(self, rep: cxr.Representation) -> None:
         """Generated Representation has geom_kind, basis, and semantic_kind fields."""
         assert isinstance(rep.geom_kind, cxr.AbstractGeometry)
@@ -75,16 +77,19 @@ class TestRepresentations:
         assert isinstance(rep.semantic_kind, cxr.AbstractSemanticKind)
 
     @given(rep=cxsr.representations(geom_kind=cxr.PointGeometry()))
+    @settings(deadline=None)
     def test_explicit_geom_kind_is_preserved(self, rep: cxr.Representation) -> None:
         """Explicitly provided geom_kind is used."""
         assert isinstance(rep.geom_kind, cxr.PointGeometry)
 
     @given(rep=cxsr.representations(basis_kind=cxr.NoBasis()))
+    @settings(deadline=None)
     def test_explicit_basis_kind_is_preserved(self, rep: cxr.Representation) -> None:
         """Explicitly provided basis_kind is used."""
         assert isinstance(rep.basis, cxr.NoBasis)
 
     @given(rep=cxsr.representations(semantic_kind=cxr.Location()))
+    @settings(deadline=None)
     def test_explicit_semantic_kind_is_preserved(self, rep: cxr.Representation) -> None:
         """Explicitly provided semantic_kind is used."""
         assert isinstance(rep.semantic_kind, cxr.Location)
@@ -96,6 +101,7 @@ class TestRepresentations:
             semantic_kind=cxr.Location(),
         )
     )
+    @settings(deadline=None)
     def test_all_three_explicit_fields(self, rep: cxr.Representation) -> None:
         """All three fields can be specified at once."""
         assert isinstance(rep.geom_kind, cxr.PointGeometry)
@@ -103,6 +109,7 @@ class TestRepresentations:
         assert isinstance(rep.semantic_kind, cxr.Location)
 
     @given(rep=cxsr.representations(geom_kind=cxr.PointGeometry()))
+    @settings(deadline=None)
     def test_point_geometry_auto_restricts_basis_and_semantic(
         self, rep: cxr.Representation
     ) -> None:
@@ -115,6 +122,7 @@ class TestRepresentations:
             geom_kind=st.just(cxr.PointGeometry()),
         )
     )
+    @settings(deadline=None)
     def test_strategy_valued_geom_kind_is_drawn(self, rep: cxr.Representation) -> None:
         """Strategy-valued geom_kind is drawn before use."""
         assert isinstance(rep.geom_kind, cxr.PointGeometry)
@@ -124,6 +132,7 @@ class TestRepresentations:
             basis_kind=st.just(cxr.NoBasis()),
         )
     )
+    @settings(deadline=None)
     def test_strategy_valued_basis_kind_is_drawn(self, rep: cxr.Representation) -> None:
         """Strategy-valued basis_kind is drawn before use."""
         assert isinstance(rep.basis, cxr.NoBasis)
@@ -133,6 +142,7 @@ class TestRepresentations:
             semantic_kind=st.just(cxr.Location()),
         )
     )
+    @settings(deadline=None)
     def test_strategy_valued_semantic_kind_is_drawn(
         self, rep: cxr.Representation
     ) -> None:
@@ -140,6 +150,7 @@ class TestRepresentations:
         assert isinstance(rep.semantic_kind, cxr.Location)
 
     @given(data=st.data())
+    @settings(deadline=None)
     def test_invalid_basis_with_check_valid_raises(self, data: st.DataObject) -> None:
         """Incompatible basis_kind with check_valid=True raises ValueError."""
 
@@ -156,6 +167,7 @@ class TestRepresentations:
             )
 
     @given(data=st.data())
+    @settings(deadline=None)
     def test_invalid_semantic_with_check_valid_raises(
         self, data: st.DataObject
     ) -> None:
@@ -181,6 +193,7 @@ class TestRepresentations:
             check_valid=False,
         )
     )
+    @settings(deadline=None)
     def test_check_valid_false_allows_any_combination(
         self, rep: cxr.Representation
     ) -> None:

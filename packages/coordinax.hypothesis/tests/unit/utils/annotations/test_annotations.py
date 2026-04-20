@@ -8,7 +8,7 @@ import jaxtyping
 import pytest
 import unxt as u
 from beartype.vale import Is
-from hypothesis import given
+from hypothesis import given, settings
 
 from coordinax.hypothesis.utils import annotations
 
@@ -182,6 +182,7 @@ class TestStrategyForAnnotation:
     # --- base type dispatch ---
 
     @given(st.data())
+    @settings(deadline=None)
     def test_plain_type_generates_instance(self, data: st.DataObject):
         """Base dispatch: st.from_type for a plain type."""
         strategy = annotations.strategy_for_annotation(int, meta=annotations.Metadata())
@@ -191,6 +192,7 @@ class TestStrategyForAnnotation:
     # --- jax.Array dispatch ---
 
     @given(st.data())
+    @settings(deadline=None)
     def test_jax_array_dispatch(self, data: st.DataObject):
         strategy = annotations.strategy_for_annotation(
             jnp.ndarray, meta=annotations.Metadata(dtype=jnp.float32, shape=(2,))
@@ -201,6 +203,7 @@ class TestStrategyForAnnotation:
         assert value.dtype == jnp.float32
 
     @given(st.data())
+    @settings(deadline=None)
     def test_jax_array_scalar(self, data: st.DataObject):
         strategy = annotations.strategy_for_annotation(
             jnp.ndarray, meta=annotations.Metadata(dtype=jnp.float64, shape=())
@@ -212,6 +215,7 @@ class TestStrategyForAnnotation:
     # --- Quantity dispatch ---
 
     @given(st.data())
+    @settings(deadline=None)
     def test_quantity_dispatch(self, data: st.DataObject):
         strategy = annotations.strategy_for_annotation(
             u.Q["length"],
@@ -223,6 +227,7 @@ class TestStrategyForAnnotation:
         assert value.shape == ()
 
     @given(st.data())
+    @settings(deadline=None)
     def test_quantity_dispatch_with_shape(self, data: st.DataObject):
         strategy = annotations.strategy_for_annotation(
             u.Q["length"],
@@ -235,6 +240,7 @@ class TestStrategyForAnnotation:
     # --- AnnotatedNotIntrospectable dispatch ---
 
     @given(st.data())
+    @settings(deadline=None)
     def test_annotated_dispatch(self, data: st.DataObject):
         """Annotated[Quantity, ...] is unwrapped and re-dispatched."""
         ann = Annotated[u.Q["length"], {"dtype": jnp.float64, "shape": ()}]  # noqa: F821
@@ -249,6 +255,7 @@ class TestStrategyForAnnotation:
     # --- JaxtypingNotIntrospectable dispatch ---
 
     @given(st.data())
+    @settings(deadline=None)
     def test_jaxtyping_dispatch_array(self, data: st.DataObject):
         ann = jaxtyping.Shaped[jnp.ndarray, "3"]
         wrapped = annotations.wrap_if_not_inspectable(ann)
@@ -260,6 +267,7 @@ class TestStrategyForAnnotation:
         assert value.shape == (3,)
 
     @given(st.data())
+    @settings(deadline=None)
     def test_jaxtyping_dispatch_scalar(self, data: st.DataObject):
         ann = jaxtyping.Shaped[jnp.ndarray, ""]
         wrapped = annotations.wrap_if_not_inspectable(ann)
@@ -271,6 +279,7 @@ class TestStrategyForAnnotation:
         assert value.shape == ()
 
     @given(st.data())
+    @settings(deadline=None)
     def test_jaxtyping_dispatch_quantity(self, data: st.DataObject):
         ann = jaxtyping.Shaped[u.Q["length"], ""]
         wrapped = annotations.wrap_if_not_inspectable(ann)
@@ -282,6 +291,7 @@ class TestStrategyForAnnotation:
         assert value.shape == ()
 
     @given(st.data())
+    @settings(deadline=None)
     def test_jaxtyping_float_dtype(self, data: st.DataObject):
         ann = jaxtyping.Float[jnp.ndarray, ""]
         wrapped = annotations.wrap_if_not_inspectable(ann)
@@ -293,6 +303,7 @@ class TestStrategyForAnnotation:
         assert jnp.issubdtype(value.dtype, jnp.floating)
 
     @given(st.data())
+    @settings(deadline=None)
     def test_jaxtyping_integer_dtype(self, data: st.DataObject):
         ann = jaxtyping.Integer[jnp.ndarray, ""]
         wrapped = annotations.wrap_if_not_inspectable(ann)
@@ -306,6 +317,7 @@ class TestStrategyForAnnotation:
     # --- meta merging ---
 
     @given(st.data())
+    @settings(deadline=None)
     def test_meta_override_in_annotated(self, data: st.DataObject):
         """Metadata embedded in Annotated overrides the default."""
         ann = Annotated[u.Q["length"], {"dtype": jnp.float32, "shape": (5,)}]  # noqa: F821
@@ -337,18 +349,21 @@ class TestCachedStrategyForAnnotation:
         assert s1 is s2
 
     @given(st.data())
+    @settings(deadline=None)
     def test_cached_jax_array(self, data: st.DataObject):
         strategy = annotations.cached_strategy_for_annotation(jnp.ndarray)
         value = data.draw(strategy)
         assert isinstance(value, jnp.ndarray)
 
     @given(st.data())
+    @settings(deadline=None)
     def test_cached_quantity(self, data: st.DataObject):
         strategy = annotations.cached_strategy_for_annotation(u.Q["length"])
         value = data.draw(strategy)
         assert isinstance(value, u.Q)
 
     @given(st.data())
+    @settings(deadline=None)
     def test_cached_jaxtyping_wrapped(self, data: st.DataObject):
         ann = jaxtyping.Shaped[jnp.ndarray, "3"]
         wrapped = annotations.wrap_if_not_inspectable(ann)

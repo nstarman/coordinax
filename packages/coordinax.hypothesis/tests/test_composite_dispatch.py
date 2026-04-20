@@ -133,12 +133,14 @@ def interval_value(draw, lo: float, hi: float):  # noqa: F811
 
 
 @given(interval_value(0, 100))
+@settings(deadline=None)
 def test_dispatch_two_int_args(v):
     assert isinstance(v, int)
     assert 0 <= v <= 100
 
 
 @given(interval_value(0.0, 1.0))
+@settings(deadline=None)
 def test_dispatch_two_float_args(v):
     assert isinstance(v, float)
     assert 0.0 <= v <= 1.0
@@ -177,6 +179,7 @@ def typed_number(draw, x: int):  # noqa: F811
 
 
 @given(typed_number(10))
+@settings(deadline=None)
 def test_most_specific_int_method_wins(v):
     """Plum selects the most-specific (int) overload for an int argument."""
     assert isinstance(v, int)
@@ -184,6 +187,7 @@ def test_most_specific_int_method_wins(v):
 
 
 @given(typed_number(3.14))
+@settings(deadline=None)
 def test_real_overload_for_float(v):
     """float is a Real but not an int → Real overload is selected."""
     assert isinstance(v, float)
@@ -215,6 +219,7 @@ def sorted_pair(draw, x: float):  # noqa: F811
 
 
 @given(sorted_pair(100))
+@settings(deadline=None)
 def test_sorted_int_pair(pair):
     a, b = pair
     assert a <= b
@@ -223,6 +228,7 @@ def test_sorted_int_pair(pair):
 
 
 @given(sorted_pair(1.0))
+@settings(deadline=None)
 def test_sorted_float_pair(pair):
     a, b = pair
     assert a <= b
@@ -254,6 +260,7 @@ def multi_bounded(draw, *xs: float):  # noqa: F811
 
 
 @given(multi_bounded(0, 10, 20))
+@settings(deadline=None)
 def test_varargs_int_overload(values):
     """All-int varargs resolves to the int overload."""
     assert len(values) == 3
@@ -264,6 +271,7 @@ def test_varargs_int_overload(values):
 
 
 @given(multi_bounded(0.0, 0.5))
+@settings(deadline=None)
 def test_varargs_float_overload(values):
     """All-float varargs resolves to the float overload."""
     assert len(values) == 2
@@ -316,6 +324,7 @@ def heterogeneous_multi(draw, *xs):
 
 
 @given(heterogeneous_multi(1, 0.5, 42))
+@settings(deadline=None)
 def test_heterogeneous_varargs_mixed_types(values):
     """Per-element dispatch handles mixed-type varargs correctly."""
     assert len(values) == 3

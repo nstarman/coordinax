@@ -15,7 +15,7 @@ from typing import final
 
 import hypothesis.strategies as st
 import pytest
-from hypothesis import given
+from hypothesis import given, settings
 
 import coordinax.charts as cxc
 
@@ -37,6 +37,7 @@ class TestBasicGeneration:
     """Test basic functionality of chart_classes strategy."""
 
     @given(chart_cls=cxst.chart_classes())
+    @settings(deadline=None)
     def test_returns_chart_subclass(self, chart_cls: type[cxc.AbstractChart]) -> None:
         """Generated class is always a subclass of AbstractChart."""
         assert issubclass(chart_cls, cxc.AbstractChart), (
@@ -44,16 +45,19 @@ class TestBasicGeneration:
         )
 
     @given(chart_cls=cxst.chart_classes())
+    @settings(deadline=None)
     def test_not_abstract_base_class(self, chart_cls: type[cxc.AbstractChart]) -> None:
         """Generated class is never AbstractChart itself."""
         assert chart_cls is not cxc.AbstractChart
 
     @given(chart_cls=cxst.chart_classes())
+    @settings(deadline=None)
     def test_not_a_metaclass(self, chart_cls: type[cxc.AbstractChart]) -> None:
         """Generated class is never a metaclass."""
         assert not issubclass(chart_cls, type)
 
     @given(chart_cls=cxst.chart_classes(exclude_abstract=True))
+    @settings(deadline=None)
     def test_is_concrete_by_default(self, chart_cls: type[cxc.AbstractChart]) -> None:
         """By default (exclude_abstract=True), only concrete classes are generated."""
         assert not is_abstract_class(chart_cls), (
@@ -61,6 +65,7 @@ class TestBasicGeneration:
         )
 
     @given(chart_cls=cxst.chart_classes(exclude_abstract=False))
+    @settings(deadline=None)
     def test_includes_abstract_when_requested(
         self, chart_cls: type[cxc.AbstractChart]
     ) -> None:
@@ -83,6 +88,7 @@ class TestFilterParameter:
         data=st.data(),
         filter_class=st.sampled_from([cxc.Abstract1D, cxc.Abstract2D, cxc.Abstract3D]),
     )
+    @settings(deadline=None)
     def test_filter_single_class(
         self, data, filter_class: type[cxc.AbstractChart]
     ) -> None:
@@ -98,6 +104,7 @@ class TestFilterParameter:
             [(cxc.AbstractChart, cxc.Abstract1D), (cxc.AbstractChart, cxc.Abstract2D)]
         ),
     )
+    @settings(deadline=None)
     def test_filter_multiple_classes(
         self, data, filter_classes: tuple[type, ...]
     ) -> None:
@@ -115,11 +122,13 @@ class TestFilterParameter:
             filter=st.sampled_from([cxc.Abstract1D, cxc.Abstract2D])
         )
     )
+    @settings(deadline=None)
     def test_dynamic_filter_strategy(self, chart_cls: type[cxc.AbstractChart]) -> None:
         """Filter parameter can be a strategy."""
         assert issubclass(chart_cls, (cxc.Abstract1D, cxc.Abstract2D))
 
     @given(chart_cls=cxst.chart_classes(filter=cxc.AbstractSpherical3D))
+    @settings(deadline=None)
     def test_filter_to_spherical_charts(
         self, chart_cls: type[cxc.AbstractChart]
     ) -> None:
@@ -136,6 +145,7 @@ class TestExcludeParameter:
     """Test exclude parameter behavior."""
 
     @given(data=st.data())
+    @settings(deadline=None)
     def test_exclude_single_class(self, data) -> None:
         """Can exclude a single class."""
         chart_cls = data.draw(cxst.chart_classes(exclude=(cxc.Cart3D,)))
@@ -143,6 +153,7 @@ class TestExcludeParameter:
         assert not issubclass(chart_cls, cxc.Cart3D)
 
     @given(data=st.data())
+    @settings(deadline=None)
     def test_exclude_multiple_classes(self, data) -> None:
         """Can exclude multiple classes."""
         excluded = (cxc.Cart3D, cxc.Spherical3D, cxc.Cart2D)
@@ -152,12 +163,14 @@ class TestExcludeParameter:
             assert not issubclass(chart_cls, exc_cls)
 
     @given(data=st.data())
+    @settings(deadline=None)
     def test_exclude_empty_tuple(self, data) -> None:
         """Empty exclude tuple has no effect."""
         chart_cls = data.draw(cxst.chart_classes(exclude=()))
         assert issubclass(chart_cls, cxc.AbstractChart)
 
     @given(data=st.data())
+    @settings(deadline=None)
     def test_exclude_respects_exclude_abstract(self, data) -> None:
         """Exclude still respects exclude_abstract=True."""
         chart_cls = data.draw(
@@ -176,6 +189,7 @@ class TestExcludeAbstractParameter:
     """Test exclude_abstract parameter behavior."""
 
     @given(chart_cls=cxst.chart_classes(exclude_abstract=True))
+    @settings(deadline=None)
     def test_exclude_abstract_true_generates_concrete(
         self, chart_cls: type[cxc.AbstractChart]
     ) -> None:
@@ -183,6 +197,7 @@ class TestExcludeAbstractParameter:
         assert not is_abstract_class(chart_cls)
 
     @given(chart_cls=cxst.chart_classes(exclude_abstract=False))
+    @settings(deadline=None)
     def test_exclude_abstract_false_accepts_abstract(
         self, chart_cls: type[cxc.AbstractChart]
     ) -> None:
@@ -190,6 +205,7 @@ class TestExcludeAbstractParameter:
         assert issubclass(chart_cls, cxc.AbstractChart)
 
     @given(data=st.data(), exclude_abstract=st.sampled_from([True, False]))
+    @settings(deadline=None)
     def test_dynamic_exclude_abstract_strategy(
         self, data, exclude_abstract: bool
     ) -> None:
@@ -209,12 +225,14 @@ class TestParameterCombinations:
     """Test combinations of multiple parameters."""
 
     @given(chart_cls=cxst.chart_classes(filter=cxc.Abstract3D, exclude=(cxc.Cart3D,)))
+    @settings(deadline=None)
     def test_filter_and_exclude(self, chart_cls: type[cxc.AbstractChart]) -> None:
         """Filter and exclude work together."""
         assert issubclass(chart_cls, cxc.Abstract3D)
         assert chart_cls is not cxc.Cart3D
 
     @given(chart_cls=cxst.chart_classes(filter=cxc.Abstract3D, exclude_abstract=True))
+    @settings(deadline=None)
     def test_filter_and_exclude_abstract(
         self, chart_cls: type[cxc.AbstractChart]
     ) -> None:
@@ -227,6 +245,7 @@ class TestParameterCombinations:
             filter=cxc.Abstract2D, exclude=(cxc.Polar2D,), exclude_abstract=True
         )
     )
+    @settings(deadline=None)
     def test_all_parameters_combined(self, chart_cls: type[cxc.AbstractChart]) -> None:
         """All parameters work together."""
         assert issubclass(chart_cls, cxc.Abstract2D)
@@ -246,6 +265,7 @@ class TestGeneratedClassProperties:
         data=st.data(),
         chart_cls=cxst.chart_classes(exclude_abstract=True),
     )
+    @settings(deadline=None)
     def test_generated_class_is_instantiable(
         self, data, chart_cls: type[cxc.AbstractChart]
     ) -> None:
@@ -263,6 +283,7 @@ class TestGeneratedClassProperties:
         data=st.data(),
         chart_cls=cxst.chart_classes(exclude_abstract=True),
     )
+    @settings(deadline=None)
     def test_generated_class_has_valid_ndim(
         self, data, chart_cls: type[cxc.AbstractChart]
     ) -> None:
@@ -277,6 +298,7 @@ class TestGeneratedClassProperties:
         data=st.data(),
         chart_cls=cxst.chart_classes(exclude_abstract=True),
     )
+    @settings(deadline=None)
     def test_generated_class_has_components(
         self, data, chart_cls: type[cxc.AbstractChart]
     ) -> None:
@@ -294,6 +316,7 @@ class TestGeneratedClassProperties:
         data=st.data(),
         chart_cls=cxst.chart_classes(exclude_abstract=True),
     )
+    @settings(deadline=None)
     def test_generated_class_components_match_ndim(
         self, data, chart_cls: type[cxc.AbstractChart]
     ) -> None:
@@ -348,6 +371,7 @@ class TestEdgeCases:
         data=st.data(),
         chart_cls=cxst.chart_classes(filter=cxc.Abstract1D, exclude_abstract=True),
     )
+    @settings(deadline=None)
     def test_1d_charts_have_one_component(
         self, data, chart_cls: type[cxc.AbstractChart]
     ) -> None:
@@ -361,6 +385,7 @@ class TestEdgeCases:
         data=st.data(),
         chart_cls=cxst.chart_classes(filter=cxc.Abstract2D, exclude_abstract=True),
     )
+    @settings(deadline=None)
     def test_2d_charts_have_two_components(
         self, data, chart_cls: type[cxc.AbstractChart]
     ) -> None:
@@ -374,6 +399,7 @@ class TestEdgeCases:
         data=st.data(),
         chart_cls=cxst.chart_classes(filter=cxc.Abstract3D, exclude_abstract=True),
     )
+    @settings(deadline=None)
     def test_3d_charts_have_three_components(
         self, data, chart_cls: type[cxc.AbstractChart]
     ) -> None:

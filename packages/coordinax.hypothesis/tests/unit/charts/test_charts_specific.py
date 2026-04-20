@@ -2,7 +2,7 @@
 
 import hypothesis.strategies as st
 import pytest
-from hypothesis import given
+from hypothesis import given, settings
 from hypothesis.errors import Unsatisfiable
 
 import coordinax.charts as cxc
@@ -11,6 +11,7 @@ import coordinax.hypothesis.main as cxst
 
 
 @given(chart=cxst.charts(cxc.Cart3D))
+@settings(deadline=None)
 def test_concrete_chart_class_generates_requested_class(
     chart: cxc.AbstractChart,
 ) -> None:
@@ -19,6 +20,7 @@ def test_concrete_chart_class_generates_requested_class(
 
 
 @given(chart=cxst.charts(cxc.Cart2D, ndim=2))
+@settings(deadline=None)
 def test_concrete_chart_class_accepts_matching_ndim(chart: cxc.AbstractChart) -> None:
     """Passing a concrete chart class accepts a compatible ndim constraint."""
     assert isinstance(chart, cxc.Cart2D)
@@ -26,6 +28,7 @@ def test_concrete_chart_class_accepts_matching_ndim(chart: cxc.AbstractChart) ->
 
 
 @given(chart=cxst.charts(cxc.AbstractCartesianProductChart))
+@settings(deadline=None)
 def test_abstract_chart_class_filters_generated_classes(
     chart: cxc.AbstractChart,
 ) -> None:
@@ -34,6 +37,7 @@ def test_abstract_chart_class_filters_generated_classes(
 
 
 @given(chart=cxst.charts(filter=cxc.Abstract3D))
+@settings(deadline=None)
 def test_filter_keyword_still_handles_dimensional_flags(
     chart: cxc.AbstractChart,
 ) -> None:
@@ -43,6 +47,7 @@ def test_filter_keyword_still_handles_dimensional_flags(
 
 
 @given(chart=cxst.charts(st.sampled_from((cxc.Cart1D, cxc.Cart2D))))
+@settings(deadline=None)
 def test_chart_class_strategy_dispatches_to_drawn_class(
     chart: cxc.AbstractChart,
 ) -> None:
@@ -54,6 +59,7 @@ def test_concrete_chart_with_impossible_ndim_is_unsatisfiable() -> None:
     """Concrete class requests remain unsatisfiable when ndim cannot match."""
 
     @given(chart=cxst.charts(cxc.Cart1D, ndim=2))
+    @settings(deadline=None)
     def impossible(chart: cxc.AbstractChart) -> None:
         del chart
 

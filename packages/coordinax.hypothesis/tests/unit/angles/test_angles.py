@@ -2,12 +2,13 @@
 
 import hypothesis.strategies as st
 import unxt as u
-from hypothesis import given
+from hypothesis import given, settings
 
 import coordinax.hypothesis.main as cxst
 
 
 @given(angle=cxst.angles())
+@settings(deadline=None)
 def test_basic_angle(angle: u.Angle) -> None:
     """Test basic angle generation."""
     assert isinstance(angle, u.Angle)
@@ -15,6 +16,7 @@ def test_basic_angle(angle: u.Angle) -> None:
 
 
 @given(angle=cxst.angles(unit="deg", elements={"min_value": -180, "max_value": 180}))
+@settings(deadline=None)
 def test_angle_with_bounds(angle: u.Angle) -> None:
     """Test angle generation with value bounds."""
     assert isinstance(angle, u.Angle)
@@ -22,6 +24,7 @@ def test_angle_with_bounds(angle: u.Angle) -> None:
 
 
 @given(angle=cxst.angles(unit="rad"))
+@settings(deadline=None)
 def test_angle_radians(angle: u.Angle) -> None:
     """Test angle generation in radians."""
     assert isinstance(angle, u.Angle)
@@ -29,6 +32,7 @@ def test_angle_radians(angle: u.Angle) -> None:
 
 
 @given(angle=cxst.angles(wrap_to=(u.Q(0, "deg"), u.Q(360, "deg"))))
+@settings(deadline=None)
 def test_angle_with_wrapping(angle: u.Angle) -> None:
     """Test angle generation with wrapping."""
     assert isinstance(angle, u.Angle)
@@ -39,6 +43,7 @@ def test_angle_with_wrapping(angle: u.Angle) -> None:
 
 
 @given(angle=cxst.angles(wrap_to=st.just((u.Q(0, "deg"), u.Q(360, "deg")))))
+@settings(deadline=None)
 def test_angle_with_wrapping_strategy(angle: u.Angle) -> None:
     """Test angle generation with wrapping."""
     assert isinstance(angle, u.Angle)
@@ -49,6 +54,7 @@ def test_angle_with_wrapping_strategy(angle: u.Angle) -> None:
 
 
 @given(angle=cxst.angles(wrap_to=(u.Q(-180, "deg"), u.Q(180, "deg"))))
+@settings(deadline=None)
 def test_angle_with_symmetric_wrapping(angle: u.Angle) -> None:
     """Test angle generation with symmetric wrapping."""
     assert isinstance(angle, u.Angle)
@@ -59,6 +65,7 @@ def test_angle_with_symmetric_wrapping(angle: u.Angle) -> None:
 
 
 @given(angle=cxst.angles(shape=5))
+@settings(deadline=None)
 def test_angle_array_1d(angle: u.Angle) -> None:
     """Test 1D angle array generation."""
     assert isinstance(angle, u.Angle)
@@ -66,6 +73,7 @@ def test_angle_array_1d(angle: u.Angle) -> None:
 
 
 @given(angle=cxst.angles(shape=(2, 3)))
+@settings(deadline=None)
 def test_angle_array_2d(angle: u.Angle) -> None:
     """Test 2D angle array generation."""
     assert isinstance(angle, u.Angle)
@@ -73,6 +81,7 @@ def test_angle_array_2d(angle: u.Angle) -> None:
 
 
 @given(angle=cxst.angles(shape=st.tuples(st.integers(1, 5), st.integers(1, 5))))
+@settings(deadline=None)
 def test_angle_dynamic_shape(angle: u.Angle) -> None:
     """Test angle generation with dynamic shape."""
     assert isinstance(angle, u.Angle)

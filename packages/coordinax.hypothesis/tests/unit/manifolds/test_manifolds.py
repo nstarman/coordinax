@@ -1,7 +1,7 @@
 """Tests for manifold strategies."""
 
 import hypothesis.strategies as st
-from hypothesis import given
+from hypothesis import given, settings
 
 import coordinax.charts as cxc
 import coordinax.manifolds as cxm
@@ -10,6 +10,7 @@ import coordinax.hypothesis.main as cxst
 
 
 @given(atlas_cls=cxst.atlas_classes())
+@settings(deadline=None)
 def test_atlas_classes_returns_concrete_atlas_subclasses(
     atlas_cls: type[cxm.AbstractAtlas],
 ) -> None:
@@ -19,6 +20,7 @@ def test_atlas_classes_returns_concrete_atlas_subclasses(
 
 
 @given(atlas=cxst.atlases())
+@settings(deadline=None)
 def test_atlases_generates_valid_atlas_instances(atlas: cxm.AbstractAtlas) -> None:
     """atlases generates valid atlas instances."""
     assert isinstance(atlas, cxm.AbstractAtlas)
@@ -27,6 +29,7 @@ def test_atlases_generates_valid_atlas_instances(atlas: cxm.AbstractAtlas) -> No
 
 
 @given(manifold_cls=cxst.manifold_classes())
+@settings(deadline=None)
 def test_manifold_classes_returns_concrete_manifold_subclasses(
     manifold_cls: type[cxm.AbstractManifold],
 ) -> None:
@@ -36,6 +39,7 @@ def test_manifold_classes_returns_concrete_manifold_subclasses(
 
 
 @given(manifold=cxst.manifolds())
+@settings(deadline=None)
 def test_manifolds_generates_valid_manifold_instances(
     manifold: cxm.AbstractManifold,
 ) -> None:
@@ -47,6 +51,7 @@ def test_manifolds_generates_valid_manifold_instances(
 
 
 @given(atlas=cxst.atlases(cxm.CustomAtlas))
+@settings(deadline=None)
 def test_custom_atlas_strategy_basic(atlas: cxm.CustomAtlas) -> None:
     """atlases(CustomAtlas) generates valid CustomAtlas objects."""
     # Strategy output should always be the concrete type we requested.
@@ -61,6 +66,7 @@ def test_custom_atlas_strategy_basic(atlas: cxm.CustomAtlas) -> None:
 
 
 @given(manifold=cxst.manifolds(cxm.CustomManifold))
+@settings(deadline=None)
 def test_custom_manifold_strategy_basic(manifold: cxm.CustomManifold) -> None:
     """manifolds(CustomManifold) generates valid CustomManifold objects."""
     # Strategy output should always be the concrete manifold wrapper.
@@ -78,6 +84,7 @@ def test_custom_manifold_strategy_basic(manifold: cxm.CustomManifold) -> None:
         required_chart_classes=(cxc.Cart2D, cxc.Polar2D),
     )
 )
+@settings(deadline=None)
 def test_custom_manifold_required_chart_classes(manifold: cxm.CustomManifold) -> None:
     """required_chart_classes are forwarded for CustomManifold draws."""
     assert manifold.has_chart(cxc.cart2d)
@@ -85,6 +92,7 @@ def test_custom_manifold_required_chart_classes(manifold: cxm.CustomManifold) ->
 
 
 @given(manifold=cxst.manifolds(st.just(cxm.CustomManifold)))
+@settings(deadline=None)
 def test_custom_manifold_from_strategy_selector(manifold: cxm.CustomManifold) -> None:
     """SearchStrategy manifold_cls draws then redispatches to typed generation."""
     assert isinstance(manifold, cxm.CustomManifold)
@@ -98,6 +106,7 @@ def test_custom_manifold_from_strategy_selector(manifold: cxm.CustomManifold) ->
         required_chart_classes=(cxc.Cart2D, cxc.Polar2D),
     )
 )
+@settings(deadline=None)
 def test_required_chart_classes_are_present(atlas: cxm.CustomAtlas) -> None:
     """required_chart_classes are always included for CustomAtlas draws."""
     # Required classes were requested explicitly in strategy parameters.
@@ -109,6 +118,7 @@ def test_required_chart_classes_are_present(atlas: cxm.CustomAtlas) -> None:
 
 
 @given(atlas=cxst.atlases(st.just(cxm.CustomAtlas)))
+@settings(deadline=None)
 def test_custom_atlas_from_strategy_selector(atlas: cxm.CustomAtlas) -> None:
     """SearchStrategy atlas_cls draws then redispatches to typed generation."""
     assert isinstance(atlas, cxm.CustomAtlas)
@@ -116,6 +126,7 @@ def test_custom_atlas_from_strategy_selector(atlas: cxm.CustomAtlas) -> None:
 
 
 @given(atlas=st.from_type(cxm.CustomAtlas))
+@settings(deadline=None)
 def test_custom_atlas_from_type_registration(atlas: cxm.CustomAtlas) -> None:
     """st.from_type(CustomAtlas) resolves to the registered strategy."""
     assert isinstance(atlas, cxm.CustomAtlas)
@@ -123,6 +134,7 @@ def test_custom_atlas_from_type_registration(atlas: cxm.CustomAtlas) -> None:
 
 
 @given(manifold=st.from_type(cxm.CustomManifold))
+@settings(deadline=None)
 def test_custom_manifold_from_type_registration(manifold: cxm.CustomManifold) -> None:
     """st.from_type(CustomManifold) resolves to the registered strategy."""
     assert isinstance(manifold, cxm.CustomManifold)

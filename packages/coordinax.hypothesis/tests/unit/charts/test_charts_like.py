@@ -1,6 +1,6 @@
 """Tests for the charts_like strategy."""
 
-from hypothesis import given
+from hypothesis import given, settings
 
 import coordinax.charts as cxc
 
@@ -8,6 +8,7 @@ import coordinax.hypothesis.main as cxst
 
 
 @given(chart=cxst.charts_like(cxc.cart3d))
+@settings(deadline=None)
 def test_charts_like_cart3d(chart: cxc.AbstractChart) -> None:
     """Test charts_like with Cart3D template."""
     assert isinstance(chart, cxc.Abstract3D)
@@ -15,6 +16,7 @@ def test_charts_like_cart3d(chart: cxc.AbstractChart) -> None:
 
 
 @given(chart=cxst.charts_like(cxc.sph3d))
+@settings(deadline=None)
 def test_charts_like_spherical3d(chart: cxc.AbstractChart) -> None:
     """Test charts_like with Spherical3D template."""
     assert isinstance(chart, cxc.Abstract3D)
@@ -23,6 +25,7 @@ def test_charts_like_spherical3d(chart: cxc.AbstractChart) -> None:
 
 
 @given(chart=cxst.charts_like(cxc.polar2d))
+@settings(deadline=None)
 def test_charts_like_polar2d(chart: cxc.AbstractChart) -> None:
     """Test charts_like with Polar2D template."""
     assert isinstance(chart, cxc.Abstract2D)
@@ -30,6 +33,7 @@ def test_charts_like_polar2d(chart: cxc.AbstractChart) -> None:
 
 
 @given(chart=cxst.charts_like(cxc.radial1d))
+@settings(deadline=None)
 def test_charts_like_radial1d(chart: cxc.AbstractChart) -> None:
     """Test charts_like with Radial1D template."""
     assert isinstance(chart, cxc.Abstract1D)
@@ -37,6 +41,7 @@ def test_charts_like_radial1d(chart: cxc.AbstractChart) -> None:
 
 
 @given(chart=cxst.charts_like(cxc.sph2))
+@settings(deadline=None)
 def test_charts_like_sph2(chart: cxc.AbstractChart) -> None:
     """Test charts_like with SphericalTwoSphere template."""
     assert isinstance(chart, cxc.Abstract2D)

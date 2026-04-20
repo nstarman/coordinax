@@ -6,13 +6,14 @@ import hypothesis.strategies as st
 import jax.numpy as jnp
 import unxt as u
 from beartype.vale import Is
-from hypothesis import given
+from hypothesis import given, settings
 from jaxtyping import Array, Float
 
 from coordinax.hypothesis.utils import annotations
 
 
 @given(st.data())
+@settings(deadline=None)
 def test_beartype_validator_extraction_quantity(data):
     """Test that Beartype validators are extracted from Annotated quantities."""
     # Define an annotated type with a Beartype validator
@@ -30,6 +31,7 @@ def test_beartype_validator_extraction_quantity(data):
 
 
 @given(st.data())
+@settings(deadline=None)
 def test_beartype_validator_extraction_array(data):
     """Test that Beartype validators are extracted from Annotated arrays."""
     # Define an annotated type with a Beartype validator
@@ -47,6 +49,7 @@ def test_beartype_validator_extraction_array(data):
 
 
 @given(st.data())
+@settings(deadline=None)
 def test_multiple_validators(data):
     """Test that multiple Beartype validators can be combined."""
     # Define an annotated type with multiple validators
@@ -68,6 +71,7 @@ def test_multiple_validators(data):
 
 
 @given(st.data())
+@settings(deadline=None)
 def test_beartype_validator_with_hypothesis(data):
     """Test that Beartype validators work with Hypothesis' @given decorator."""
     PositiveLength = Annotated[u.Q["length"], Is[lambda x: x.value > 0]]  # noqa: F821

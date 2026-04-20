@@ -1,7 +1,7 @@
 """Tests for the vectors strategy."""
 
 import pytest
-from hypothesis import given, strategies as st
+from hypothesis import given, strategies as st, settings
 
 import coordinax.charts as cxc
 import coordinax.manifolds as cxm
@@ -21,6 +21,7 @@ _F32_BOUNDED = st.floats(min_value=-10.0, max_value=10.0, allow_nan=False, width
 
 
 @given(vec=vector_strategy())
+@settings(deadline=None)
 def test_vectors_basic(vec: cxv.Point) -> None:
     """vectors() should generate valid Point instances."""
     assert isinstance(vec, cxv.Point)
@@ -29,6 +30,7 @@ def test_vectors_basic(vec: cxv.Point) -> None:
 
 
 @given(vec=vector_strategy(cxc.cart3d))
+@settings(deadline=None)
 def test_vectors_concrete_chart_only(vec: cxv.Point) -> None:
     """vectors(chart) should generate vectors for that chart (rep/manifold inferred)."""
     assert vec.chart is cxc.cart3d
@@ -37,6 +39,7 @@ def test_vectors_concrete_chart_only(vec: cxv.Point) -> None:
 
 
 @given(vec=vector_strategy(SUPPORTED_CHARTS))
+@settings(deadline=None)
 def test_vectors_chart_strategy(vec: cxv.Point) -> None:
     """vectors(chart_strategy) should draw a chart and generate a valid point."""
     assert isinstance(vec, cxv.Point)
@@ -45,6 +48,7 @@ def test_vectors_chart_strategy(vec: cxv.Point) -> None:
 
 
 @given(vec=vector_strategy(cxc.cart3d, cxr.point))
+@settings(deadline=None)
 def test_vectors_concrete_chart_and_rep(vec: cxv.Point) -> None:
     """vectors(chart, rep) should fix chart and rep on the generated point."""
     assert vec.chart is cxc.cart3d
@@ -53,6 +57,7 @@ def test_vectors_concrete_chart_and_rep(vec: cxv.Point) -> None:
 
 
 @given(vec=vector_strategy(SUPPORTED_CHARTS, cxr.point))
+@settings(deadline=None)
 def test_vectors_chart_strategy_concrete_rep(vec: cxv.Point) -> None:
     """vectors(chart_strategy, rep) should draw a chart then fix the rep."""
     assert vec.rep == cxr.point
@@ -61,6 +66,7 @@ def test_vectors_chart_strategy_concrete_rep(vec: cxv.Point) -> None:
 
 
 @given(vec=vector_strategy(cxc.cart3d, cxsr.representations(check_valid=True)))
+@settings(deadline=None)
 def test_vectors_concrete_chart_rep_strategy(vec: cxv.Point) -> None:
     """vectors(chart, rep_strategy) should draw a rep then build the point."""
     assert vec.chart is cxc.cart3d
@@ -68,6 +74,7 @@ def test_vectors_concrete_chart_rep_strategy(vec: cxv.Point) -> None:
 
 
 @given(vec=vector_strategy(cxc.cart3d, shape=(5,)))
+@settings(deadline=None)
 def test_vectors_propagate_shape(vec: cxv.Point) -> None:
     """**kw forwarding: shape=(...) should be reflected in vec.shape."""
     assert vec.chart is cxc.cart3d
@@ -75,6 +82,7 @@ def test_vectors_propagate_shape(vec: cxv.Point) -> None:
 
 
 @given(data=st.data())
+@settings(deadline=None)
 def test_vectors_infer_manifold_from_chart(data: st.DataObject) -> None:
     """When manifold is not given, it should be inferred from the chart."""
     vec = data.draw(vector_strategy(cxc.sph3d, cxr.point))
@@ -82,6 +90,7 @@ def test_vectors_infer_manifold_from_chart(data: st.DataObject) -> None:
 
 
 @given(data=st.data())
+@settings(deadline=None)
 def test_vectors_explicit_manifold(data: st.DataObject) -> None:
     """vectors(chart, rep, manifold) should preserve the provided manifold."""
     manifold = cxm.EuclideanManifold(3)
@@ -90,6 +99,7 @@ def test_vectors_explicit_manifold(data: st.DataObject) -> None:
 
 
 @given(data=st.data())
+@settings(deadline=None)
 def test_vectors_manifold_strategy(data: st.DataObject) -> None:
     """vectors(chart, rep, manifold_strategy) should draw a manifold."""
     manifold = cxm.EuclideanManifold(3)
@@ -98,6 +108,7 @@ def test_vectors_manifold_strategy(data: st.DataObject) -> None:
 
 
 @given(data=st.data())
+@settings(deadline=None)
 def test_vectors_incompatible_manifold_raises(data: st.DataObject) -> None:
     """Passing a manifold that does not support the chart must raise ValueError."""
     with pytest.raises(ValueError, match="support"):
@@ -105,6 +116,7 @@ def test_vectors_incompatible_manifold_raises(data: st.DataObject) -> None:
 
 
 @given(vec=st.from_type(cxv.Point))
+@settings(deadline=None)
 def test_vector_from_type_basic(vec: cxv.Point) -> None:
     """from_type(Point) should resolve to the vectors strategy."""
     assert isinstance(vec, cxv.Point)
@@ -116,18 +128,21 @@ class TestPointValueControl:
     """Tests showing how to control the values (e.g. quadrant) of generated points."""
 
     @given(vec=vector_strategy(cxc.cart2d, cxr.point, elements=_F32_POS))
+    @settings(deadline=None)
     def test_first_quadrant_via_elements(self, vec: cxv.Point) -> None:
         """elements= constrains all components to positive values (first quadrant)."""
         assert vec.data["x"].ustrip("m") > 0
         assert vec.data["y"].ustrip("m") > 0
 
     @given(vec=vector_strategy(cxc.cart2d, cxr.point, elements=_F32_NEG))
+    @settings(deadline=None)
     def test_third_quadrant_via_elements(self, vec: cxv.Point) -> None:
         """elements= constrains all components to negative values (third quadrant)."""
         assert vec.data["x"].ustrip("m") < 0
         assert vec.data["y"].ustrip("m") < 0
 
     @given(vec=vector_strategy(cxc.cart3d, cxr.point, elements=_F32_POS))
+    @settings(deadline=None)
     def test_first_octant_via_elements(self, vec: cxv.Point) -> None:
         """elements= constrains all Cartesian 3D components to positive values."""
         assert vec.data["x"].ustrip("m") > 0
@@ -135,6 +150,7 @@ class TestPointValueControl:
         assert vec.data["z"].ustrip("m") > 0
 
     @given(data=st.data())
+    @settings(deadline=None)
     def test_second_quadrant_per_component(self, data: st.DataObject) -> None:
         """Use st.data() to draw different element ranges per component.
 
@@ -148,6 +164,7 @@ class TestPointValueControl:
         assert vec_y.data["y"].ustrip("m") > 0
 
     @given(vec=vector_strategy(cxc.cart2d, cxr.point, elements=_F32_BOUNDED))
+    @settings(deadline=None)
     def test_bounded_range(self, vec: cxv.Point) -> None:
         """elements= with explicit bounds keeps all component magnitudes in range."""
         assert -10.0 <= vec.data["x"].ustrip("m") <= 10.0

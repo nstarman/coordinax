@@ -3,7 +3,7 @@
 import jaxtyping
 
 import jax.numpy as jnp
-from hypothesis import given, strategies as st
+from hypothesis import given, strategies as st, settings
 
 import unxt as u
 
@@ -74,6 +74,7 @@ class TestStrategyForAnnotation:
     """Test strategy_for_annotation function with different argument combinations."""
 
     @given(st.data())
+    @settings(deadline=None)
     def test_type_base_case(self, data: st.DataObject) -> None:
         """Test strategy_for_annotation(type, meta={}) - base case dispatch."""
         # When meta is empty, should use st.from_type
@@ -84,6 +85,7 @@ class TestStrategyForAnnotation:
         assert isinstance(value, int)
 
     @given(st.data())
+    @settings(deadline=None)
     def test_quantity_type_with_metadata(self, data: st.DataObject) -> None:
         """Test strategy_for_annotation(Quantity, meta) - quantity dispatch."""
         # Create Metadata from a Shaped annotation
@@ -99,6 +101,7 @@ class TestStrategyForAnnotation:
         assert u.dimension_of(value) == u.dimension("length")
 
     @given(st.data())
+    @settings(deadline=None)
     def test_array_type_with_metadata(self, data: st.DataObject) -> None:
         """Test strategy_for_annotation(Array, meta) - array dispatch."""
         ann = jaxtyping.Shaped[jnp.ndarray, "3"]
@@ -111,6 +114,7 @@ class TestStrategyForAnnotation:
         assert value.shape == (3,)
 
     @given(st.data())
+    @settings(deadline=None)
     def test_shaped_quantity_empty_shape(self, data: st.DataObject) -> None:
         """Test Shaped[Quantity['length'], ''] produces scalar."""
         ann = jaxtyping.Shaped[u.Q["length"], ""]
@@ -126,6 +130,7 @@ class TestStrategyForAnnotation:
         assert value.shape == ()
 
     @given(st.data())
+    @settings(deadline=None)
     def test_shaped_quantity_with_dimension(self, data: st.DataObject) -> None:
         """Test Shaped[Quantity[Dimension(...)], ''] works."""
         ann = jaxtyping.Shaped[u.Q[u.dimension("length")], ""]

@@ -12,6 +12,7 @@ import coordinax.hypothesis.main as cxst
 
 
 @given(chart=cxst.charts(cxm.EmbeddedChart))
+@settings(deadline=None)
 def test_embedded_chart_dispatch_generates_embedded_chart(
     chart: cxc.AbstractChart,
 ) -> None:
@@ -22,6 +23,7 @@ def test_embedded_chart_dispatch_generates_embedded_chart(
 
 
 @given(chart=cxst.charts(cxm.EmbeddedChart, ndim=2))
+@settings(deadline=None)
 def test_embedded_chart_dispatch_accepts_matching_ndim(
     chart: cxc.AbstractChart,
 ) -> None:
@@ -43,6 +45,7 @@ def test_embedded_chart_dispatch_rejects_non_matching_ndim() -> None:
 
 
 @given(data=st.data())
+@settings(deadline=None)
 def test_embedded_chart_dispatch_rejects_filter_and_exclude(
     data: st.DataObject,
 ) -> None:

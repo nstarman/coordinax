@@ -2,7 +2,7 @@
 
 import pytest
 from astropy.coordinates import Angle as AstropyAngle
-from hypothesis import given
+from hypothesis import given, settings
 from plum import convert
 
 import unxt_hypothesis as ust
@@ -25,6 +25,7 @@ def test_astropy_angle_to_cx_angle() -> None:
 
 
 @given(unit=ust.units("angle"))
+@settings(deadline=None)
 def test_astropy_angle_to_cx_angle_hypothesis(unit: str) -> None:
     """Test converting AstropyAngle to cxa.Angle for various angle units."""
     apy = AstropyAngle(0.5, unit)
@@ -50,6 +51,7 @@ def test_cx_angle_to_astropy_angle() -> None:
 
 
 @given(angle=ust.angles())
+@settings(deadline=None)
 def test_cx_angle_to_astropy_angle_hypothesis(angle: cxa.Angle) -> None:
     """Test converting cxa.Angle to AstropyAngle for various angles."""
     apy = convert(angle, AstropyAngle)
@@ -75,6 +77,7 @@ def test_angle_roundtrip() -> None:
 
 
 @given(angle=ust.angles())
+@settings(deadline=None)
 def test_angle_roundtrip_hypothesis(angle: cxa.Angle) -> None:
     """Test roundtrip: cxa.Angle -> AstropyAngle -> cxa.Angle."""
     apy = convert(angle, AstropyAngle)

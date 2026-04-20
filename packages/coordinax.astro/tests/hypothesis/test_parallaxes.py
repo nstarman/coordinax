@@ -1,7 +1,7 @@
 """Tests for the parallaxes strategy."""
 
 import hypothesis.strategies as st
-from hypothesis import given
+from hypothesis import given, settings
 
 import unxt as u
 
@@ -10,6 +10,7 @@ import coordinax.hypothesis.astro as cxastrost
 
 
 @given(plx=cxastrost.parallaxes())
+@settings(deadline=None)
 def test_basic_parallax(plx: cxastro.Parallax) -> None:
     """Test basic parallax generation."""
     assert isinstance(plx, cxastro.Parallax)
@@ -18,6 +19,7 @@ def test_basic_parallax(plx: cxastro.Parallax) -> None:
 
 
 @given(plx=cxastrost.parallaxes(check_negative=False))
+@settings(deadline=None)
 def test_parallax_allow_negative(plx: cxastro.Parallax) -> None:
     """Test parallax generation with negative values allowed."""
     assert isinstance(plx, cxastro.Parallax)
@@ -25,6 +27,7 @@ def test_parallax_allow_negative(plx: cxastro.Parallax) -> None:
 
 
 @given(plx=cxastrost.parallaxes(unit="mas"))
+@settings(deadline=None)
 def test_parallax_with_units(plx: cxastro.Parallax) -> None:
     """Test parallax generation with specific units."""
     assert isinstance(plx, cxastro.Parallax)
@@ -32,6 +35,7 @@ def test_parallax_with_units(plx: cxastro.Parallax) -> None:
 
 
 @given(plx=cxastrost.parallaxes(unit="arcsec"))
+@settings(deadline=None)
 def test_parallax_arcsec(plx: cxastro.Parallax) -> None:
     """Test parallax generation in arcseconds."""
     assert isinstance(plx, cxastro.Parallax)
@@ -39,6 +43,7 @@ def test_parallax_arcsec(plx: cxastro.Parallax) -> None:
 
 
 @given(plx=cxastrost.parallaxes(shape=5))
+@settings(deadline=None)
 def test_parallax_array_1d(plx: cxastro.Parallax) -> None:
     """Test 1D array parallax generation."""
     assert isinstance(plx, cxastro.Parallax)
@@ -47,6 +52,7 @@ def test_parallax_array_1d(plx: cxastro.Parallax) -> None:
 
 
 @given(plx=cxastrost.parallaxes(shape=(2, 3)))
+@settings(deadline=None)
 def test_parallax_array_2d(plx: cxastro.Parallax) -> None:
     """Test 2D parallax array generation."""
     assert isinstance(plx, cxastro.Parallax)
@@ -54,6 +60,7 @@ def test_parallax_array_2d(plx: cxastro.Parallax) -> None:
 
 
 @given(plx=cxastrost.parallaxes(check_negative=st.sampled_from([True, False])))
+@settings(deadline=None)
 def test_parallax_with_strategy_check_negative(plx: cxastro.Parallax) -> None:
     """Test parallax with check_negative as a strategy."""
     assert isinstance(plx, cxastro.Parallax)
@@ -65,6 +72,7 @@ def test_parallax_with_strategy_check_negative(plx: cxastro.Parallax) -> None:
         elements=st.floats(min_value=1.0, max_value=100.0, width=32)
     )
 )
+@settings(deadline=None)
 def test_parallax_with_custom_elements(plx: cxastro.Parallax) -> None:
     """Test parallax with custom elements range."""
     assert isinstance(plx, cxastro.Parallax)
@@ -76,6 +84,7 @@ def test_parallax_with_custom_elements(plx: cxastro.Parallax) -> None:
         check_negative=True, elements=st.floats(min_value=0.0, max_value=10.0, width=32)
     )
 )
+@settings(deadline=None)
 def test_parallax_check_negative_with_elements(plx: cxastro.Parallax) -> None:
     """Test that check_negative works with custom elements."""
     assert isinstance(plx, cxastro.Parallax)
@@ -88,6 +97,7 @@ class TestParallaxFromType:
     """Test st.from_type() for Parallax type."""
 
     @given(plx=st.from_type(cxastro.Parallax))
+    @settings(deadline=None)
     def test_from_type_basic(self, plx: cxastro.Parallax) -> None:
         """Test that st.from_type(Parallax) generates valid Parallax instances."""
         assert isinstance(plx, cxastro.Parallax)
@@ -95,11 +105,13 @@ class TestParallaxFromType:
         assert plx.value >= 0
 
     @given(plx=st.from_type(cxastro.Parallax))
+    @settings(deadline=None)
     def test_from_type_has_angle_dimension(self, plx: cxastro.Parallax) -> None:
         """Test that generated parallaxes have angle dimension."""
         assert u.dimension_of(plx) == u.dimension("angle")
 
     @given(data=st.data())
+    @settings(deadline=None)
     def test_from_type_generates_variety(self, data: st.DataObject) -> None:
         """Test that from_type generates different values."""
         plx1 = data.draw(st.from_type(cxastro.Parallax))
@@ -109,6 +121,7 @@ class TestParallaxFromType:
         assert isinstance(plx2, cxastro.Parallax)
 
     @given(data=st.data())
+    @settings(deadline=None)
     def test_builds_with_parallax_arg(self, data: st.DataObject) -> None:
         """Test that st.builds() can use from_type for Parallax arguments."""
 

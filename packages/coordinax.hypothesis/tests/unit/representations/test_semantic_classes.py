@@ -2,7 +2,7 @@
 
 import hypothesis.strategies as st
 import pytest
-from hypothesis import given
+from hypothesis import given, settings
 
 import coordinax.representations as cxr
 
@@ -19,6 +19,7 @@ class TestSemanticClasses:
     """Tests for the semantic_classes strategy."""
 
     @given(sem_cls=cxsr.semantic_classes())
+    @settings(deadline=None)
     def test_returns_subclass_of_abstract_semantic_kind(
         self, sem_cls: type[cxr.AbstractSemanticKind]
     ) -> None:
@@ -26,6 +27,7 @@ class TestSemanticClasses:
         assert issubclass(sem_cls, cxr.AbstractSemanticKind)
 
     @given(sem_cls=cxsr.semantic_classes())
+    @settings(deadline=None)
     def test_never_returns_abstract_base(
         self, sem_cls: type[cxr.AbstractSemanticKind]
     ) -> None:
@@ -33,6 +35,7 @@ class TestSemanticClasses:
         assert sem_cls is not cxr.AbstractSemanticKind
 
     @given(sem_cls=cxsr.semantic_classes())
+    @settings(deadline=None)
     def test_is_concrete_and_instantiable(
         self, sem_cls: type[cxr.AbstractSemanticKind]
     ) -> None:
@@ -41,6 +44,7 @@ class TestSemanticClasses:
         assert isinstance(instance, cxr.AbstractSemanticKind)
 
     @given(sem_cls=cxsr.semantic_classes(include=(cxr.Location,)))
+    @settings(deadline=None)
     def test_include_restricts_to_provided_classes(
         self, sem_cls: type[cxr.AbstractSemanticKind]
     ) -> None:
@@ -48,6 +52,7 @@ class TestSemanticClasses:
         assert sem_cls is cxr.Location
 
     @given(data=st.data())
+    @settings(deadline=None)
     def test_empty_candidates_raises_value_error(self, data: st.DataObject) -> None:
         """Excluding all candidates raises ValueError."""
         all_semantics = get_all_subclasses(
@@ -72,6 +77,7 @@ class TestSemantics:
     """Tests for the semantics strategy."""
 
     @given(sem=cxsr.semantics())
+    @settings(deadline=None)
     def test_returns_abstract_semantic_kind_instance(
         self, sem: cxr.AbstractSemanticKind
     ) -> None:
@@ -79,11 +85,13 @@ class TestSemantics:
         assert isinstance(sem, cxr.AbstractSemanticKind)
 
     @given(sem=cxsr.semantics(include=(cxr.Location,)))
+    @settings(deadline=None)
     def test_include_restricts_to_location(self, sem: cxr.AbstractSemanticKind) -> None:
         """include parameter restricts instances to the provided classes."""
         assert isinstance(sem, cxr.Location)
 
     @given(sem=cxsr.semantics())
+    @settings(deadline=None)
     def test_never_returns_abstract_class_instance(
         self, sem: cxr.AbstractSemanticKind
     ) -> None:

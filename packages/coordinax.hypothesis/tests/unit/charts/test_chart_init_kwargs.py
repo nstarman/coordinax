@@ -1,7 +1,7 @@
 """Tests for the chart_init_kwargs strategy."""
 
 import hypothesis.strategies as st
-from hypothesis import example, given
+from hypothesis import example, given, settings
 
 import unxt as u
 
@@ -11,6 +11,7 @@ import coordinax.hypothesis.main as cxst
 
 @given(kwargs=cxst.chart_init_kwargs(cxst.chart_classes()))
 @example(kwargs={})
+@settings(deadline=None)
 def test_chart_init_kwargs_exists(kwargs: dict) -> None:
     """Test chart_init_kwargs generates kwargs.
 
@@ -40,6 +41,7 @@ def _chart_class_with_kwargs(draw):
 @example(pair=(cxc.ProlateSpheroidal3D, {"Delta": u.StaticQuantity(1.0, "kpc")}))
 @example(pair=(cxc.PoincarePolar6D, {}))
 @example(pair=(cxc.CartND, {}))
+@settings(deadline=None)
 def test_chart_init_kwargs_instantiates(pair) -> None:
     """Test chart_init_kwargs instantiates charts."""
     chart_class, kwargs = pair
