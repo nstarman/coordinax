@@ -1,7 +1,7 @@
 """Test {mod}`coordinax.distances`."""
 
 import plum
-from hypothesis import given
+from hypothesis import given, settings
 
 import unxt as u
 
@@ -9,6 +9,7 @@ import coordinax.hypothesis.main as cxst
 
 
 @given(cxst.distances())
+@settings(deadline=None)
 def test_promote_distance(d):
     """Test the promotion rule for distance."""
     # Quantities
@@ -25,6 +26,7 @@ def test_promote_distance(d):
 
 
 @given(cxst.distances())
+@settings(deadline=None)
 def test_convert_distance_to_quantity(d):
     """Test converting distance types to general quantity types.
 

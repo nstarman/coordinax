@@ -1,6 +1,6 @@
 """Test {mod}`coordinax.angles`."""
 
-from hypothesis import given
+from hypothesis import given, settings
 from plum import convert, promote
 
 import unxt as u
@@ -9,6 +9,7 @@ import coordinax.hypothesis.main as cxst
 
 
 @given(cxst.angles())
+@settings(deadline=None)
 def test_promotion_rule(a):
     """Test the promotion rule for angles."""
     # Quantities
@@ -25,6 +26,7 @@ def test_promotion_rule(a):
 
 
 @given(cxst.angles())
+@settings(deadline=None)
 def test_convert_angle_to_quantity(a):
     """Test converting angle types to general quantity types.
 

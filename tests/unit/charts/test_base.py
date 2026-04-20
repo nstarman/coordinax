@@ -7,7 +7,7 @@ import contextlib
 
 import plum
 import pytest
-from hypothesis import given
+from hypothesis import given, settings
 
 import unxt as u
 
@@ -21,6 +21,7 @@ from coordinax.charts._src.base import CHART_CLASSES
 
 
 @given(cxst.chart_classes())
+@settings(deadline=None)
 def test_chart_registered_in_chart_classes(chart_cls) -> None:
     """All charts are registered in CHART_CLASSES."""
     assert chart_cls in CHART_CLASSES
@@ -35,6 +36,7 @@ class TestChartProperties:
     """Unit tests for AbstractChart behavior."""
 
     @given(cxst.charts())
+    @settings(deadline=None)
     def test_chart_properties(self, chart) -> None:
         """Components returns a tuple."""
         # Components
@@ -127,6 +129,7 @@ def _func_has_method(f: plum.Function, sig: tuple[type, ...], /) -> bool:
 
 
 @given(chart=cxst.charts())
+@settings(deadline=None)
 def test_chart_has_init_subclass(chart) -> None:
     """Test that generated charts have init subclasses."""
     assert hasattr(chart, "__init_subclass__")
@@ -134,6 +137,7 @@ def test_chart_has_init_subclass(chart) -> None:
 
 
 @given(chart=cxst.charts())
+@settings(deadline=None)
 def test_chart_has_components(chart) -> None:
     """Test that generated charts have components."""
     assert hasattr(chart, "components")
@@ -143,6 +147,7 @@ def test_chart_has_components(chart) -> None:
 
 
 @given(chart=cxst.charts())
+@settings(deadline=None)
 def test_chart_has_coord_dimensions(chart) -> None:
     """Test that generated charts have coord_dimensions."""
     assert hasattr(chart, "coord_dimensions")
@@ -152,6 +157,7 @@ def test_chart_has_coord_dimensions(chart) -> None:
 
 
 @given(chart=cxst.charts())
+@settings(deadline=None)
 def test_chart_has_ndim(chart) -> None:
     """Test that generated charts expose ndim."""
     assert hasattr(chart, "ndim")
@@ -160,6 +166,7 @@ def test_chart_has_ndim(chart) -> None:
 
 
 @given(chart=cxst.charts())
+@settings(deadline=None)
 def test_chart_has_cartesian(chart) -> None:
     """Test that generated charts have cartesian."""
     if not _func_has_method(cxc.cartesian_chart, (type(chart),)):

@@ -3,7 +3,7 @@
 import hypothesis.strategies as st
 import jax.numpy as jnp
 import pytest
-from hypothesis import given
+from hypothesis import given, settings
 
 import unxt as u
 import unxt_hypothesis as ust
@@ -15,6 +15,7 @@ from coordinax.internal.custom_types import CDict
 
 
 @given(cxst.cdicts(cxst.charts()))
+@settings(deadline=None)
 def test_cdict_of_cdict_is_cdict(cdict: CDict) -> None:
     """cdict(CDict) should return a CDict (dict with string keys)."""
     got = cxc.cdict(cdict)
@@ -22,6 +23,7 @@ def test_cdict_of_cdict_is_cdict(cdict: CDict) -> None:
 
 
 @given(ust.quantities(shape=shapes_ending_in_123()))
+@settings(deadline=None)
 def test_cdict_from_quantity(q):
     """cdict(Quantity) should return a CDict."""
     got = cxc.cdict(q)

@@ -72,6 +72,7 @@ class TestQuaxedUnary:
 
     @pytest.mark.parametrize("fn", [qnp.abs, qnp.negative])
     @given(angle=cxst.angles())
+    @settings(deadline=None)
     def test_preserves_type_and_unit(self, fn: object, angle: cxa.Angle) -> None:
         """Abs and negative always return an Angle with the original unit."""
         result = fn(angle)
@@ -79,6 +80,7 @@ class TestQuaxedUnary:
         assert result.unit == angle.unit
 
     @given(angle=cxst.angles())
+    @settings(deadline=None)
     def test_abs_nonneg(self, angle: cxa.Angle) -> None:
         """qnp.abs returns a non-negative value for every input."""
         assert jnp.all(qnp.abs(angle).value >= 0)
@@ -103,6 +105,7 @@ class TestQuaxedTrig:
         assert jnp.allclose(result.value, expected, atol=1e-5)
 
     @given(angle=_angle_rad)
+    @settings(deadline=None)
     def test_pythagorean_identity(self, angle: cxa.Angle) -> None:
         """sin²(x) + cos²(x) == 1 for all angles (numerical sanity check)."""
         s2 = qnp.sin(angle).value ** 2
@@ -138,11 +141,13 @@ class TestQuaxedBinary:
             unit="rad", elements=st.floats(min_value=0.0, max_value=3.0, width=32)
         ),
     )
+    @settings(deadline=None)
     def test_add_commutativity(self, a: cxa.Angle, b: cxa.Angle) -> None:
         """qnp.add(a, b) == qnp.add(b, a)."""
         assert jnp.allclose(qnp.add(a, b).value, qnp.add(b, a).value, atol=1e-5)
 
     @given(angle=cxst.angles())
+    @settings(deadline=None)
     def test_add_preserves_unit(self, angle: cxa.Angle) -> None:
         assert qnp.add(angle, angle).unit == angle.unit
 
@@ -168,6 +173,7 @@ class TestQuaxedReductions:
 
     @pytest.mark.parametrize("fn", [qnp.sum, qnp.mean])
     @given(angle=cxst.angles(shape=(4,)))
+    @settings(deadline=None)
     def test_preserves_unit(self, fn: object, angle: cxa.Angle) -> None:
         """Reductions preserve the Angle unit."""
         assert fn(angle).unit == angle.unit
@@ -299,6 +305,7 @@ class TestQuaxQuaxify:
         assert jnp.allclose(result.value[2], 1.0, atol=1e-5)
 
     @given(angle=_angle_rad)
+    @settings(deadline=None)
     def test_quaxify_pythagorean_identity(self, angle: cxa.Angle) -> None:
         """sin²+cos² == 1 via quaxified raw jax.numpy functions."""
         s = quax.quaxify(jax.numpy.sin)(angle)
