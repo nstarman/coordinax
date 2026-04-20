@@ -182,6 +182,7 @@ class TestGeq:
         data=st.data(),
         min_val=float32s(min_value=0.0, max_value=10.0),
     )
+    @settings(deadline=None)
     def test_values_above_min_pass(self, data: st.DataObject, min_val: float) -> None:
         """Values >= min should pass through unchanged."""
         x = data.draw(

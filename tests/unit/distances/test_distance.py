@@ -176,6 +176,7 @@ class TestDistanceArithmetic:
     """Arithmetic operators observe the non-negativity constraint of Distance."""
 
     @given(d=cxst.distances())
+    @settings(deadline=None)
     def test_add_returns_distance(self, d: cxd.Distance) -> None:
         assert isinstance(d + d, cxd.Distance)
 

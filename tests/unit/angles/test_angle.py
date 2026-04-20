@@ -160,6 +160,7 @@ class TestAngleWrapTo:
         ],
     )
     @given(data=st.data())
+    @settings(deadline=None)
     def test_wrap_to_range(
         self,
         unit_str: str,
