@@ -132,6 +132,11 @@ Astronomy frames require the `[astro]` extra (`pip install "coordinax[astro]"`) 
 
 `to_frame` composes the full transformation chain automatically. The example below converts from ICRS to the Galactic bar frame, which co-rotates at pattern speed $\Omega_b$ relative to Galactocentric. A time-dependent `Rotate` operator captures the rotation; `TransformedReferenceFrame` wraps the base frame with it; `frame_transition` fuses the resulting ICRS -> GCF -> bar chain on-the-fly:
 
+<!-- invisible-code-block: python
+import importlib.util
+-->
+<!-- skip: start if(importlib.util.find_spec('coordinax.astro') is None, reason="coordinax.astro not installed") -->
+
 ```pycon
 >>> import jax.numpy as jnp
 >>> import coordinax.main as cx
@@ -165,6 +170,8 @@ Composed((...))
 <Point: chart=Cart3D (x, y, z) [pc]
     [ 240.763 8118.404   20.8  ]>
 ```
+
+<!-- skip: end -->
 
 ## Citation
 
