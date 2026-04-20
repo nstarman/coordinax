@@ -1,40 +1,22 @@
 # coordinax.hypothesis
 
-```{toctree}
-:maxdepth: 1
-:hidden:
-
-api.md
-testing-guide.md
-plum-dispatch-hypothesis-guide.md
-spec.md
-```
-
 Hypothesis strategies for property-based testing with [coordinax](https://github.com/GalacticDynamics/coordinax).
 
 This package provides [Hypothesis](https://hypothesis.readthedocs.io/) strategies for generating random coordinax objects (angles, distances, parallaxes, distance moduli) for property-based testing.
 
 ## Installation
 
-::::{tab-set}
+=== "pip"
 
-:::{tab-item} pip
+    ```bash
+    pip install coordinax.hypothesis
+    ```
 
-```bash
-pip install coordinax.hypothesis
-```
+=== "uv"
 
-:::
-
-:::{tab-item} uv
-
-```bash
-uv add coordinax.hypothesis
-```
-
-:::
-
-::::
+    ```bash
+    uv add coordinax.hypothesis
+    ```
 
 ## Quick Start
 
@@ -62,14 +44,14 @@ def test_distance_property(dist):
 
 ### `angles(wrap_to=None, **kwargs)`
 
-Generate random {class}`unxt.Angle` objects for testing.
+Generate random `unxt.Angle` objects for testing.
 
-This strategy builds on {func}`unxt_hypothesis.quantities` to generate angles with optional wrapping bounds. The strategy is useful for property-based testing of angle-related computations.
+This strategy builds on `unxt_hypothesis.quantities` to generate angles with optional wrapping bounds. The strategy is useful for property-based testing of angle-related computations.
 
 **Parameters:**
 
 - `wrap_to` (`SearchStrategy[tuple[Quantity, Quantity]] | None`): Optional hypothesis strategy that generates a tuple of (min_bound, max_bound) for angle wrapping. If None, generates angles without wrapping (default: None).
-- `**kwargs`: Additional keyword arguments passed to {func}`~unxt_hypothesis.quantities`. Common options include:
+- `**kwargs`: Additional keyword arguments passed to `unxt_hypothesis.quantities`. Common options include:
   - `units` (str): Unit for the angle (e.g., "rad", "deg")
   - `min_value` (float): Minimum value for the angle
   - `max_value` (float): Maximum value for the angle
@@ -227,7 +209,7 @@ This strategy builds on `unxt_hypothesis.quantities` to generate parallaxes with
 **Parameters:**
 
 - `check_negative` (bool | SearchStrategy[bool]): Whether to enforce non-negative parallaxes. If `True` (default), generated parallaxes will be >= 0. Can be a hypothesis strategy to vary this behavior across test examples. Set to `False` when testing handling of noisy measurements.
-- `**kwargs`: Additional keyword arguments passed to {func}`unxt_hypothesis.quantities`. Common options include:
+- `**kwargs`: Additional keyword arguments passed to `unxt_hypothesis.quantities`. Common options include:
   - `units` (str): Unit for the parallax (e.g., "mas", "arcsec", "deg")
   - `shape` (int | tuple | SearchStrategy): Shape of the generated parallax array
   - `elements` (SearchStrategy): Strategy for generating array elements. When `check_negative=True`, the min_value will be automatically adjusted to 0 if needed.
@@ -280,9 +262,9 @@ def test_nearby_parallax(plx):
 
 ## Integration with `unxt-hypothesis`
 
-The {mod}`coordinax.hypothesis` package builds on top of `unxt-hypothesis` strategies.
+The `coordinax.hypothesis` package builds on top of `unxt-hypothesis` strategies.
 
-For more advanced usage patterns, see the {doc}`Testing Guide </packages/coordinax.hypothesis/testing-guide>`.
+For more advanced usage patterns, see the [Testing Guide](testing-guide.md).
 
 ## Contributing
 

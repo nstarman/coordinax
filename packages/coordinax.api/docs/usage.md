@@ -1,8 +1,8 @@
 # Usage Guide
 
-This guide demonstrates how to use {mod}`coordinax.api` to implement custom vector types and coordinate transformations that integrate with the `coordinax` ecosystem.
+This guide demonstrates how to use [`coordinax.api`][coordinax.api] to implement custom vector types and coordinate transformations that integrate with the `coordinax` ecosystem.
 
-The {mod}`coordinax.api` package uses [plum-dispatch](https://github.com/beartype/plum) for multiple dispatch. This allows different implementations of the same function based on the types of the arguments.
+The `coordinax.api` package uses [plum-dispatch](https://github.com/beartype/plum) for multiple dispatch. This allows different implementations of the same function based on the types of the arguments.
 
 ## Representations
 
@@ -68,6 +68,6 @@ print(f"Cartesian: x={back.x:.2f}, y={back.y:.2f}")  # x=3.00, y=4.00
 
 ## Next Steps
 
-- See the {doc}`API Reference </packages/coordinax.api/api>` for complete documentation
+- See the [API Reference](packages/coordinax.api/api.md) for complete documentation
 - Check out the [coordinax documentation](https://coordinax.readthedocs.io/) for concrete implementations
 - Review the plum-dispatch documentation for advanced dispatch patterns

@@ -66,9 +66,9 @@ _c2s_cx = cx.pt_map(cx.cart3d, cx.sph3d, usys=usys)
 c2s_cx = jax.jit(vmap(_c2s_cx))
 ```
 
-```{note}
-This one `coordinax`-backed function will be able to transform ALL of the object types we work with without modification, thanks to the way `coordinax` objects are designed to work with JAX and Quax.
-```
+!!! note
+
+    This one `coordinax`-backed function will be able to transform ALL of the object types we work with without modification, thanks to the way `coordinax` objects are designed to work with JAX and Quax.
 
 ### Array
 
@@ -126,9 +126,9 @@ usys = u.unitsystems.si
 c2s_bad(xarr, cx.cart3d, cx.sph3d, usys=usys)
 ```
 
-```{note}
-The `vmap` we are using is from `jaxmore`, which is a thin wrapper around `jax.vmap` that adds some extra features, in particular support for keyword arguments.
-```
+!!! note
+
+    The `vmap` we are using is from `jaxmore`, which is a thin wrapper around `jax.vmap` that adds some extra features, in particular support for keyword arguments.
 
 As expected, this is **much** slower than the hard-coded version. This is all the **wrapper overhead** and **pytree complexity** in action. Even though the argument `xarr` is a raw JAX array the vmap-with-kwargs has kwarg-related overhead and the JIT has to deal with the static arguments (`chart_from`,`chart_to`,`usys`).
 

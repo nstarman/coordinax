@@ -8,7 +8,7 @@ This guide focuses only on chart functionality in `coordinax.charts`.
 - Chart maps change coordinate representation while preserving the same point.
 - Charts are static descriptors; coordinate values live in dictionaries.
 
-```{code-block} python
+```python
 >>> import coordinax.charts as cxc
 
 >>> cxc.cart3d.components
@@ -30,7 +30,7 @@ For same-manifold chart changes, transition and realization maps agree:
 
 Use `pt_map` for same-manifold chart transitions and `pt_map` for the general point map interface.
 
-```{code-block} python
+```python
 >>> import coordinax.charts as cxc
 >>> import unxt as u
 
@@ -46,7 +46,7 @@ True
 
 Chart selection is independent of point data:
 
-```{code-block} python
+```python
 >>> import coordinax.charts as cxc
 
 >>> cxc.cartesian_chart(cxc.sph3d)
@@ -57,7 +57,7 @@ Cart3D()
 
 `guess_chart` infers a chart from keys or array shape heuristics. `cdict` normalizes different input forms to component dictionaries.
 
-```{code-block} python
+```python
 >>> import coordinax.charts as cxc
 >>> import unxt as u
 
@@ -81,7 +81,7 @@ Cart3D()
 
 Product-chart transitions are factorwise. `SpaceTimeCT` is a flat-key product chart with fixed time factor and selectable spatial factor.
 
-```{code-block} python
+```python
 >>> import coordinax.charts as cxc
 >>> import unxt as u
 
@@ -106,7 +106,7 @@ Product-chart transitions are factorwise. `SpaceTimeCT` is a flat-key product ch
 
 Passing a component dictionary with `unxt.Quantity` values returns a `QuantityMatrix` whose element `[j, i]` carries the unit `output_unit_j / input_unit_i`:
 
-```{code-block} python
+```python
 >>> import coordinax.charts as cxc
 >>> import unxt as u
 
@@ -127,7 +127,7 @@ QuantityMatrix(
 
 Pass a plain numeric dict and supply `usys` to interpret the dimensionless elements:
 
-```{code-block} python
+```python
 >>> import jax.numpy as jnp
 >>> import coordinax.charts as cxc
 >>> import unxt as u
@@ -142,7 +142,7 @@ Pass a plain numeric dict and supply `usys` to interpret the dimensionless eleme
 
 `jacobian_pt_map(None, *args, **kwargs)` -- or more explicitly, `jacobian_pt_map(from_chart, to_chart, usys=usys)` -- returns a callable that can be applied to many points without re-building the underlying point-map partial each time. This is the recommended pattern for use inside `jax.jit` and `jax.vmap`:
 
-```{code-block} python
+```python
 >>> import jax
 >>> import coordinax.charts as cxc
 >>> import unxt as u
@@ -159,7 +159,7 @@ Pass a plain numeric dict and supply `usys` to interpret the dimensionless eleme
 
 The curried form is JIT- and vmap-compatible:
 
-```{code-block} python
+```python
 >>> import jax
 >>> import jax.numpy as jnp
 >>> import coordinax.charts as cxc
@@ -182,7 +182,7 @@ The curried form is JIT- and vmap-compatible:
 
 The coordinate-change chain rule states that composing two Jacobians gives the Jacobian of the composed map. Use `quaxed.numpy.matmul` (or `coordinax._src.quantity_matrix.qnp.matmul`) for unit-aware matrix multiply:
 
-```{code-block} python
+```python
 >>> import quaxed.numpy as qnp
 >>> import coordinax.charts as cxc
 >>> import unxt as u
@@ -208,10 +208,7 @@ The coordinate-change chain rule states that composing two Jacobians gives the J
 - If you need a canonical Cartesian chart object: `cartesian_chart`
 - If your input type varies (dict/quantity/array): `cdict` and `guess_chart`
 
-:::{seealso}
+!!! info "See also"
 
-[Charts API](../api/charts.md)
-
-[Working With Manifolds](manifolds.md)
-
-:::
+    - [Charts API](../api/charts.md)
+    - [Working With Manifolds](manifolds.md)

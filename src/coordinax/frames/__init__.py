@@ -1,7 +1,71 @@
-r"""Reference frames and transformations between them.
+r"""Reference frames and frame-transition construction.
 
-Examples
---------
+The `coordinax.frames` module provides reference frames and frame-transition
+construction for relating different spatial observers and coordinate
+perspectives.
+
+## Overview
+
+Frames represent spatial observers. The transform operators themselves live in
+`coordinax.transforms` (typically imported as `cxfm`), and `coordinax.frames`
+constructs frame transitions using those operators.
+
+For design philosophy, reference frame models, and practical workflows, see
+[Working With Frames](../guides/frames.md). For background math, see {ref}`spec
+§ Frame Transforms <frame-transforms>`.
+
+## Transformation Groups
+
+Transformation groups classify transformations by the geometric properties they
+preserve:
+
+| Group | Parent | Preserves | Intuition |
+| --- | --- | --- | --- |
+| **Identity** | — | Everything (null) | Do nothing |
+| **Diffeomorphism** | — | Smooth structure | Any smooth invertible map |
+| **Affine** | Diffeomorphism | Parallelism, hyperplanes | Linear + translation
+  |
+| **Euclidean** | Affine | Distances, angles | Rotations + slides |
+| **Orthogonal** | Affine | Angles (fixes origin) | Rotations/reflections
+  through origin |
+| **Special Orthogonal** | Orthogonal | Orientation (det=+1) | Proper rotations
+  only |
+| **Poincaré** | Diffeomorphism | Spacetime intervals | Lorentz boosts +
+  translations |
+| **Lorentz** | — | Minkowski metric | Proper & improper boosts |
+| **Proper Orthochronous Lorentz** | Lorentz | Space+time orient. | Physical
+  relativistic transforms |
+
+For detailed semantics and use cases of each group, see [Working With
+Frames](../guides/frames.md#transformation-groups-mathematical-classification).
+
+## Functional API
+
+### Frame Operations
+
+- `frame_transition(frame1, frame2)`: construct a transformation operator from
+  one frame to another
+- `AbstractReferenceFrame`: base class for defining reference frames
+
+### Transform Operations
+
+Transform operations and transform classes are in
+[`coordinax.transforms`](transforms.md).
+
+### Built-in Frames
+
+- `Alice`, `Alex`: example stationary frames
+- `NoFrame`: identity frame
+- `TransformedReferenceFrame`: frame defined relative to a base frame
+
+### Transformation Group Classes (Markers)
+
+Transformation-group marker classes are in
+[`coordinax.transforms`](transforms.md).
+
+
+## Quick Start
+
 >>> import quaxed.numpy as jnp
 >>> import unxt as u
 >>> import coordinax.vectors as cxv

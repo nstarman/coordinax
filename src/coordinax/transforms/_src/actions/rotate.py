@@ -52,9 +52,7 @@ class Rotate(AbstractTransform):
 
     The coordinate transform is given by:
 
-    $$
-    $$
-        (t,\mathbf{x}) \mapsto (t, R \mathbf{x})
+    $$ (t,\mathbf{x}) \mapsto (t, R \mathbf{x}) $$
 
     where $R$ is the rotation matrix.  Note this is intrinsically time
     dependent.
@@ -92,7 +90,7 @@ class Rotate(AbstractTransform):
     >>> op
     Rotate(i64[3,3](jax))
 
-    Rotation operators can be applied to {class}`~coordinax.Point` and other
+    Rotation operators can be applied to ``Point`` objects and other
     higher-level objects, with behavior depending on the role:
 
     >>> v = cx.Point.from_([1, 0, 0], "m")  # A cxr.Point vector
@@ -102,8 +100,8 @@ class Rotate(AbstractTransform):
     <Point: chart=Cart3D (x, y, z) [m]
         [0 1 0]>
 
-    This also works for a batch of vectors (as a note, it is more efficient to
-    `jax.vmap` over the `jax.jit`ted operator):
+    This also works for a batch of vectors. For best performance, use
+    ``jax.vmap`` over the ``jax.jit``-compiled operator:
 
     >>> v = cx.Point.from_([[1, 0, 0], [0, 1, 0]], "m")  # A Point vector
     >>> print(op(t, v))
@@ -119,9 +117,9 @@ class Rotate(AbstractTransform):
     {'x': Q(0, unit='m'), 'y': Q(1, unit='m'), 'z': Q(0, unit='m')}
 
     In addition to the standard low-level objects, Rotation operators can be
-    applied to {class}`~unxt.Quantity` and Array-like objects, taken to
-    represent a Cartesian vectors. For Quantity, the role is inferred from the
-    units, while Arrays are always points:
+    applied to ``Quantity`` and array-like objects, taken to represent
+    Cartesian vectors. For ``Quantity``, the role is inferred from the units,
+    while arrays are always treated as points:
 
     >>> q = u.Q([1, 0, 0], "m")
     >>> t = u.Q(1, "s")
@@ -178,8 +176,8 @@ class Rotate(AbstractTransform):
     ) -> "Rotate":
         """Initialize from Euler angles.
 
-        See `jax.scipy.spatial.transform.Rotation.from_euler`.
-        `XYZ` are intrinsic rotations, `xyz` are extrinsic rotations.
+        See ``jax.scipy.spatial.transform.Rotation.from_euler``.
+        ``XYZ`` are intrinsic rotations, ``xyz`` are extrinsic rotations.
 
         Examples
         --------
@@ -428,7 +426,7 @@ def from_(cls: type[Rotate], obj: ArrayLike, /) -> Rotate:
 
 @Rotate.from_.dispatch  # ty: ignore[unresolved-attribute]
 def from_(cls: type[Rotate], obj: jtransform.Rotation, /) -> Rotate:
-    """Initialize from a `jax.scipy.spatial.transform.Rotation`.
+    """Initialize from a ``jax.scipy.spatial.transform.Rotation``.
 
     Examples
     --------

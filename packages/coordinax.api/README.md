@@ -6,25 +6,17 @@ This package defines the abstract dispatch interfaces for `coordinax`'s core fun
 
 ## Installation
 
-::::{tab-set}
-
-:::{tab-item} pip
+### pip
 
 ```bash
 pip install coordinax.api
 ```
 
-:::
-
-:::{tab-item} uv
+### uv
 
 ```bash
 uv add coordinax.api
 ```
-
-:::
-
-::::
 
 ## Why Use `coordinax.api`?
 

@@ -10,24 +10,22 @@ You will learn how to:
 - Upgrade arrays to higher-level objects
 - Use arrays with JAX
 
-```{admonition} Object Levels
-:class: tip
+!!! tip "Object Levels"
 
-Coordinax supports five levels of coordinate representation, each adding
-more metadata. This tutorial covers the **bottom level** — plain arrays.
+    Coordinax supports five levels of coordinate representation, each adding
+    more metadata. This tutorial covers the **bottom level** — plain arrays.
 
-| Level | Type | See tutorial |
-| --- | --- | --- |
-| Coordinate | `Coordinate` | [Coordinate tutorial](./coordinate_objects.md) |
-| Vector | `Vector` | [Vector tutorial](./vector_objects.md) |
-| CDict | `dict[str, Quantity]` | [CDict tutorial](./cdict_objects.md) |
-| Quantity | `unxt.Quantity` | [Quantity tutorial](./quantity_objects.md) |
-| **Array** | `jax.Array` | *this page* |
-```
+    | Level | Type | See tutorial |
+    | --- | --- | --- |
+    | Coordinate | `Coordinate` | [Coordinate tutorial](./coordinate_objects.md) |
+    | Vector | `Vector` | [Vector tutorial](./vector_objects.md) |
+    | CDict | `dict[str, Quantity]` | [CDict tutorial](./cdict_objects.md) |
+    | Quantity | `unxt.Quantity` | [Quantity tutorial](./quantity_objects.md) |
+    | **Array** | `jax.Array` | *this page* |
 
 ## Setup
 
-```{code-block} python
+```python
 >>> import coordinax.main as cx
 >>> import coordinax.charts as cxc
 >>> import coordinax.frames as cxf
@@ -53,7 +51,7 @@ The trade-off: you must pass chart, representation, and a unit system to every c
 
 Use `cxfm.act()` with explicit chart, representation, and **unit system**:
 
-```{code-block} python
+```python
 >>> usys = u.unitsystem("m", "s", "kg", "rad")
 
 >>> rot90z = cxfm.Rotate.from_euler("z", u.Q(90, "deg"))
@@ -77,7 +75,7 @@ The arguments:
 
 Transforms like `Translate` store their offsets **with units** (e.g. `Translate({"x": Q(1, "km"), ...})`). A bare array has no units, so coordinax cannot add metres to a unitless number. The `usys` tells coordinax how to interpret the array: "these numbers are in metres."
 
-```{code-block} python
+```python
 >>> usys = u.unitsystem("km", "s", "kg", "rad")
 >>> shift = cxfm.Translate.from_([1, 2, 3], "km")
 
@@ -91,7 +89,7 @@ True
 
 For chart conversion, first convert the array into a CDict using `cxc.cdict()` with a chart and unit:
 
-```{code-block} python
+```python
 >>> d = cxc.cdict(jnp.array([1.0, 2.0, 3.0]), "km", cxc.cart3d)
 >>> sorted(d.keys())
 ['x', 'y', 'z']
@@ -99,7 +97,7 @@ For chart conversion, first convert the array into a CDict using `cxc.cdict()` w
 
 Then convert charts via `pt_map`:
 
-```{code-block} python
+```python
 >>> d_sph = cxc.pt_map(d, cxc.cart3d, cxc.sph3d)
 >>> sorted(d_sph.keys())
 ['phi', 'r', 'theta']
@@ -113,7 +111,7 @@ Arrays sit at the bottom of the coordinax tower. You can upgrade step-by-step:
 
 Attach units:
 
-```{code-block} python
+```python
 >>> arr = jnp.array([1.0, 2.0, 3.0])
 >>> q = u.Q(arr, "km")
 >>> q.unit
@@ -124,7 +122,7 @@ Unit("km")
 
 Attach chart and representation:
 
-```{code-block} python
+```python
 >>> v = cx.Point.from_(q)
 >>> v.chart
 Cart3D()
@@ -134,7 +132,7 @@ Cart3D()
 
 Attach a reference frame:
 
-```{code-block} python
+```python
 >>> coord = cx.Point.from_(v, cxf.alice)
 >>> coord.frame
 Alice()
@@ -144,7 +142,7 @@ Alice()
 
 Skip the quantity step:
 
-```{code-block} python
+```python
 >>> v = cx.Point.from_([1, 2, 3], "km")
 >>> v.chart
 Cart3D()
@@ -154,7 +152,7 @@ Cart3D()
 
 Plain arrays are native JAX — `jit`, `vmap`, and `grad` work without any special handling:
 
-```{code-block} python
+```python
 >>> usys = u.unitsystem("m", "s", "kg", "rad")
 >>> rot90z = cxfm.Rotate.from_euler("z", u.Q(90, "deg"))
 

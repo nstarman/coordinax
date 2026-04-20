@@ -9,23 +9,15 @@ This document is the **normative** specification for the mathematical and softwa
 
 ## Table of Contents
 
-```{contents}
-:depth: 2
-```
-
 </br>
 
 ---
 
-(math-spec)=
-
-# The Math
+# The Math { #math-spec }
 
 In this section we fix the _mathematical objects_ that `coordinax` represents and the _transformation laws_ that determine how component data moves. This is a high-level overview; later sections specify each object and API in detail.
 
-(math-spec-angles-and-distances)=
-
-## Angles and Distances
+## Angles and Distances { #math-spec-angles-and-distances }
 
 <details>
 <summary>Software Specification</summary>
@@ -43,15 +35,11 @@ A **distance quantity** has dimensions of length and, in the strict metric sense
 
 </br>
 
-(math-spec-points)=
-
-## Points
+## Points { #math-spec-points }
 
 A point is an abstract geometric object. In this section we will explore how points can be concretized into coordinates -- e.g. "x", "y", "z" -- in coordinate representations --- e.g. Cartesian --- on manifolds -- e.g. $\mathbb{R}^3$. We will see how these coordinate representations of these points can be changed in the same manifold and across manifolds. We will also explore (time-dependent) actions on these coordinates, e.g. translations, and how to build these actions into changes of reference frames.
 
-(math-spec-smooth-manifolds)=
-
-### Smooth Manifolds
+### Smooth Manifolds { #math-spec-smooth-manifolds }
 
 **Smooth** means that the manifold has a well-defined notion of differentiability, allowing us to perform calculus on it. **Manifold** indicates that the space is locally similar to $\mathbb{R}^n$ but can have a different global topology, such as being curved or having holes.
 
@@ -59,9 +47,7 @@ A **point** is simply an element $p \in M$.
 
 Most of the important properties and structures associated with smooth manifolds --- such as coordinate systems, charts, atlases, and transition maps --- will be introduced and explained in subsequent sections.
 
-(math-spec-charts)=
-
-### Charts
+### Charts { #math-spec-charts }
 
 [Software Spec](#software-spec-charts)
 
@@ -108,9 +94,7 @@ is a valid atlas for $\mathbb{R}^3$. The **maximal atlas** $\mathcal{A}_{\mathrm
 
 In [Smooth Manifolds](#math-spec-smooth-manifolds) we defined a smooth manifold as a topological space $M$ and a notion of differentiability. Now we can refine this definition, and specify that the maximal smooth atlas $\mathcal{A}_{\mathrm{max}}$ provides this differentiability notion. Thus a smooth manifold is a topological space equipped with a maximal smooth atlas --- formally $(M, \mathcal{A}_{\mathrm{max}})$, though often abbreviated back to just $M$.
 
-(math-spec-transition-maps)=
-
-### Transition Maps
+### Transition Maps { #math-spec-transition-maps }
 
 [Software Spec](#software-spec-pt_map)
 
@@ -136,9 +120,7 @@ $$
     \tau_{C\to S} = \left( \sqrt(x^2+y^2+z^2), \arccos(z/r), \arctan(y/x) \right)
     $$
 
-(math-spec-transition-maps-jacobian)=
-
-#### Jacobian of the Transition Map
+#### Jacobian of the Transition Map { #math-spec-transition-maps-jacobian }
 
 The **Jacobian** of a transition map is the matrix of first partial derivatives of the new coordinates with respect to the old coordinates. For
 
@@ -162,9 +144,7 @@ $$
 
 for the inverse transition map.
 
-(math-spec-embedded-manifolds)=
-
-### Embedded Manifolds
+### Embedded Manifolds { #math-spec-embedded-manifolds }
 
 Before defining maps between manifolds, we fix the relevant vocabulary.
 
@@ -299,9 +279,7 @@ C_1'}$ and the last $n_2$ components transform by $\tau_{C_2 \to C_2'}$, indepen
 
 </br>
 
-(frame-transforms)=
-
-### Frame Transforms
+### Frame Transforms { #frame-transforms }
 
 A **static frame transformation** is a smooth map
 
@@ -584,11 +562,9 @@ $$
 
 This group represents the absence of any transformation.
 
-```{admonition} Examples
-:class: dropdown
+??? example "Examples"
 
-- identity frame transformation
-```
+    - identity frame transformation
 
 ### Diffeomorphism Group $\mathrm{Diff}(M)$
 
@@ -608,16 +584,14 @@ $$
 
 This is the largest transformation group normally considered in differential geometry.
 
-```{admonition} Examples
-:class: dropdown
+??? example "Examples"
 
-- coordinate system changes
-- nonlinear coordinate wraps
-- accelerated coordinate systems
-- Rindler coordinate transformations
-- general smooth reparameterizations
-- nonlinear warps
-```
+    - coordinate system changes
+    - nonlinear coordinate wraps
+    - accelerated coordinate systems
+    - Rindler coordinate transformations
+    - general smooth reparameterizations
+    - nonlinear warps
 
 ### Affine Group $\mathrm{Aff}(\mathbb{R}^n)$
 
@@ -639,15 +613,13 @@ Affine transformations preserve:
 
 but do **not** necessarily preserve distances or angles.
 
-```{admonition} Examples
-:class: dropdown
+??? example "Examples"
 
-- translations
-- linear transformations
-- scalings
-- shears
-- coordinate rescalings
-```
+    - translations
+    - linear transformations
+    - scalings
+    - shears
+    - coordinate rescalings
 
 ### Special Orthogonal Group $SO(n)$
 
@@ -663,13 +635,11 @@ These transformations preserve:
 - angles
 - orientation
 
-```{admonition} Examples
-:class: dropdown
+??? example "Examples"
 
-- spatial rotations
-- rotation matrices
-- rigid rotations of coordinate frames
-```
+    - spatial rotations
+    - rotation matrices
+    - rigid rotations of coordinate frames
 
 ### Orthogonal Group $O(n)$
 
@@ -681,13 +651,11 @@ $$
 
 Transformations preserve distances but may reverse orientation.
 
-```{admonition} Examples
-:class: dropdown
+??? example "Examples"
 
-- reflections across planes
-- mirror symmetry
-- rotations combined with reflections
-```
+    - reflections across planes
+    - mirror symmetry
+    - rotations combined with reflections
 
 ### Euclidean Group $E(n)$
 
@@ -705,14 +673,12 @@ These transformations preserve:
 - angles
 - rigid body structure
 
-```{admonition} Examples
-:class: dropdown
+??? example "Examples"
 
-- translations
-- rotations
-- reflections
-- rigid body motions
-```
+    - translations
+    - rotations
+    - reflections
+    - rigid body motions
 
 ### Lorentz Group $O(1,3)$
 
@@ -730,14 +696,12 @@ $$
 
 where $\eta$ is the Minkowski metric.
 
-```{admonition} Examples
-:class: dropdown
+??? example "Examples"
 
-- Lorentz boosts
-- spatial rotations in spacetime
-- time reversal
-- parity transformations
-```
+    - Lorentz boosts
+    - spatial rotations in spacetime
+    - time reversal
+    - parity transformations
 
 ### Proper Orthochronous Lorentz Group $SO^+(1,3)$
 
@@ -748,12 +712,10 @@ This subgroup preserves:
 - spacetime orientation
 - direction of time
 
-```{admonition} Examples
-:class: dropdown
+??? example "Examples"
 
-- Lorentz boosts
-- spatial rotations
-```
+    - Lorentz boosts
+    - spatial rotations
 
 ### Poincaré Group $IO(1,3)$
 
@@ -765,14 +727,12 @@ $$
 
 It is the full group of **isometries of Minkowski spacetime**.
 
-```{admonition} Examples
-:class: dropdown
+??? example "Examples"
 
-- spacetime translations
-- Lorentz boosts
-- spacetime rotations
-- inertial frame transformations
-```
+    - spacetime translations
+    - Lorentz boosts
+    - spacetime rotations
+    - inertial frame transformations
 
 ### Minkowski Affine Group
 
@@ -786,24 +746,17 @@ with $A \in GL(4)$.
 
 These transformations preserve affine structure but not necessarily the Minkowski metric.
 
-```{admonition} Examples
-:class: dropdown
+??? example "Examples"
 
-- linear spacetime transformations
-- shears in spacetime coordinates
-- coordinate scalings
-```
+    - linear spacetime transformations
+    - shears in spacetime coordinates
+    - coordinate scalings
 
 </br>
 
 ---
 
 # Packages
-
-```{contents}
-:local:
-:depth: 1
-```
 
 ## Main
 
@@ -842,9 +795,7 @@ Semi-public API:
 
 </br>
 
-(software-spec-angles)=
-
-## Angles
+## Angles { #software-spec-angles }
 
 The `coordinax.angles` module provides the angle-facing scalar API used by charts, vectors, and frame transformations.
 
@@ -868,9 +819,7 @@ The `coordinax.angles` module provides the angle-facing scalar API used by chart
 
 </br>
 
-(software-spec-distances)=
-
-## Distances
+## Distances { #software-spec-distances }
 
 The `coordinax.distances` module provides the distance-facing scalar API used by coordinate charts and astronomy-oriented conversions.
 
@@ -881,8 +830,6 @@ The `coordinax.distances` module provides the distance-facing scalar API used by
     Properties:
 
     - `distance`: convert to a [`coordinax.distances.Distance`](#software-spec-distance) with length units. This is the canonical distance representation for all distance-like quantities.
-
-(software-spec-distance)=
 
 !!! info `Distance`
 
@@ -898,9 +845,7 @@ The `coordinax.distances` module provides the distance-facing scalar API used by
 
 </br>
 
-(software-spec-charts)=
-
-## Charts
+## Charts { #software-spec-charts }
 
 The `coordinax.charts` module provides the chart-facing API for representing points on manifolds with explicit component names, ordering, and physical dimensions, including chart construction, chart selection, and transition maps between compatible coordinate representations.
 
@@ -1015,8 +960,6 @@ The `coordinax.charts` module provides the chart-facing API for representing poi
     - When no chart is explicitly provided, `guess_chart` is used to infer Cartesian chart dimensionality from array/quantity shape. This works for arrays/quantities with trailing axis size 1, 2, or 3 only.
     - Units are preserved: a quantity input returns a `CDict` of quantities.
 
-(software-spec-pt_map)=
-
 !!! info `pt_map`
 
     Transform point coordinates from one chart to another.
@@ -1058,8 +1001,6 @@ The `coordinax.charts` module provides the chart-facing API for representing poi
     coordinates from `chart` into `chart.cartesian`.
 
     This is implemented as a thin wrapper over `pt_map`.
-
-(software-spec-tangent-map)=
 
 !!! info `jacobian_pt_map`
 
@@ -1120,7 +1061,7 @@ The `coordinax.charts` module provides the chart-facing API for representing poi
     - Raises `ValueError` if `at` keys do not match `from_chart.components` (via
       `check_data`).
 
-### Dimensional Flags
+### Dimensional Flags { #software-spec-tangent-map }
 
 !!! info `AbstractDimensionalFlag`
 
@@ -1525,9 +1466,7 @@ The `coordinax.charts` module provides the chart-facing API for representing poi
 
 </br>
 
-(software-spec-representations)=
-
-## Representations
+## Representations { #software-spec-representations }
 
 Building off transition maps and the other transformation laws we introduce a generalization over transformation laws that streamlines software implementation.
 
@@ -1570,8 +1509,6 @@ A representation is therefore **not** the same thing as a chart: the chart deter
         semantic_kind: AbstractSemanticKind
     ```
 
-(software-spec-singletons)=
-
 !!! info Pre-defined Representations
 
     `Representation` instances for standard use cases.
@@ -1582,7 +1519,7 @@ A representation is therefore **not** the same thing as a chart: the chart deter
 
 </br>
 
-### Functional API
+### Functional API { #software-spec-singletons }
 
 !!! info `cconvert`
 
@@ -1597,8 +1534,6 @@ A representation is therefore **not** the same thing as a chart: the chart deter
 
     - $(C_{f}, R_{f}, C_{i}, R_{i})$ -> $(C_{f}, K_{f}, R_{f}, C_{i}, K_{i}, R_{i})$ general redispatch to use the geometric type in the transformation selection.
     - $(C_{f}, \text{PointGeometry}, R_{f}, C_{i}, \text{PointGeometry}, R_{i})$ redispatch to use the transition map $\varphi_{C_{f}} \circ \varphi_{C_{i}}^{-1}$. $R_{i,f}$ are checked that [B=NoBasis()](#software-spec-no_basis), [S=Location()](#software-spec-location)
-
-(software-spec-guess_rep)=
 
 !!! info `guess_rep`
 
@@ -1617,7 +1552,7 @@ A representation is therefore **not** the same thing as a chart: the chart deter
 
 </br>
 
-### Geometric Kind
+### Geometric Kind { #software-spec-guess_rep }
 
 A **geometry kind** identifies the mathematical type of geometric object that component data represents. Importantly, the geometry kind is **independent of the coordinate chart** used to represent the components. The same geometric object may be written in any compatible chart.
 
@@ -1625,8 +1560,6 @@ Geometric objects arise from geometric structures associated with a manifold $M$
 
 - **Points**: a point is an element $$p \in M .$$ If $q_i$ and $q_f$ are two coordinate descriptions of the same point, then the transformation law is $$
 q_f = \tau(q_i) .$$ An important example is the **point geometry**.
-
-(software-spec-abstractgeometry)=
 
 !!! info `AbstractGeometry`
 
@@ -1649,8 +1582,6 @@ q_f = \tau(q_i) .$$ An important example is the **point geometry**.
 
     - `AbstractGeometry` is a static dispatch object category (no runtime numerical payload).
     - Concrete subclasses should represent immutable geometric categories.
-
-(software-spec-guess_geometry_kind)=
 
 !!! info `guess_geometry_kind`
 
@@ -1691,7 +1622,7 @@ q_f = \tau(q_i) .$$ An important example is the **point geometry**.
 
 </br>
 
-### Basis
+### Basis { #software-spec-guess_geometry_kind }
 
 Many geometric objects live in vector spaces. In such spaces, component values depend on the choice of basis.
 
@@ -1712,8 +1643,6 @@ The coefficients $v^a$ are the **components of the vector in the basis** $B$.
 However, not all geometric objects require a basis specification.
 
 - Points are affine objects and do not belong to a vector space. Their coordinates are chart values, not vector components.
-
-(software-spec-abstractsbasis)=
 
 !!! info `AbstractBasis`
 
@@ -1739,8 +1668,6 @@ However, not all geometric objects require a basis specification.
     - `AbstractBasis` is a static dispatch object category.
     - Concrete subclasses should represent immutable basis categories.
 
-(software-spec-guess_basis_kind)=
-
 !!! info `guess_basis_kind`
 
     Infer basis kind from lightweight structural information.
@@ -1756,8 +1683,6 @@ However, not all geometric objects require a basis specification.
 
     - Empty mapping -> `ValueError`.
     - Unregistered dimension -> `ValueError`.
-
-(software-spec-no_basis)=
 
 !!! info `NoBasis` and `no_basis`
 
@@ -1779,7 +1704,7 @@ However, not all geometric objects require a basis specification.
 
 </br>
 
-### Semantic Kind
+### Semantic Kind { #software-spec-no_basis }
 
 A **semantic kind** specifies the **interpretation** attached to a geometric object.
 
@@ -1795,8 +1720,6 @@ Separating semantics from geometry provides two advantages:
 
 1. Correct transformation laws -- transformation behavior depends only on geometry kind and basis, not on semantics.
 2. Clear interpretation -- different semantic kinds distinguish objects that share the same mathematical type but represent different physical quantities.
-
-(software-spec-abstractsemantickind)=
 
 !!! info `AbstractSemanticKind`
 
@@ -1822,8 +1745,6 @@ Separating semantics from geometry provides two advantages:
     - `AbstractSemanticKind` is a static dispatch object category (no runtime numerical payload).
     - Concrete subclasses should represent immutable semantic categories.
 
-(software-spec-guess_semantic_kind)=
-
 !!! info `guess_semantic_kind`
 
     Infer semantic kind from lightweight structural information.
@@ -1840,8 +1761,6 @@ Separating semantics from geometry provides two advantages:
     - Empty mapping -> `ValueError`.
     - Multiple non-angle dimensions after discarding -> `ValueError`.
     - Unregistered dimension -> `ValueError`.
-
-(software-spec-location)=
 
 !!! info `Location` and `loc`
 
@@ -1863,9 +1782,7 @@ Separating semantics from geometry provides two advantages:
 
 </br>
 
-(software-spec-vectors)=
-
-## Vectors
+## Vectors { #software-spec-vectors }
 
 !!! info `AbstractVector`
 
@@ -1952,9 +1869,7 @@ Separating semantics from geometry provides two advantages:
 
 </br>
 
-(software-spec-manifolds)=
-
-## Manifolds
+## Manifolds { #software-spec-manifolds }
 
 The `coordinax.metrics` module, typically imported as `import coordinax.manifolds as cxm`, adds Riemannian (and pseudo-Riemannian) structure to smooth manifolds.
 
@@ -1965,8 +1880,6 @@ $$g_p : T_pM \times T_pM \to \mathbb{R}, \quad p \in M.$$
 In a local chart with coordinates $q = (q^1, \ldots, q^n)$, the metric is encoded by the **metric matrix**
 
 $$g_{ij}(q) = g_p\!\left(\frac{\partial}{\partial q^i}, \frac{\partial}{\partial q^j}\right).$$
-
-(software-spec-guess-manifold)=
 
 !!! info `guess_manifold`
 
@@ -2028,8 +1941,6 @@ $$g_{ij}(q) = g_p\!\left(\frac{\partial}{\partial q^i}, \frac{\partial}{\partial
     - This function is primarily used internally and in high-level convenience APIs.
     - When the input is a manifold, it is returned unchanged without validation.
     - When inferring from a point (CDict), the chart inference is performed by `cxc.guess_chart()`, which uses its own dispatch logic.
-
-(software-spec-scale-factors)=
 
 !!! info `scale_factors`
 
@@ -2110,8 +2021,6 @@ $$g_{ij}(q) = g_p\!\left(\frac{\partial}{\partial q^i}, \frac{\partial}{\partial
 
     - `AbstractMetric.scale_factors` and `AbstractManifold.scale_factors` are thin wrappers over `cxm.scale_factors`.
     - The name `scale_factors` in the software API follows the library convention for metric diagonal entries, even though some mathematical texts reserve “scale factor” for $\sqrt{g_{ii}}$.
-
-(software-spec-angle-between)=
 
 !!! info `angle_between`
 
@@ -2204,8 +2113,6 @@ $$g_{ij}(q) = g_p\!\left(\frac{\partial}{\partial q^i}, \frac{\partial}{\partial
     - This API is for tangent-space geometry. Point-role coordinates should first be converted into a tangent/displacement representation if that is the intended meaning.
     - The angle is defined intrinsically by the metric at the supplied base point and is therefore chart-invariant under valid coordinate changes.
 
-(software-spec-abstractatlas)=
-
 !!! info `AbstractAtlas`
 
     An atlas is the collection of compatible charts that defines the smooth structure of a manifold. If $ \mathcal{A} = \{(U_\alpha, \varphi_\alpha)\} $ is an atlas on a topological manifold $M$, then the pair $ (M, \mathcal{A}) $ is a smooth manifold. In `coordinax`, the atlas object is the software representation of this smooth structure: it specifies which charts are valid coordinate descriptions of the manifold.
@@ -2261,8 +2168,6 @@ $$g_{ij}(q) = g_p\!\left(\frac{\partial}{\partial q^i}, \frac{\partial}{\partial
 
     In this call the atlas first verifies that both charts belong to the same atlas before delegating to the registered point transition map implementation.
 
-(software-spec-abstractmetric)=
-
 !!! info `AbstractMetric`
 
     `AbstractMetric` is the abstract base for metric tensors used by manifold objects.
@@ -2314,8 +2219,6 @@ $$g_{ij}(q) = g_p\!\left(\frac{\partial}{\partial q^i}, \frac{\partial}{\partial
 
     - `scale_factors(chart, /, *, at, usys=None)`: convenience wrapper around [`cxm.scale_factors`](#software-spec-scale-factors). Returns the 1-D `QuantityMatrix` of diagonal metric entries in `chart` at base point `at`.
 
-(software-spec-abstractmanifold)=
-
 !!! info `AbstractManifold`
 
     `AbstractManifold` defines the core interface for manifolds. A smooth manifold object represents the mathematical pair
@@ -2362,7 +2265,7 @@ $$g_{ij}(q) = g_p\!\left(\frac{\partial}{\partial q^i}, \frac{\partial}{\partial
     - Minkowski [`MinkowskiManifold`](#software-spec-minkowskimanifold)
     - Custom [`CustomManifold`](#software-spec-custommanifold)
 
-### Euclidean Manifolds
+### Euclidean Manifolds { #software-spec-abstractmanifold }
 
 !!! info `EuclideanAtlas`
 
@@ -2442,8 +2345,6 @@ $$g_{ij}(q) = g_p\!\left(\frac{\partial}{\partial q^i}, \frac{\partial}{\partial
     False
     ```
 
-(software-spec-euclideanmetric)=
-
 !!! info `EuclideanMetric`
 
     `EuclideanMetric` is the flat Riemannian metric on $\mathbb{R}^n$.
@@ -2490,8 +2391,6 @@ $$g_{ij}(q) = g_p\!\left(\frac{\partial}{\partial q^i}, \frac{\partial}{\partial
     >>> m.signature
     (1, 1, 1)
     ```
-
-(software-spec-euclideanmanifold)=
 
 !!! info `EuclideanManifold`
 
@@ -2548,7 +2447,7 @@ $$g_{ij}(q) = g_p\!\left(\frac{\partial}{\partial q^i}, \frac{\partial}{\partial
      'phi': Array(0.78539816, dtype=float64, ...)}
     ```
 
-### Hyper-Spherical Manifolds
+### Hyper-Spherical Manifolds { #software-spec-euclideanmanifold }
 
 !!! info `HyperSphericalAtlas`
 
@@ -2575,8 +2474,6 @@ $$g_{ij}(q) = g_p\!\left(\frac{\partial}{\partial q^i}, \frac{\partial}{\partial
     Charts on other manifolds, such as `Cart2D` or Euclidean 3-space charts, are not members of this atlas.
 
     As with `EuclideanAtlas`, membership is determined by chart registration rather than by hard-coded enumeration using the ``register`` class method.
-
-(software-spec-hypersphericalmetric)=
 
 !!! info `HyperSphericalMetric`
 
@@ -2627,8 +2524,6 @@ $$g_{ij}(q) = g_p\!\left(\frac{\partial}{\partial q^i}, \frac{\partial}{\partial
     >>> m.signature
     (1, 1)
     ```
-
-(software-spec-twospheremanifold)=
 
 !!! info `HyperSphericalManifold`
 
@@ -2700,9 +2595,7 @@ $$g_{ij}(q) = g_p\!\left(\frac{\partial}{\partial q^i}, \frac{\partial}{\partial
     False
     ```
 
-### Minkowski Manifolds
-
-(software-spec-minkowskiatlas)=
+### Minkowski Manifolds { #software-spec-twospheremanifold }
 
 !!! info `MinkowskiAtlas`
 
@@ -2738,8 +2631,6 @@ $$g_{ij}(q) = g_p\!\left(\frac{\partial}{\partial q^i}, \frac{\partial}{\partial
 
     - This atlas defines chart compatibility only.
     - Metric formulas are specified by MinkowskiMetric.
-
-(software-spec-minkowskimetric)=
 
 !!! info `MinkowskiMetric`
 
@@ -2796,8 +2687,6 @@ $$g_{ij}(q) = g_p\!\left(\frac{\partial}{\partial q^i}, \frac{\partial}{\partial
     (-1, 1, 1, 1)
     ```
 
-(software-spec-minkowskimanifold)=
-
 !!! info `MinkowskiManifold`
 
     Minkowski spacetime manifold $( \mathbb{R}^{1,3}, \eta)$ with Lorentzian metric signature $(-1, 1, 1, 1)$.
@@ -2844,9 +2733,7 @@ $$g_{ij}(q) = g_p\!\left(\frac{\partial}{\partial q^i}, \frac{\partial}{\partial
     (-1, 1, 1, 1)
     ```
 
-### Custom Manifolds
-
-(software-spec-customatlas)=
+### Custom Manifolds { #software-spec-minkowskimanifold }
 
 !!! info `CustomAtlas`
 
@@ -2895,8 +2782,6 @@ $$g_{ij}(q) = g_p\!\left(\frac{\partial}{\partial q^i}, \frac{\partial}{\partial
     False
     ```
 
-(software-spec-custommetric)=
-
 !!! info `CustomMetric`
 
     `CustomMetric` is a concrete metric implementation for user-defined manifolds.
@@ -2936,8 +2821,6 @@ $$g_{ij}(q) = g_p\!\left(\frac{\partial}{\partial q^i}, \frac{\partial}{\partial
     >>> metric.ndim
     3
     ```
-
-(software-spec-custommanifold)=
 
 !!! info `CustomManifold`
 
@@ -2988,9 +2871,7 @@ $$g_{ij}(q) = g_p\!\left(\frac{\partial}{\partial q^i}, \frac{\partial}{\partial
     False
     ```
 
-### Product Manifolds
-
-(software-spec-cartesianproductatlas)=
+### Product Manifolds { #software-spec-custommanifold }
 
 !!! info `CartesianProductAtlas`
 
@@ -3017,12 +2898,12 @@ $$g_{ij}(q) = g_p\!\left(\frac{\partial}{\partial q^i}, \frac{\partial}{\partial
 
     A chart belongs to this atlas iff:
 
-    1. it is a {class}`~coordinax.charts.CartesianProductChart`, and
+    1. it is a `coordinax.charts.CartesianProductChart`, and
     2. each factor chart in the product chart belongs to the corresponding factor atlas.
 
     Default chart:
 
-    - `default_chart()` returns a {class}`~coordinax.charts.CartesianProductChart` constructed from the default charts of each factor atlas.
+    - `default_chart()` returns a `coordinax.charts.CartesianProductChart` constructed from the default charts of each factor atlas.
 
     Factor access:
 
@@ -3060,8 +2941,6 @@ $$g_{ij}(q) = g_p\!\left(\frac{\partial}{\partial q^i}, \frac{\partial}{\partial
     >>> atlas.has_chart(cxc.sph2)
     False
     ```
-
-(software-spec-cartesianproductmetric)=
 
 !!! info `CartesianProductMetric`
 
@@ -3119,8 +2998,6 @@ $$g_{ij}(q) = g_p\!\left(\frac{\partial}{\partial q^i}, \frac{\partial}{\partial
     (3, 3)
     ```
 
-(software-spec-cartesianproductmanifold)=
-
 !!! info `CartesianProductManifold`
 
     Manifold defined as a Cartesian product of other manifolds: $M = M_1 \times M_2 \times \cdots \times M_k$.
@@ -3150,7 +3027,7 @@ $$g_{ij}(q) = g_p\!\left(\frac{\partial}{\partial q^i}, \frac{\partial}{\partial
 
     Chart membership:
 
-    - `has_chart(chart)` returns true iff the chart is a {class}`~coordinax.charts.CartesianProductChart` whose factor charts belong to the corresponding factor atlases.
+    - `has_chart(chart)` returns true iff the chart is a `coordinax.charts.CartesianProductChart` whose factor charts belong to the corresponding factor atlases.
 
     Coordinate operations:
 
@@ -3193,9 +3070,7 @@ $$g_{ij}(q) = g_p\!\left(\frac{\partial}{\partial q^i}, \frac{\partial}{\partial
     False
     ```
 
-### Embedded Manifolds
-
-(software-spec-abstractembeddingmap)=
+### Embedded Manifolds { #software-spec-cartesianproductmanifold }
 
 !!! info `AbstractEmbeddingMap`
 
@@ -3225,8 +3100,6 @@ $$g_{ij}(q) = g_p\!\left(\frac{\partial}{\partial q^i}, \frac{\partial}{\partial
     - `ambient`: $(x, y, z)$ Cartesian coordinates in $\mathbb{R}^3$
     - `embed`: $(\theta, \phi) \mapsto (R\sin\theta\cos\phi, R\sin\theta\sin\phi, R\cos\theta)$
     - `project`: drop radial component, recover $(\theta, \phi)$
-
-(software-spec-customembeddingmap)=
 
 !!! info `CustomEmbeddingMap`
 
@@ -3288,8 +3161,6 @@ $$g_{ij}(q) = g_p\!\left(\frac{\partial}{\partial q^i}, \frac{\partial}{\partial
     CustomEmbeddingMap(intrinsic=Cart1D(), ambient=Cart2D(), ...)
     ```
 
-(software-spec-inducedmetric)=
-
 !!! info `InducedMetric`
 
     `InducedMetric` is the pullback metric on an embedded manifold.
@@ -3345,8 +3216,6 @@ $$g_{ij}(q) = g_p\!\left(\frac{\partial}{\partial q^i}, \frac{\partial}{\partial
     >>> metric.signature
     (1, 1)
     ```
-
-(software-spec-embeddedmanifold)=
 
 !!! info `EmbeddedManifold`
 
@@ -3437,8 +3306,6 @@ $$g_{ij}(q) = g_p\!\left(\frac{\partial}{\partial q^i}, \frac{\partial}{\partial
     {'theta': Angle(1.57079633, 'rad'), 'phi': Angle(0., 'rad')}
     ```
 
-(software-spec-embeddedchart)=
-
 !!! info `EmbeddedChart`
 
     Convenience wrapper chart that pairs an intrinsic chart with an embedding map to define a chart on an embedded manifold.
@@ -3499,7 +3366,7 @@ $$g_{ij}(q) = g_p\!\left(\frac{\partial}{\partial q^i}, \frac{\partial}{\partial
 
 <a id="software-spec-transforms"></a>
 
-## Transforms
+## Transforms { #software-spec-embeddedchart }
 
 The canonical transformation API is exposed by `coordinax.transforms`, which is typically imported as `import coordinax.transforms as cxfm`.
 
@@ -3540,8 +3407,6 @@ flowchart TD
 
 Each group corresponds to a set of transformations preserving a particular geometric structure.
 
-(software-spec-identitygroup)=
-
 !!! info `IdentityGroup`
 
     The trivial transformation group containing only the identity map.
@@ -3553,8 +3418,6 @@ Each group corresponds to a set of transformations preserving a particular geome
     $$
 
     for every point $p$ on the manifold.
-
-(software-spec-diffeomorphismgroup)=
 
 !!! info `DiffeomorphismGroup`
 
@@ -3570,8 +3433,6 @@ Each group corresponds to a set of transformations preserving a particular geome
 
     This is the largest natural transformation group associated with a smooth manifold.
 
-(software-spec-affinegroup)=
-
 !!! info `AffineGroup`
 
     The group of affine transformations of an affine space.
@@ -3585,8 +3446,6 @@ Each group corresponds to a set of transformations preserving a particular geome
     where $A$ is an invertible linear map and $b$ is a translation vector.
 
     Affine transformations preserve affine combinations and parallelism.
-
-(software-spec-euclideangroup)=
 
 !!! info `EuclideanGroup`
 
@@ -3606,8 +3465,6 @@ Each group corresponds to a set of transformations preserving a particular geome
     - rotations
     - reflections
 
-(software-spec-orthogonalgroup)=
-
 !!! info `OrthogonalGroup`
 
     The group of orthogonal linear transformations.
@@ -3620,8 +3477,6 @@ Each group corresponds to a set of transformations preserving a particular geome
 
     Elements correspond to rotations and reflections about the origin.
 
-(software-spec-specialorthogonalgroup)=
-
 !!! info `SpecialOrthogonalGroup`
 
     The subgroup of the orthogonal group with determinant
@@ -3631,8 +3486,6 @@ Each group corresponds to a set of transformations preserving a particular geome
     $$
 
     These transformations preserve both the inner product and the orientation of space. In Euclidean space they correspond to **rotations**.
-
-(software-spec-lorentzgroup)=
 
 !!! info `LorentzGroup`
 
@@ -3650,8 +3503,6 @@ Each group corresponds to a set of transformations preserving a particular geome
     \Lambda^{\mathsf T} \eta \Lambda = \eta.
     $$
 
-(software-spec-properorthochronouslorentzgroup)=
-
 !!! info `ProperOrthochronousLorentzGroup`
 
     The identity component of the Lorentz group.
@@ -3662,8 +3513,6 @@ Each group corresponds to a set of transformations preserving a particular geome
     - time orientation
 
     and are continuously connected to the identity transformation.
-
-(software-spec-poincaregroup)=
 
 !!! info `PoincareGroup`
 
@@ -3681,9 +3530,7 @@ Each group corresponds to a set of transformations preserving a particular geome
 
 </br>
 
-### Concrete Transforms
-
-(software-spec-transforms-identity)=
+### Concrete Transforms { #software-spec-poincaregroup }
 
 !!! info `Identity`
 
@@ -3692,8 +3539,6 @@ Each group corresponds to a set of transformations preserving a particular geome
     $$
     I : p \mapsto p
     $$
-
-(software-spec-transforms-translate)=
 
 !!! info `Translate`
 
@@ -3732,8 +3577,6 @@ Each group corresponds to a set of transformations preserving a particular geome
     ```text
     Translate(delta1) + Translate(delta2) == Translate(delta1 + delta2)
     ```
-
-(software-spec-transforms-rotate)=
 
 !!! info `Rotate`
 
@@ -3817,8 +3660,6 @@ Each group corresponds to a set of transformations preserving a particular geome
     Reflect(Q1) + Reflect(Q2) == Reflect(Q2 @ Q1)
     ```
 
-(software-spec-transforms-scaling)=
-
 !!! info `Scale`
 
     A **Scale** is a transformation that applies a linear scaling to position components while leaving other representations unchanged.
@@ -3887,9 +3728,7 @@ Each group corresponds to a set of transformations preserving a particular geome
 
 </br>
 
-(software-spec-frames)=
-
-## Frames
+## Frames { #software-spec-frames }
 
 The canonical frame API is exposed by `coordinax.frames`, which is typically imported as `import coordinax.frames as cxf`.
 
@@ -3897,13 +3736,9 @@ A **reference frame** is an abstract label used to identify a coordinate descrip
 
 **Frame transitions** (`frame_transition`) map a pair of frames to the `AbstractTransform` that converts from one to the other. This transform is then applied via `act`.
 
-(software-spec-abstractreferenceframe)=
-
 !!! info `AbstractReferenceFrame`
 
     Abstract base class for reference frames.
-
-(software-spec-alice)=
 
 !!! info `Alice` and `Alex`
 
@@ -3912,3 +3747,5 @@ A **reference frame** is an abstract label used to identify a coordinate descrip
     - `frame_transition(Alice, Alice)` → `Identity()`
     - `frame_transition(Alex, Alex)` → `Identity()`
     - `frame_transition(Alice, Alex)` → a `Translate | Rotate` composition.
+
+<a id="software-spec-alice"></a>

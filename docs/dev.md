@@ -80,7 +80,7 @@ The authoritative session definitions live in the repository root `noxfile.py`. 
 - `uv run nox -s all`: runs the default contributor gate: lint, test, and docs.
 - `uv run nox -s lint`: runs `precommit`, `pylint`, and `ty`.
 - `uv run nox -s test`: runs the default test session.
-- `uv run nox -s docs`: builds the documentation.
+- `uv run nox -s docs`: builds the documentation site with MkDocs plus Zensical.
 
 ### Linting and Type Checks
 
@@ -108,10 +108,10 @@ uv run nox -s "pytest(package='hypothesis')" -- -k distances
 
 ### Documentation
 
-- `uv run nox -s docs`: build HTML docs.
-- `uv run nox -s docs -- --serve`: build docs with live reload via `sphinx-autobuild`.
-- `uv run nox -s docs -- -b linkcheck`: check external links.
-- `uv run nox -s build_api_docs`: regenerate API reference source files under `docs/api/`.
+- `uv run nox -s docs`: build the documentation site.
+- `uv run nox -s docs -- --serve`: serve the documentation locally with Zensical.
+- `uv run nox -s docs -- --clean`: clean the Zensical cache before building.
+- `uv run nox -s build_api_docs`: confirm that API pages are generated automatically during the docs build.
 
 ### Packaging
 

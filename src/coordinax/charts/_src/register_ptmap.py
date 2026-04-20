@@ -623,13 +623,15 @@ def pt_map(
 
     We calculate through cylindrical coordinates first:
 
-    $\rho = \sqrt{(\mu-\Delta^2)\left(1-\frac{|\nu|}{\Delta^2}\right)}$
-    $z = \sqrt{\mu\,\frac{|\nu|}{\Delta^2}}\;\mathrm{sign}(\nu)$
-    $\phi = \phi.$
+    - $\rho = \sqrt{(\mu-\Delta^2)\left(1-\frac{\lvert \nu \rvert}{\Delta^2}\right)}$
+    - $z = \sqrt{\mu\,\frac{\lvert \nu \rvert}{\Delta^2}}\,\mathrm{sign}(\nu)$
+    - $\phi = \phi$
 
     Then convert to Cartesian:
 
-    $x=\rho\cos\phi$, $y=\rho\sin\phi$, $z=z$.
+    - $x=\rho\cos\phi$
+    - $y=\rho\sin\phi$
+    - $z=z$
 
     Examples
     --------
@@ -1000,15 +1002,15 @@ def pt_map(
 
     Validity constraints (enforced by the representation) are:
 
-    - $\Delta > 0$,
-    - $\mu \ge \Delta^2$,
-    - $|\nu| \le \Delta^2$.
+    - $\Delta > 0$
+    - $\mu \ge \Delta^2$
+    - $\lvert \nu \rvert \le \Delta^2$
 
     The conversion proceeds via
 
-    $\rho = \sqrt{(\mu-\Delta^2)\left(1-\frac{|\nu|}{\Delta^2}\right)}$,
-    $z = \sqrt{\mu\,\frac{|\nu|}{\Delta^2}}\,\mathrm{sign}(\nu)$,
-    $\phi = \phi$.
+    - $\rho = \sqrt{(\mu-\Delta^2)\left(1-\frac{\lvert \nu \rvert}{\Delta^2}\right)}$
+    - $z = \sqrt{\mu\,\frac{\lvert \nu \rvert}{\Delta^2}}\,\mathrm{sign}(\nu)$
+    - $\phi = \phi$
 
     Examples
     --------
@@ -1064,10 +1066,10 @@ def pt_map(
 
     Then
 
-    $\mu = \Delta^2 + \tfrac12(D + D_f)$ (with numerically-stable branches),
-    $|\nu| = \dfrac{2\Delta^2}{S + D}\,z^2$,
-    and $\nu = |\nu|\,\mathrm{sign}(z)$, with a stability fix when
-    $\Delta^2 - |\nu|$ is small.
+    - $\mu = \Delta^2 + \tfrac12(D + D_f)$ with numerically stable branches
+    - $\lvert \nu \rvert = \dfrac{2\Delta^2}{S + D}\,z^2$
+    - $\nu = \lvert \nu \rvert\,\mathrm{sign}(z)$ with a stability fix when
+      $\Delta^2 - \lvert \nu \rvert$ is small.
 
     Examples
     --------

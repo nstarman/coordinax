@@ -26,7 +26,7 @@ class EuclideanManifold(AbstractManifold):
     {class}`coordinax.manifolds.EuclideanAtlas` whose charts are local
     diffeomorphisms
 
-    $$\varphi : U \subset \mathbb{R}^n \to \mathbb{R}^n.$$
+    $$ \varphi : U \subset \mathbb{R}^n \to \mathbb{R}^n. $$
 
     A chart $C = (U, \varphi)$ is admitted by the atlas when its dimensionality
     matches $n$ and either (1) it is explicitly registered with
@@ -40,18 +40,22 @@ class EuclideanManifold(AbstractManifold):
     \varphi_\alpha)$ and $C_\beta = (U_\beta, \varphi_\beta)$ in the atlas, the
     **transition map** is
 
-    $$\tau_{\alpha \to \beta}
+    $$
+        \tau_{\alpha \to \beta}
         = \varphi_\beta \circ \varphi_\alpha^{-1} : \varphi_\alpha(U_\alpha \cap
         U_\beta)
-          \to \varphi_\beta(U_\alpha \cap U_\beta).$$
+          \to \varphi_\beta(U_\alpha \cap U_\beta).
+    $$
 
     Because $\mathbb{R}^n$ is flat and simply connected, every transition map is
     a smooth diffeomorphism on a connected open domain. For example, the
     Cartesian-to-spherical transition on $\mathbb{R}^3$ is
 
-    $$\tau_{C \to S}(x, y, z)
+    $$
+        \tau_{C \to S}(x, y, z)
         = \Bigl(\sqrt{x^2 + y^2 + z^2},\;
-                \arccos\!\tfrac{z}{r},\; \operatorname{atan2}(y, x)\Bigr).$$
+                \arccos\!\tfrac{z}{r},\; \operatorname{atan2}(y, x)\Bigr).
+    $$
 
     **Pre-built instance.** The module exports
     {obj}`coordinax.manifolds.euclidean3d` as a pre-built instance for the
@@ -62,12 +66,6 @@ class EuclideanManifold(AbstractManifold):
     ndim : int
         Intrinsic dimension $n \geq 0$ of the manifold — the number of
         independent coordinates required to label a point.
-
-    Attributes
-    ----------
-    atlas : EuclideanAtlas
-        The atlas of coordinate charts compatible with this manifold. Its
-        {attr}`~EuclideanAtlas.ndim` equals ``ndim``.
 
     Examples
     --------

@@ -4,25 +4,17 @@ Hypothesis strategies for property-based testing with [coordinax](https://github
 
 ## Installation
 
-::::{tab-set}
-
-:::{tab-item} pip
+**pip**:
 
 ```bash
 pip install coordinax.hypothesis
 ```
 
-:::
-
-:::{tab-item} uv
+**uv**:
 
 ```bash
 uv add coordinax.hypothesis
 ```
-
-:::
-
-::::
 
 ## Quick Start
 

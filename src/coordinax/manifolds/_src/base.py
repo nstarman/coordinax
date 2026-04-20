@@ -346,19 +346,6 @@ class AbstractManifold(metaclass=abc.ABCMeta):
     All geometric and numerical work is delegated to the charts and the atlas;
     the manifold itself is a lightweight descriptor.
 
-    Attributes
-    ----------
-    atlas : AbstractAtlas
-        The atlas that defines the smooth structure of this manifold. The atlas
-        records the intrinsic dimension and determines which charts are
-        compatible.
-    ndim : int
-        Intrinsic dimension $n$ of the manifold, forwarded from
-        {attr}`atlas.ndim <AbstractAtlas.ndim>`.
-    default_chart : AbstractChart
-        A canonical chart chosen by the atlas, forwarded from
-        {meth}`atlas.default_chart() <AbstractAtlas.default_chart>`.
-
     Notes
     -----
     - Manifold objects are **structural descriptors**, not numerical arrays.

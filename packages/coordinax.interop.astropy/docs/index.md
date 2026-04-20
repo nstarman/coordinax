@@ -1,7 +1,3 @@
----
-sd_hide_title: true
----
-
 # `coordinax.interop.astropy`
 
 `coordinax.interop.astropy` provides seamless conversion between `coordinax` and `astropy` objects. This package enables you to work with both libraries interchangeably.
@@ -10,25 +6,17 @@ sd_hide_title: true
 
 [![PyPI version][pypi-version]][pypi-link] [![PyPI platforms][pypi-platforms]][pypi-link]
 
-::::{tab-set}
+=== "uv"
 
-:::{tab-item} uv
+    ```bash
+    uv add coordinax.interop.astropy
+    ```
 
-```bash
-uv add coordinax.interop.astropy
-```
+=== "pip"
 
-:::
-
-:::{tab-item} pip
-
-```bash
-pip install coordinax.interop.astropy
-```
-
-:::
-
-::::
+    ```bash
+    pip install coordinax.interop.astropy
+    ```
 
 ## Quick Start
 
@@ -37,7 +25,7 @@ import importlib.util
 -->
 <!-- skip: start if(importlib.util.find_spec('coordinax.interop.astropy') is None, reason="coordinax.interop.astropy not installed") -->
 
-```{code-block} python
+```python
 >>> import jax.numpy as jnp
 >>> import plum
 
@@ -47,14 +35,14 @@ import importlib.util
 >>> import astropy.coordinates as apyc
 ```
 
-```{code-block} python
+```python
 >>> angle = cx.Angle(jnp.array([1, 2, 3]), "rad")
 >>> angle_apy = plum.convert(angle, apyc.Angle)
 >>> plum.convert(angle_apy, cx.Angle)
 Angle([1., 2., 3.], 'rad')
 ```
 
-```{code-block} python
+```python
 >>> distance = cx.Distance(jnp.array([1, 2, 3]), "km")
 >>> distance_apy = plum.convert(distance, apyc.Distance)
 >>> cx.Distance.from_(distance_apy)
@@ -65,14 +53,7 @@ For a full walkthrough of Angle, Distance, DistanceModulus, and Parallax convers
 
 ## Guides
 
-```{toctree}
-:maxdepth: 1
-:hidden:
-
-quantities.md
-```
-
-- Quantities: Detailed examples of converting angles and distance-like quantities
+- [Quantities](quantities.md): detailed examples of converting angles and distance-like quantities
 
 ## See Also
 

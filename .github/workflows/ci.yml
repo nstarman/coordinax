@@ -104,7 +104,7 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@681c641aba71e4a1c380be3ab5e12ad51f415867 # v6
 
-      - name: Build docs (warnings as errors)
+      - name: Build docs with warnings treated as failures
         run: uv run --frozen nox -s docs -- -W
 
   status:

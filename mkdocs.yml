@@ -1,0 +1,135 @@
+site_name: coordinax
+site_description: Coordinates and reference frames in JAX
+site_author: Coordinax Developers
+site_url: https://coordinax.readthedocs.io/
+repo_url: https://github.com/GalacticDynamics/coordinax
+repo_name: GalacticDynamics/coordinax
+edit_uri: ""
+docs_dir: docs
+site_dir: _build/html
+exclude_docs: |
+  _build/
+dev_addr: 127.0.0.1:8000
+nav:
+  - Home: index.md
+  - Packages:
+      - coordinax: index.md
+      - coordinax.api: packages/coordinax.api/index.md
+      - coordinax.astro: packages/coordinax.astro/index.md
+      - coordinax.hypothesis: packages/coordinax.hypothesis/index.md
+      - coordinax.interop.astropy: packages/coordinax.interop.astropy/index.md
+      - coordinax.curveframes: packages/coordinax.curveframes/index.md
+  - Guides:
+      - Overview: guides/index.md
+      - Specialized quantities: guides/quantities.md
+      - Charts: guides/charts.md
+      - Manifolds: guides/manifolds.md
+      - Representations: guides/representations.md
+      - Vectors: guides/vectors.md
+      - Frames: guides/frames.md
+      - Transforms: guides/transforms.md
+      - Performance: guides/perf.ipynb
+  - Tutorials:
+      - Array objects: tutorials/array_objects.md
+      - CDict objects: tutorials/cdict_objects.md
+      - Coordinate objects: tutorials/coordinate_objects.md
+      - Quantity objects: tutorials/quantity_objects.md
+      - Time-dependent frames: tutorials/time_dependent_frames.md
+      - Vector objects: tutorials/vector_objects.md
+  - API:
+      - Overview: api/index.md
+      - Angles: api/angles.md
+      - Distances: api/distances.md
+      - Charts: api/charts.md
+      - Manifolds: api/manifolds.md
+      - Representations: api/representations.md
+      - Frames: api/frames.md
+      - Transforms: api/transforms.md
+      - Vectors: api/vectors.md
+      - Internal: api/internal.md
+  - More:
+      - Glossary: glossary.md
+      - Conventions: conventions.md
+      - Specification: spec.md
+      - Contributing: contributing.md
+      - Developer guide: dev.md
+      - Maintainers: maintainers.md
+
+theme:
+  name: material
+  logo: _static/favicon.png
+  favicon: _static/favicon.png
+  features:
+    - navigation.sections
+    - navigation.top
+    - toc.integrate
+    - content.code.copy
+    - search.highlight
+    - search.suggest
+  palette:
+    - scheme: default
+      primary: white
+      accent: amber
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - scheme: slate
+      primary: black
+      accent: amber
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+  icon:
+    repo: fontawesome/brands/github
+
+extra_css:
+  - _static/custom.css
+extra_javascript:
+  - _static/mathjax.js
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - def_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: "¤"
+      toc_depth: 4
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+
+plugins:
+  - search:
+      separator: "[\\s\\-,:!=\\[\\]()\"/]+|(?!\\b)(?=[A-Z][a-z])|\\.(?!\\d)|&[lg]t;"
+  - autorefs:
+      link_titles: external
+  - mkdocstrings:
+      handlers:
+        python:
+          inventories:
+            - https://docs.python.org/3/objects.inv
+            - https://jax.readthedocs.io/en/latest/objects.inv
+            - https://docs.kidger.site/equinox/objects.inv
+          paths:
+            - src
+            - packages/coordinax.api/src
+            - packages/coordinax.astro/src
+            - packages/coordinax.curveframes/src
+            - packages/coordinax.hypothesis/src
+            - packages/coordinax.interop.astropy/src
+          options:
+            force_inspection: true
+            heading_level: 3
+            inherited_members: false
+            members_order: source
+            show_root_heading: true
+            show_signature_annotations: true
+            show_source: false
+            show_symbol_type_heading: true
+            show_symbol_type_toc: true

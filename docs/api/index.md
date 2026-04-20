@@ -1,21 +1,17 @@
 # `coordinax` library
 
-```{eval-rst}
+Reference documentation for the main `coordinax` package.
 
-.. currentmodule:: coordinax
+Use the pages in this section to browse the public submodules:
 
-.. automodule:: coordinax
-    :exclude-members: aval, default, materialise, enable_materialise
-    :noindex:
+- [Angles](angles.md)
+- [Distances](distances.md)
+- [Charts](charts.md)
+- [Manifolds](manifolds.md)
+- [Representations](representations.md)
+- [Frames](frames.md)
+- [Transforms](transforms.md)
+- [Vectors](vectors.md)
+- [Internal](internal.md)
 
-```
-
-```{toctree}
-:maxdepth: 1
-:titlesonly:
-:hidden:
-:caption: API submodules
-:glob:
-
-*
-```
+::: coordinax

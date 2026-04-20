@@ -1,80 +1,12 @@
----
-sd_hide_title: true
----
-
-<h1> <code> coordinax </code> </h1>
-
-```{toctree}
-:maxdepth: 1
-:hidden:
-:caption: 📦 Packages
-
-coordinax.api <packages/coordinax.api/index.md>
-coordinax <self>
-coordinax.astro <packages/coordinax.astro/index.md>
-coordinax.hypothesis <packages/coordinax.hypothesis/index.md>
-coordinax.interop.astropy <packages/coordinax.interop.astropy/index.md>
-```
-
-```{toctree}
-:maxdepth: 1
-:hidden:
-:caption: 📚 Guides
-
-guides/quantities.md
-guides/charts.md
-guides/manifolds.md
-guides/representations.md
-guides/vectors.md
-guides/frames.md
-guides/transforms.md
-packages/coordinax.hypothesis/testing-guide
-Performance <guides/perf.ipynb>
-```
-
-```{toctree}
-:maxdepth: 1
-:hidden:
-:caption: 🧭 Tutorials
-:glob:
-
-tutorials/*
-```
-
-```{toctree}
-:maxdepth: 2
-:hidden:
-:caption: 📘 API Reference
-
-coordinax.api <packages/coordinax.api/api>
-coordinax <api/index.md>
-coordinax.astro <packages/coordinax.astro/api>
-coordinax.hypothesis <packages/coordinax.hypothesis/api>
-coordinax.interop.astropy <packages/coordinax.interop.astropy/api>
-```
-
-```{toctree}
-:maxdepth: 2
-:hidden:
-:caption: More
-
-glossary.md
-conventions.md
-spec.md
-contributing.md
-dev.md
-maintainers.md
-```
-
 # 🚀 Get Started
 
 `coordinax` enables working with coordinates and reference frames with [JAX][jax].
 
 `coordinax` supports JAX's main features:
 
-- JIT compilation ({func}`~jax.jit`)
-- vectorization ({func}`~jax.vmap`, etc.)
-- auto-differentiation ({func}`~jax.grad`, {func}`~jax.jacobian`, {func}`jax.hessian`)
+- JIT compilation via [`jax.jit`][jax.jit]
+- vectorization via [`jax.vmap`][jax.vmap]
+- auto-differentiation via [`jax.grad`][jax.grad], [`jax.jacobian`][jax.jacobian], and [`jax.hessian`][jax.hessian]
 - GPU/TPU/multi-host acceleration
 
 And best of all, `coordinax` doesn't force you to use special unit-compatible re-exports of JAX libraries. You can use `coordinax` with existing JAX code, and with one simple decorator ([`quax.quaxify`](https://docs.kidger.site/quax/)), JAX will work with `coordinax` objects.
@@ -85,56 +17,44 @@ And best of all, `coordinax` doesn't force you to use special unit-compatible re
 
 [![PyPI version][pypi-version]][pypi-link] [![PyPI platforms][pypi-platforms]][pypi-link]
 
-::::{tab-set}
+=== "pip"
 
-:::{tab-item} pip
+    ```bash
+    pip install coordinax
+    ```
 
-```bash
-pip install coordinax
-```
+=== "uv"
 
-:::
+    ```bash
+    uv add coordinax
+    ```
 
-:::{tab-item} uv
+=== "source, via uv"
 
-```bash
-uv add coordinax
-```
+    To install the latest development version of `coordinax` directly from the GitHub repository, use uv:
 
-:::
+    ```bash
+    uv add git+https://github.com/GalacticDynamics/coordinax.git@main
+    ```
 
-:::{tab-item} source, via pip
+    You can customize the branch by replacing `main` with any other branch name.
 
-To install the latest development version of `coordinax` directly from the GitHub repository, use pip:
+=== "building from source"
 
-```bash
-uv add git+https://https://github.com/GalacticDynamics/coordinax.git@main
-```
+    To build `coordinax` from source, clone the repository and install it with uv:
 
-You can customize the branch by replacing `main` with any other branch name.
-
-:::
-
-:::{tab-item} building from source
-
-To build `coordinax` from source, clone the repository and install it with uv:
-
-```bash
-cd /path/to/parent
-git clone https://https://github.com/GalacticDynamics/coordinax.git
-cd coordinax
-uv pip install -e .  # editable mode
-```
-
-:::
-
-::::
+    ```bash
+    cd /path/to/parent
+    git clone https://github.com/GalacticDynamics/coordinax.git
+    cd coordinax
+    uv pip install -e .
+    ```
 
 ## Quickstart
 
 The `coordinax` package has powerful tools for representing, using, and transforming coordinate objects, such as:
 
-- specific {class}`~unxt.quantity.Quantity` subclasses like {class}`~coordinax.angles.Angle` and {class}`~coordinax.distances.Distance`
+- specific quantity subclasses like [Angle][coordinax.angles.Angle] and [Distance][coordinax.distances.Distance]
 - and more!
 
 This functionality is organized into submodules available under the top-level `coordinax` namespace. You can import them directly, or for many objects use the `coordinax.main` namespace to access them.
@@ -155,7 +75,7 @@ import coordinax.representations
 import coordinax.vectors
 -->
 
-```{code-block} python
+```python
 >>> import coordinax
 >>> import sys
 
@@ -183,11 +103,11 @@ We recommend importing as needed:
 
 ### Angles and Distances
 
-`coordinax` is built on top of [`unxt`](http://unxt.readthedocs.io), which provides support for quantity objects that represent a data array with an associated unit with the {class}`unxt.quantity.Quantity` class. These {class}`~unxt.quantity.Quantity` objects can be used throughout `coordinax`, but `coordinax` also provides specific classes that offer additional functionality.
+`coordinax` is built on top of [`unxt`](http://unxt.readthedocs.io), which provides quantity objects that pair array values with physical units. These quantity objects can be used throughout `coordinax`, and the library also provides specialized types with additional coordinate-aware behavior.
 
-Let's start with angles, which are represented by the {class}`~coordinax.angles.Angle` class. This class enforces that the inputted units have angular dimensions and provides some other useful utilities for working with angles. For example, the resulting {class}`~coordinax.angles.Angle` (a re-export of `unxt.Angle`) object can be wrapped to a specific range to conform to a branch cut (e.g., 0 to $2\pi$ or $-180^\circ$ to $180^\circ$).
+Let's start with angles, which are represented by [Angle][coordinax.angles.Angle]. This class enforces angular dimensionality and provides convenient utilities for working with branch cuts and wrapped ranges such as $[0, 2\pi)$ or $(-180^\circ, 180^\circ]$.
 
-```{code-block} python
+```python
 >>> import coordinax.main as cx
 >>> import unxt as u
 
@@ -199,17 +119,17 @@ Angle(370, 'deg')
 Angle(10, 'deg')
 ```
 
-Similarly, the {class}`~coordinax.distances.Distance` class represents distances in `coordinax`:
+Similarly, [Distance][coordinax.distances.Distance] represents distances in `coordinax`:
 
-```{code-block} python
+```python
 >>> d = cx.Distance(10, "kpc")
 >>> d
 Distance(10, 'kpc')
 ```
 
-but other distance-like objects can be represented with the {class}`~coordinax.astro.Parallax` and {class}`~coordinax.astro.DistanceModulus` classes. These classes check that the units have distance dimensions, and they provide useful properties for converting between different distance representations.
+Other distance-like objects can be represented with [`Parallax`][coordinax.astro.Parallax] and [`DistanceModulus`][coordinax.astro.DistanceModulus] from [`coordinax.astro`][coordinax.astro]. These classes validate their physical units and provide convenient conversions between distance representations.
 
-```{code-block} python
+```python
 >>> import coordinax.astro as cxastro
 >>> import plum
 

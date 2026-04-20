@@ -8,9 +8,7 @@ This document is the normative specification for `coordinax.curveframes`.
 
 # The Math
 
-(curveframes-math-curves)=
-
-## Curves in Euclidean 3-Space
+## Curves in Euclidean 3-Space { #curveframes-math-curves }
 
 A **smooth parameterized curve** is a smooth map
 
@@ -21,9 +19,7 @@ $$
 
 where $\Lambda \subseteq \mathbb{R}$ is an open interval and $\tau$ is a smooth **evolution parameter** (arc length, time, proper time, etc.). The curve is **regular** when $\boldsymbol{\gamma}'(\tau) \neq 0$ for all $\tau \in \Lambda$.
 
-(curveframes-math-frenet-serret)=
-
-## Frenet–Serret Frame
+## Frenet–Serret Frame { #curveframes-math-frenet-serret }
 
 For a regular curve $\boldsymbol{\gamma}$ with non-vanishing curvature, the **Frenet–Serret frame** attaches an oriented orthonormal triad $(\mathbf{T}, \mathbf{N}, \mathbf{B})$ to each point:
 
@@ -57,9 +53,7 @@ $$
 2. **Right-handedness**: $\mathbf{B} = \mathbf{T} \times \mathbf{N}$.
 3. **Singularity**: The frame is undefined when the curvature $\kappa(\tau) = 0$ (i.e.\ the curve is locally straight).
 
-(curveframes-math-frenet-transform)=
-
-## Frenet–Serret Transform
+## Frenet–Serret Transform { #curveframes-math-frenet-transform }
 
 The Frenet–Serret frame defines a $\tau$-dependent **rigid-body transform** (translation + rotation) between the ambient Cartesian frame and the curve-attached frame.
 
@@ -143,9 +137,7 @@ $$
 
 which is exactly the inverse transform defined above.
 
-(curveframes-math-frenet-ref-frame)=
-
-## Frenet–Serret Reference Frame
+## Frenet–Serret Reference Frame { #curveframes-math-frenet-ref-frame }
 
 A **Frenet–Serret reference frame** $\mathcal{F}_\gamma$ is a curve-attached reference frame defined relative to an ambient **base frame** $\mathcal{B}$. At each parameter value $\tau$, the frame is centred at $\boldsymbol{\gamma}(\tau)$ with oriented axes $(\mathbf{T}, \mathbf{N}, \mathbf{B})$.
 
@@ -171,9 +163,7 @@ $$
 
 The evolution parameter $\tau$ is **not** stored on the frame object. It is supplied at evaluation time when the frame transition operator is applied to coordinates via `act(op, tau, x)`.
 
-(curveframes-math-bishop)=
-
-## Bishop Frame
+## Bishop Frame { #curveframes-math-bishop }
 
 The **Bishop frame** (also called the **rotation-minimising frame** or **parallel-transport frame**) attaches an orthonormal triad $(\mathbf{T}, \mathbf{U}_1, \mathbf{U}_2)$ to each point of a regular curve $\boldsymbol{\gamma}(\tau)$. Unlike the Frenet–Serret frame, it is well-defined even when the curvature vanishes ($\kappa = 0$), because it does not depend on $\boldsymbol{\gamma}''$.
 
@@ -232,9 +222,7 @@ $$
 
 The Bishop frame is the unique frame in this family for which $d\theta/d\tau = 0$ (no torsion-induced twist).
 
-(curveframes-math-bishop-transform)=
-
-## Bishop Transform
+## Bishop Transform { #curveframes-math-bishop-transform }
 
 The Bishop frame defines a $\tau$-dependent **rigid-body transform** (translation + rotation) between the ambient Cartesian frame and the curve-attached frame, with the same algebraic structure as the Frenet–Serret transform.
 
@@ -303,9 +291,7 @@ $$
 
 where $R_B = [\mathbf{T}_B;\,\mathbf{U}_{1,B};\,\mathbf{U}_{2,B}]$ (rows).
 
-(curveframes-math-bishop-ref-frame)=
-
-## Bishop Reference Frame
+## Bishop Reference Frame { #curveframes-math-bishop-ref-frame }
 
 A **Bishop reference frame** $\mathcal{B}_\gamma$ is a curve-attached reference frame defined relative to an ambient **base frame** $\mathcal{B}$. At each parameter value $\tau$, the frame is centred at $\boldsymbol{\gamma}(\tau)$ with oriented axes $(\mathbf{T}, \mathbf{U}_1, \mathbf{U}_2)$.
 
@@ -323,9 +309,7 @@ The evolution parameter $\tau$ is **not** stored on the frame object. It is supp
 
 # The Software
 
-(curveframes-sw-overview)=
-
-## Overview
+## Overview { #curveframes-sw-overview }
 
 The public API lives under `coordinax.curveframes` (typically imported as `import coordinax.curveframes as cxfc`).
 
@@ -336,8 +320,6 @@ The public API lives under `coordinax.curveframes` (typically imported as `impor
 | `FrenetSerretFrame` | `@final` | Frenet–Serret curve-attached reference frame |
 | `BishopTransform` | `@final` | $\tau$-dependent rotation-minimising transform |
 | `BishopFrame` | `@final` | Bishop (rotation-minimising) curve frame |
-
-(curveframes-sw-abstract-curve-frame)=
 
 !!! info `AbstractParallelTransportFrame`
 
@@ -351,8 +333,6 @@ The public API lives under `coordinax.curveframes` (typically imported as `impor
     `AbstractParallelTransportFrame` is **not instantiable directly**; concrete subclasses (e.g. `FrenetSerretFrame`, `BishopFrame`) must be `@final`.
 
     Because `AbstractParallelTransportFrame` IS-A `AbstractTransformedReferenceFrame`, the generic `frame_transition` dispatches registered for `AbstractTransformedReferenceFrame` apply automatically. No additional frame-transition dispatches are needed for concrete curve-frame subclasses.
-
-(curveframes-sw-frenet-transform)=
 
 !!! info `FrenetSerretTransform`
 
@@ -393,8 +373,6 @@ The public API lives under `coordinax.curveframes` (typically imported as `impor
 
     - `act(op: FrenetSerretTransform, tau, x: AbstractQuantity, chart, rep)` — evaluates the frame fields at $\tau$ and applies the uniform formula $R(\tau)(x - \gamma(\tau))$. Works for both forward and inverse instances.
     - `act(op: FrenetSerretTransform, tau, x: CDict, chart, rep)` — extracts the component dictionary into a Quantity array, applies the transform, and repacks into a CDict.
-
-(curveframes-sw-frenet-frame)=
 
 !!! info `FrenetSerretFrame`
 
@@ -441,8 +419,6 @@ The public API lives under `coordinax.curveframes` (typically imported as `impor
     p_curve = cxfm.act(op, tau, p_ambient)
     ```
 
-(curveframes-sw-bishop-transform)=
-
 !!! info `BishopTransform`
 
     A `@final` subclass of `coordinax.transforms.AbstractTransform` representing a $\tau$-dependent rotation-minimising curve-frame transform.
@@ -485,8 +461,6 @@ The public API lives under `coordinax.curveframes` (typically imported as `impor
     - `act(op: BishopTransform, tau, x: AbstractQuantity, chart, rep)` — same uniform formula as FrenetSerretTransform: $R(\tau)(x - \gamma(\tau))$ where $R = [\mathbf{T};\,\mathbf{U}_1;\,\mathbf{U}_2]$.
     - `act(op: BishopTransform, tau, x: CDict, chart, rep)` — extract → transform → repack.
 
-(curveframes-sw-bishop-frame)=
-
 !!! info `BishopFrame`
 
     A `@final` subclass of `AbstractParallelTransportFrame[FrameT]` representing a Bishop (rotation-minimising) curve-attached reference frame.
@@ -528,3 +502,5 @@ The public API lives under `coordinax.curveframes` (typically imported as `impor
     p_ambient = u.Q(jnp.array([1.0, 0.0, 0.0]), "m")
     p_curve = cxfm.act(op, tau, p_ambient)
     ```
+
+<a id="curveframes-sw-bishop-frame"></a>

@@ -38,9 +38,7 @@ This pattern improves code clarity and avoids the fragile base class problem. Se
 
 ## 2. Type System & JAX Integration
 
-(jax-integration)=
-
-### PyTree Registration
+### PyTree Registration { #jax-integration }
 
 All `coordinax` objects are **PyTrees**—JAX's abstraction for hierarchical data structures that can be traced through transformations like `jit`, `vmap`, and `grad`.
 
@@ -154,9 +152,7 @@ See [Glossary: Representation Conversion, cconvert](glossary.md); [spec.md § Re
 
 ---
 
-(multiple-dispatch-patterns)=
-
-## 5. Multiple Dispatch Patterns
+## 5. Multiple Dispatch Patterns { #multiple-dispatch-patterns }
 
 `coordinax` uses **plum-dispatch** for flexible, type-aware function implementations.
 
@@ -271,6 +267,6 @@ As `JAX` is function-oriented, but Python is generally object-oriented, `coordin
 
 ## Multiple Dispatch
 
-`coordinax` uses [multiple dispatch](https://beartype.github.io/plum/) to hook into `quax`'s flexible and extensible system to enable custom array-ish objects, like {class}`~unxt.quantity.Quantity`, in `JAX`. Also, `coordinax` uses multiple dispatch to enable deep interoperability between `coordinax` and other libraries, like `astropy` (and anything user-defined).
+`coordinax` uses [multiple dispatch](https://beartype.github.io/plum/) to hook into `quax`'s flexible and extensible system to enable custom array-ish objects, like `unxt.quantity.Quantity`, in `JAX`. Also, `coordinax` uses multiple dispatch to enable deep interoperability between `coordinax` and other libraries, like `astropy` (and anything user-defined).
 
 For more information on multiple dispatch, see the [plum documentation](https://beartype.github.io/plum/).

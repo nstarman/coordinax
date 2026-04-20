@@ -1,6 +1,5 @@
 version: 2
 
-# Set the version of Python and other tools you might need
 build:
   os: ubuntu-22.04
   tools:
@@ -9,13 +8,9 @@ build:
     - asdf plugin add uv
     - asdf install uv latest
     - asdf global uv latest
-    - uv sync --group docs --frozen
-    - uv run nox -s docs -- --output-dir=$READTHEDOCS_OUTPUT
+    - uv sync --group docs --extra workspace --frozen
+    - uv run nox -s docs
+    - mkdir -p "$READTHEDOCS_OUTPUT/html"
+    - cp -a _build/html/. "$READTHEDOCS_OUTPUT/html/"
 
-sphinx:
-  builder: html
-  configuration: docs/conf.py
-  fail_on_warning: true
-
-# Don't build any extra formats
 formats: []

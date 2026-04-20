@@ -19,7 +19,7 @@ If you only need raw chart transforms, use the charts guide. If you need compati
 - An **atlas** defines chart membership and defaults.
 - Manifold-level coordinate methods validate chart compatibility before delegating to chart-level maps.
 
-```{code-block} python
+```python
 >>> import coordinax.charts as cxc
 >>> import coordinax.manifolds as cxm
 
@@ -43,7 +43,7 @@ False
 
 `EuclideanManifold(n)` supports Euclidean charts of matching dimension.
 
-```{code-block} python
+```python
 >>> import coordinax.charts as cxc
 >>> import coordinax.manifolds as cxm
 
@@ -60,7 +60,7 @@ True
 
 `HyperSphericalManifold` supports intrinsic two-sphere charts and rejects planar Euclidean 2D charts.
 
-```{code-block} python
+```python
 >>> import coordinax.charts as cxc
 >>> import coordinax.manifolds as cxm
 
@@ -77,7 +77,7 @@ False
 
 Use `guess_manifold` when you have data or a chart and need a manifold object.
 
-```{code-block} python
+```python
 >>> import coordinax.charts as cxc
 >>> import coordinax.manifolds as cxm
 
@@ -92,7 +92,7 @@ HyperSphericalManifold(ndim=2)
 
 Manifold wrappers enforce that both charts belong to the manifold atlas.
 
-```{code-block} python
+```python
 >>> import coordinax.charts as cxc
 >>> import coordinax.manifolds as cxm
 >>> import unxt as u
@@ -112,7 +112,7 @@ Use `scale_factors` when you want the diagonal entries of the metric matrix in a
 
 This returns the metric diagonal $g_{ii}$, not the basis lengths $\sqrt{g_{ii}}$. The result is a 1-D `QuantityMatrix` because different coordinate directions can carry different units.
 
-```{code-block} python
+```python
 >>> import coordinax.charts as cxc
 >>> import coordinax.manifolds as cxm
 >>> import quaxed.numpy as jnp
@@ -142,7 +142,7 @@ Use `angle_between` when you want the metric angle between two **tangent vectors
 
 This is a tangent-space operation, not a point-to-point operation. The vectors are interpreted in the coordinate basis of the chosen chart, and the metric is evaluated at the base point `at`.
 
-```{code-block} python
+```python
 >>> import coordinax.charts as cxc
 >>> import coordinax.manifolds as cxm
 >>> import quaxed.numpy as jnp
@@ -160,7 +160,7 @@ Array(True, dtype=bool)
 
 For curvilinear charts, the angle is still intrinsic, but the metric weights the coordinate directions at the supplied base point:
 
-```{code-block} python
+```python
 >>> metric = cxm.HyperSphericalMetric(ndim=2)
 >>> at = {"theta": jnp.array(jnp.pi / 2), "phi": jnp.array(0.0)}
 >>> uvec = {"theta": jnp.array(1.0), "phi": jnp.array(0.0)}
@@ -196,7 +196,7 @@ where $\tau_N$ and $\tau_M$ are exactly the chart-level operations from [Working
 
 Use `EmbeddedChart` for compact chart-facing embed/project operations.
 
-```{code-block} python
+```python
 >>> import coordinax.charts as cxc
 >>> import coordinax.manifolds as cxm
 >>> import quaxed.numpy as jnp
@@ -233,7 +233,7 @@ This workflow chains:
 
 Use `EmbeddedManifold` when you need explicit manifold objects with atlas compatibility checks.
 
-```{code-block} python
+```python
 >>> import coordinax.charts as cxc
 >>> import coordinax.manifolds as cxm
 >>> import unxt as u
@@ -261,7 +261,7 @@ Use `EmbeddedManifold` when you need explicit manifold objects with atlas compat
 
 Use `CustomEmbeddingMap` for user-defined embed/project rules while still reusing chart and manifold plumbing.
 
-```{code-block} python
+```python
 >>> import coordinax.charts as cxc
 >>> import coordinax.manifolds as cxm
 >>> import unxt as u
@@ -297,7 +297,7 @@ Product manifolds are symmetric: factors are independent peers and transitions a
 
 When needed, build manifolds from explicit chart sets with `CustomAtlas` and `CustomManifold`.
 
-```{code-block} python
+```python
 >>> import coordinax.charts as cxc
 >>> import coordinax.manifolds as cxm
 
@@ -314,7 +314,7 @@ False
 
 Product manifolds combine independent factors and sum dimensions.
 
-```{code-block} python
+```python
 >>> import coordinax.manifolds as cxm
 
 >>> MP = cxm.CartesianProductManifold(
@@ -333,12 +333,8 @@ Product manifolds combine independent factors and sum dimensions.
 - Need custom chart membership rules: `CustomAtlas` + `CustomManifold`
 - Need manifold products: `CartesianProductManifold`
 
-:::{seealso}
+!!! info "See also"
 
-[Working With Charts](charts.md)
-
-[Manifolds API](../api/manifolds.md)
-
-[Charts API](../api/charts.md)
-
-:::
+    - [Working With Charts](charts.md)
+    - [Manifolds API](../api/manifolds.md)
+    - [Charts API](../api/charts.md)

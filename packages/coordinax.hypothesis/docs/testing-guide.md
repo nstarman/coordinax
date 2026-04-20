@@ -34,29 +34,21 @@ def test_angle_properties(angle):
 
 Hypothesis will generate random test cases with different values, uncovering edge cases you might not have thought of.
 
-For advanced strategy-factory patterns that combine `plum.dispatch` and `@hypothesis.strategies.composite`, see {doc}`plum-dispatch-hypothesis-guide`.
+For advanced strategy-factory patterns that combine `plum.dispatch` and `@hypothesis.strategies.composite`, see [plum-dispatch-hypothesis-guide](plum-dispatch-hypothesis-guide.md).
 
 ## Installation
 
-::::{tab-set}
+=== "pip"
 
-:::{tab-item} pip
+    ```bash
+    pip install coordinax.hypothesis
+    ```
 
-```bash
-pip install coordinax.hypothesis
-```
+=== "uv"
 
-:::
-
-:::{tab-item} uv
-
-```bash
-uv add coordinax.hypothesis
-```
-
-:::
-
-::::
+    ```bash
+    uv add coordinax.hypothesis
+    ```
 
 ## Basic Examples
 
@@ -286,7 +278,7 @@ def test_charts_like_polar(chart):
 
 ## Integration with `unxt-hypothesis`
 
-The {mod}`coordinax.hypothesis` package builds on top of `unxt-hypothesis` strategies. You can use both packages together:
+The `coordinax.hypothesis` package builds on top of `unxt-hypothesis` strategies. You can use both packages together:
 
 ```python
 from hypothesis import given

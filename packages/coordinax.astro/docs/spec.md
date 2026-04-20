@@ -9,10 +9,6 @@ This document is the **normative** specification for the mathematical and softwa
 
 ## Table of Contents
 
-```{contents}
-:depth: 2
-```
-
 ---
 
 # The Math
@@ -86,11 +82,6 @@ $$
 ---
 
 # Packages
-
-```{contents}
-:local:
-:depth: 1
-```
 
 ## `coordinax.astro`
 

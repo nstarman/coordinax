@@ -6,25 +6,17 @@ This package implements Frenet-Serret and Bishop frames for tau-parameterized sm
 
 ## Installation
 
-::::{tab-set}
-
-:::{tab-item} pip
+**pip**:
 
 ```bash
 pip install coordinax.curveframes
 ```
 
-:::
-
-:::{tab-item} uv
+**uv**:
 
 ```bash
 uv add coordinax.curveframes
 ```
-
-:::
-
-::::
 
 ## Quick Start
 

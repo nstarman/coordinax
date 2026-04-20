@@ -171,5 +171,5 @@ This pattern is the most flexible for variable-length mixed-type inputs.
 
 ## See Also
 
-- Existing package guide: {doc}`testing-guide`
+- Existing package guide: [testing-guide](testing-guide.md)
 - Integration tests that validate these patterns: `packages/coordinax.hypothesis/tests/test_composite_dispatch.py`

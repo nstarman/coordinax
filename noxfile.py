@@ -20,6 +20,34 @@ nox.options.default_venv_backend = "uv"
 DIR = Path(__file__).parent.resolve()
 
 
+def _stage_docs_source() -> Path:
+    """Materialize a concrete docs tree for Zensical.
+
+    The authoritative package docs live inside each workspace package under
+    ``packages/*/docs``. The repository-level ``docs/packages`` entries are
+    routing bridges, but Zensical only indexes real files inside ``docs_dir``.
+    Copy the docs tree into ``_build`` and follow those links so the staged tree
+    contains the actual package pages without duplicating the source of truth in
+    the repository.
+    """
+    staged_docs = DIR / "scratch" / "docs_src"
+    staged_docs.parent.mkdir(parents=True, exist_ok=True)
+    if staged_docs.exists():
+        shutil.rmtree(staged_docs)
+    shutil.copytree(DIR / "docs", staged_docs, symlinks=False)
+    return staged_docs
+
+
+def _stage_mkdocs_config(docs_dir: Path, /) -> Path:
+    """Write a temporary MkDocs config that points at the staged docs tree."""
+    staged_config = DIR / ".mkdocs.staged.yml"
+    rel_docs_dir = docs_dir.relative_to(DIR).as_posix()
+    config_text = (DIR / "mkdocs.yml").read_text()
+    config_text = config_text.replace("docs_dir: docs", f"docs_dir: {rel_docs_dir}", 1)
+    staged_config.write_text(config_text)
+    return staged_config
+
+
 @final
 class PackageEnum(StrEnum):
     """Enum for package names."""
@@ -157,75 +185,48 @@ def pytest(s: nox.Session, /, package: PackageEnum) -> None:
 
 @session(uv_groups=["docs"], uv_extras=["workspace"], reuse_venv=True)
 def docs(s: nox.Session, /) -> None:
-    """Build the docs. Pass "--serve" to serve. Pass "-b linkcheck" to check links."""
+    """Build the docs with Zensical. Pass "--serve" to preview locally."""
+    # This is the canonical documentation entry point for the repository.
+    # The old Sphinx pipeline has been fully replaced by MkDocs + Material.
     parser = argparse.ArgumentParser()
     parser.add_argument("--serve", action="store_true", help="Serve after building")
+    parser.add_argument("--clean", action="store_true", help="Clean the Zensical cache")
     parser.add_argument(
-        "-b",
-        dest="builder",
-        default="html",
-        help="Build target (default: html)",
+        "-W",
+        "--strict",
+        action="store_true",
+        help="Fail the session if the docs build emits warnings.",
     )
-    parser.add_argument("--output-dir", dest="output_dir", default="_build")
     args, posargs = parser.parse_known_args(s.posargs)
 
-    if args.builder != "html" and args.serve:
-        s.error("Must not specify non-HTML builder with --serve")
+    # Build from a staged docs tree so the authoritative package docs remain in
+    # their workspace packages while Zensical still sees a concrete docs_dir.
+    staged_docs = _stage_docs_source()
+    staged_config = _stage_mkdocs_config(staged_docs)
+    command = [
+        "zensical",
+        "serve" if args.serve else "build",
+        "-f",
+        str(staged_config),
+    ]
+    if args.clean and not args.serve:
+        # Only the build command supports a clean rebuild of generated output.
+        command.append("--clean")
+    command.extend(posargs)
 
-    s.chdir("docs")
-
-    # Convert jupytext markdown files to notebooks
-    s.run(
-        "jupytext",
-        "--to",
-        "notebook",
-        "guides/perf.md",
-        "--output",
-        "guides/perf.ipynb",
-    )
-
-    if args.builder == "linkcheck":
-        s.run(
-            "sphinx-build",
-            "-b",
-            "linkcheck",
-            ".",
-            "_build/linkcheck",
-            *posargs,
-        )
+    if not args.strict:
+        s.run(*command)
         return
 
-    shared_args = (
-        "-n",  # nitpicky mode
-        "-T",  # full tracebacks
-        f"-b={args.builder}",
-        f"-d {args.output_dir}/doctrees",
-        "-D",
-        "language=en",
-        ".",
-        f"{args.output_dir}/{args.builder}",
-        *posargs,
-    )
+    # Zensical advertises a native strict flag, but it currently reports that
+    # the mode is unsupported. Enforce warning-free builds here instead.
+    output = s.run(*command, silent=True, success_codes=[0]) or ""
+    print(output, end="")
 
-    if args.serve:
-        s.run("sphinx-autobuild", *shared_args)
-    else:
-        s.run("sphinx-build", "--keep-going", *shared_args)
-
-
-@session(uv_groups=["docs"], reuse_venv=True)
-def build_api_docs(s: nox.Session, /) -> None:
-    """Build (regenerate) API docs."""
-    s.chdir("docs")
-    s.run(
-        "sphinx-apidoc",
-        "-o",
-        "api/",
-        "--module-first",
-        "--no-toc",
-        "--force",
-        "../src/coordinax",
-    )
+    lowered = output.lower()
+    warning_signatures = ("warning:", "warning ", "pluginerror:")
+    if any(sig in lowered for sig in warning_signatures):
+        s.error("Docs build emitted warnings in strict mode.")
 
 
 # =============================================================================

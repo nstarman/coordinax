@@ -58,16 +58,7 @@ class CartesianProductManifold(AbstractManifold):
         Unique string names for each factor, in the same order as ``factors``.
         Used as keys when indexing into the product atlas.
 
-    Attributes
-    ----------
-    atlas : CartesianProductAtlas
-        The product atlas formed from the factor atlases.
-    metric : CartesianProductMetric
-        The canonical product metric formed from the factor metrics.
-    ndim : int
-        Total intrinsic dimension $\sum_i n_i$.
-    default_chart : CartesianProductChart
-        Product of the default charts from each factor atlas.
+
 
     Examples
     --------

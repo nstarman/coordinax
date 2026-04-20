@@ -12,24 +12,22 @@ You will learn how to:
 
 **Prerequisites**: [Working With Quantities (Angles & Distances)](../guides/quantities.md).
 
-```{admonition} Object Levels
-:class: tip
+!!! tip "Object Levels"
 
-Coordinax supports five levels of coordinate representation, each adding
-more metadata. This tutorial covers `Quantity`.
+    Coordinax supports five levels of coordinate representation, each adding
+    more metadata. This tutorial covers `Quantity`.
 
-| Level | Type | See tutorial |
-| --- | --- | --- |
-| Coordinate | `Coordinate` | [Coordinate tutorial](./coordinate_objects.md) |
-| Point | `Vector` | [Vector tutorial](./vector_objects.md) |
-| CDict | `dict[str, Quantity]` | [CDict tutorial](./cdict_objects.md) |
-| **Quantity** | `unxt.Quantity` | *this page* |
-| Array | `jax.Array` | [Array tutorial](./array_objects.md) |
-```
+    | Level | Type | See tutorial |
+    | --- | --- | --- |
+    | Coordinate | `Coordinate` | [Coordinate tutorial](./coordinate_objects.md) |
+    | Point | `Vector` | [Vector tutorial](./vector_objects.md) |
+    | CDict | `dict[str, Quantity]` | [CDict tutorial](./cdict_objects.md) |
+    | **Quantity** | `unxt.Quantity` | *this page* |
+    | Array | `jax.Array` | [Array tutorial](./array_objects.md) |
 
 ## Setup
 
-```{code-block} python
+```python
 >>> import coordinax.main as cx
 >>> import coordinax.charts as cxc
 >>> import coordinax.frames as cxf
@@ -44,7 +42,7 @@ more metadata. This tutorial covers `Quantity`.
 
 A `Quantity` attaches **units** to an array. This prevents silent unit confusion — is `1.0` in metres, kilometres, or degrees?
 
-```{code-block} python
+```python
 >>> q = u.Q([1.0, 2.0, 3.0], "km")
 >>> q.unit
 Unit("km")
@@ -56,7 +54,7 @@ Quantities do **not** carry component names (no "x", "y", "z" labels), chart, re
 
 Use `cxfm.act()` with a quantity. Coordinax infers the chart from the array shape (length 3 → `cart3d`) and assumes point representation:
 
-```{code-block} python
+```python
 >>> rot90z = cxfm.Rotate.from_euler("z", u.Q(90, "deg"))
 
 >>> q = u.Q([1.0, 0.0, 0.0], "km")
@@ -69,7 +67,7 @@ Unit("km")
 
 Override the inferred chart:
 
-```{code-block} python
+```python
 >>> result = cxfm.act(rot90z, None, q, cxc.cart3d)
 >>> result.unit
 Unit("km")
@@ -79,7 +77,7 @@ Unit("km")
 
 Full control:
 
-```{code-block} python
+```python
 >>> result = cxfm.act(rot90z, None, q, cxc.cart3d, cxr.point)
 >>> result.unit
 Unit("km")
@@ -87,7 +85,7 @@ Unit("km")
 
 ### Translation
 
-```{code-block} python
+```python
 >>> shift = cxfm.Translate.from_([1, 2, 3], "km")
 
 >>> q_origin = u.Q([0.0, 0.0, 0.0], "km")
@@ -100,7 +98,7 @@ Unit("km")
 
 The identity transform returns the exact same object:
 
-```{code-block} python
+```python
 >>> q = u.Q([1.0, 2.0, 3.0], "km")
 >>> result = cxfm.act(cxfm.Identity(), None, q)
 >>> result is q
@@ -111,7 +109,7 @@ True
 
 Use `cxc.cdict()` to split a quantity into named components:
 
-```{code-block} python
+```python
 >>> q = u.Q([1, 2, 3], "km")
 
 >>> d = cxc.cdict(q)
@@ -124,7 +122,7 @@ Q(1, 'km')
 
 With an explicit chart:
 
-```{code-block} python
+```python
 >>> d = cxc.cdict(u.Q([1, 2, 3], "km"), cxc.cart3d)
 >>> sorted(d.keys())
 ['x', 'y', 'z']
@@ -132,7 +130,7 @@ With an explicit chart:
 
 Once decomposed into a CDict, you can change charts:
 
-```{code-block} python
+```python
 >>> d_sph = cxc.pt_map(d, cxc.cart3d, cxc.sph3d)
 >>> sorted(d_sph.keys())
 ['phi', 'r', 'theta']
@@ -142,7 +140,7 @@ Once decomposed into a CDict, you can change charts:
 
 Promote a quantity to a `Vector`:
 
-```{code-block} python
+```python
 >>> q = u.Q([1, 2, 3], "m")
 
 >>> v = cx.Point.from_(q)
@@ -155,7 +153,7 @@ True
 
 With an explicit chart:
 
-```{code-block} python
+```python
 >>> v = cx.Point.from_(q, cxc.cart3d)
 >>> v.chart
 Cart3D()
@@ -165,7 +163,7 @@ Cart3D()
 
 Go all the way from a quantity to a `Coordinate`:
 
-```{code-block} python
+```python
 >>> q = u.Q([1, 2, 3], "km")
 
 >>> v = cx.Point.from_(q)
@@ -180,7 +178,7 @@ Cart3D()
 
 Standard `unxt` API:
 
-```{code-block} python
+```python
 >>> q_m = u.Q([1000, 2000, 3000], "m")
 >>> q_km = u.uconvert("km", q_m)
 >>> q_km.unit
@@ -191,7 +189,7 @@ Unit("km")
 
 Quantities are Quax `ArrayValue` objects and work with JAX transformations:
 
-```{code-block} python
+```python
 >>> rot90z = cxfm.Rotate.from_euler("z", u.Q(90, "deg"))
 
 >>> @jax.jit

@@ -6,25 +6,17 @@ This package provides astronomical reference frames like ICRS and Galactocentric
 
 ## Installation
 
-::::{tab-set}
-
-:::{tab-item} pip
+**pip**:
 
 ```bash
 pip install coordinax[astro]
 ```
 
-:::
-
-:::{tab-item} uv
+**uv**:
 
 ```bash
 uv add coordinax --extra astro
 ```
-
-:::
-
-::::
 
 ## Quick Start
 
