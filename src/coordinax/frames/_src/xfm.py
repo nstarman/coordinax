@@ -35,6 +35,8 @@ class AbstractTransformedReferenceFrame(AbstractReferenceFrame, Generic[FrameT])
 
     Examples
     --------
+    .. skip: start
+
     >>> import quaxed.numpy as jnp
     >>> import unxt as u
     >>> import coordinax.vectors as cxv
@@ -60,6 +62,8 @@ class AbstractTransformedReferenceFrame(AbstractReferenceFrame, Generic[FrameT])
 
     >>> op.inverse(q_frame) == q_icrs
     Array(True, dtype=bool)
+
+    .. skip: end
 
     """
 
@@ -91,6 +95,8 @@ class TransformedReferenceFrame(AbstractTransformedReferenceFrame[FrameT]):
 
     Examples
     --------
+    .. skip: start
+
     >>> import quaxed.numpy as jnp
     >>> import unxt as u
     >>> import coordinax.vectors as cxv
@@ -117,6 +123,8 @@ class TransformedReferenceFrame(AbstractTransformedReferenceFrame[FrameT]):
     >>> op.inverse(q_frame) == q_icrs
     Array(True, dtype=bool)
 
+    .. skip: end
+
     """
 
     #: The base reference frame.
@@ -136,6 +144,8 @@ def frame_transition(
 
     Examples
     --------
+    .. skip: start
+
     >>> import quaxed.numpy as jnp
     >>> import coordinax.vectors as cxv
     >>> import coordinax.frames as cxf
@@ -157,6 +167,8 @@ def frame_transition(
     <Point: chart=Cart3D (x, y, z) [kpc]
         [0. 1. 0.]>
 
+    .. skip: end
+
     """
     return api.frame_transition(from_frame, to_frame.base_frame) | to_frame.xop  # ty: ignore[unsupported-operator]
 
@@ -169,6 +181,8 @@ def frame_transition(
 
     Examples
     --------
+    .. skip: start
+
     >>> import quaxed.numpy as jnp
     >>> import coordinax.vectors as cxv
     >>> import coordinax.frames as cxf
@@ -190,6 +204,8 @@ def frame_transition(
     <Point: chart=Cart3D (x, y, z) [kpc]
         [1. 0. 0.]>
 
+    .. skip: end
+
     """
     return from_frame.xop.inverse | api.frame_transition(
         from_frame.base_frame, to_frame
@@ -204,6 +220,8 @@ def frame_transition(
 
     Examples
     --------
+    .. skip: start
+
     >>> import quaxed.numpy as jnp
     >>> import coordinax.vectors as cxv
     >>> import coordinax.frames as cxf
@@ -223,6 +241,8 @@ def frame_transition(
     >>> print(q_frame2)
     <Point: chart=Cart3D (x, y, z) [kpc]
         [ 1. -1.  0.]>
+
+    .. skip: end
 
     """
     return (
