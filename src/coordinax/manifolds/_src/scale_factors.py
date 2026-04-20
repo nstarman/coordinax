@@ -43,7 +43,7 @@ def scale_factors(
     QuantityMatrix([1., 4., 4.], '(, km2 / rad2, km2 / rad2)')
 
     """
-    return cxmapi.scale_factors(manifold.metric, chart, at=at, usys=usys)
+    return cxmapi.scale_factors(manifold.metric, chart, at=at, usys=usys)  # type: ignore[invalid-return-type]
 
 
 @plum.dispatch
