@@ -25,7 +25,7 @@ You will learn how to:
 
 ## Setup
 
-```python
+```pycon
 >>> import coordinax.main as cx
 >>> import coordinax.charts as cxc
 >>> import coordinax.frames as cxf
@@ -51,7 +51,7 @@ The trade-off: you must pass chart, representation, and a unit system to every c
 
 Use `cxfm.act()` with explicit chart, representation, and **unit system**:
 
-```python
+```pycon
 >>> usys = u.unitsystem("m", "s", "kg", "rad")
 
 >>> rot90z = cxfm.Rotate.from_euler("z", u.Q(90, "deg"))
@@ -75,7 +75,7 @@ The arguments:
 
 Transforms like `Translate` store their offsets **with units** (e.g. `Translate({"x": Q(1, "km"), ...})`). A bare array has no units, so coordinax cannot add metres to a unitless number. The `usys` tells coordinax how to interpret the array: "these numbers are in metres."
 
-```python
+```pycon
 >>> usys = u.unitsystem("km", "s", "kg", "rad")
 >>> shift = cxfm.Translate.from_([1, 2, 3], "km")
 
@@ -89,7 +89,7 @@ True
 
 For chart conversion, first convert the array into a CDict using `cxc.cdict()` with a chart and unit:
 
-```python
+```pycon
 >>> d = cxc.cdict(jnp.array([1.0, 2.0, 3.0]), "km", cxc.cart3d)
 >>> sorted(d.keys())
 ['x', 'y', 'z']
@@ -97,7 +97,7 @@ For chart conversion, first convert the array into a CDict using `cxc.cdict()` w
 
 Then convert charts via `pt_map`:
 
-```python
+```pycon
 >>> d_sph = cxc.pt_map(d, cxc.cart3d, cxc.sph3d)
 >>> sorted(d_sph.keys())
 ['phi', 'r', 'theta']
@@ -111,7 +111,7 @@ Arrays sit at the bottom of the coordinax tower. You can upgrade step-by-step:
 
 Attach units:
 
-```python
+```pycon
 >>> arr = jnp.array([1.0, 2.0, 3.0])
 >>> q = u.Q(arr, "km")
 >>> q.unit
@@ -122,7 +122,7 @@ Unit("km")
 
 Attach chart and representation:
 
-```python
+```pycon
 >>> v = cx.Point.from_(q)
 >>> v.chart
 Cart3D()
@@ -132,7 +132,7 @@ Cart3D()
 
 Attach a reference frame:
 
-```python
+```pycon
 >>> coord = cx.Point.from_(v, cxf.alice)
 >>> coord.frame
 Alice()
@@ -142,7 +142,7 @@ Alice()
 
 Skip the quantity step:
 
-```python
+```pycon
 >>> v = cx.Point.from_([1, 2, 3], "km")
 >>> v.chart
 Cart3D()
@@ -152,13 +152,14 @@ Cart3D()
 
 Plain arrays are native JAX — `jit`, `vmap`, and `grad` work without any special handling:
 
-```python
+```pycon
 >>> usys = u.unitsystem("m", "s", "kg", "rad")
 >>> rot90z = cxfm.Rotate.from_euler("z", u.Q(90, "deg"))
 
 >>> @jax.jit
 ... def rotate_array(x):
 ...     return cxfm.act(rot90z, None, x, cxc.cart3d, cxr.point, usys=usys)
+...
 
 >>> arr = jnp.array([1.0, 0.0, 0.0])
 >>> result = rotate_array(arr)

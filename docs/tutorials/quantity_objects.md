@@ -27,7 +27,7 @@ You will learn how to:
 
 ## Setup
 
-```python
+```pycon
 >>> import coordinax.main as cx
 >>> import coordinax.charts as cxc
 >>> import coordinax.frames as cxf
@@ -42,7 +42,7 @@ You will learn how to:
 
 A `Quantity` attaches **units** to an array. This prevents silent unit confusion — is `1.0` in metres, kilometres, or degrees?
 
-```python
+```pycon
 >>> q = u.Q([1.0, 2.0, 3.0], "km")
 >>> q.unit
 Unit("km")
@@ -54,7 +54,7 @@ Quantities do **not** carry component names (no "x", "y", "z" labels), chart, re
 
 Use `cxfm.act()` with a quantity. Coordinax infers the chart from the array shape (length 3 → `cart3d`) and assumes point representation:
 
-```python
+```pycon
 >>> rot90z = cxfm.Rotate.from_euler("z", u.Q(90, "deg"))
 
 >>> q = u.Q([1.0, 0.0, 0.0], "km")
@@ -67,7 +67,7 @@ Unit("km")
 
 Override the inferred chart:
 
-```python
+```pycon
 >>> result = cxfm.act(rot90z, None, q, cxc.cart3d)
 >>> result.unit
 Unit("km")
@@ -77,7 +77,7 @@ Unit("km")
 
 Full control:
 
-```python
+```pycon
 >>> result = cxfm.act(rot90z, None, q, cxc.cart3d, cxr.point)
 >>> result.unit
 Unit("km")
@@ -85,7 +85,7 @@ Unit("km")
 
 ### Translation
 
-```python
+```pycon
 >>> shift = cxfm.Translate.from_([1, 2, 3], "km")
 
 >>> q_origin = u.Q([0.0, 0.0, 0.0], "km")
@@ -98,7 +98,7 @@ Unit("km")
 
 The identity transform returns the exact same object:
 
-```python
+```pycon
 >>> q = u.Q([1.0, 2.0, 3.0], "km")
 >>> result = cxfm.act(cxfm.Identity(), None, q)
 >>> result is q
@@ -109,7 +109,7 @@ True
 
 Use `cxc.cdict()` to split a quantity into named components:
 
-```python
+```pycon
 >>> q = u.Q([1, 2, 3], "km")
 
 >>> d = cxc.cdict(q)
@@ -122,7 +122,7 @@ Q(1, 'km')
 
 With an explicit chart:
 
-```python
+```pycon
 >>> d = cxc.cdict(u.Q([1, 2, 3], "km"), cxc.cart3d)
 >>> sorted(d.keys())
 ['x', 'y', 'z']
@@ -130,7 +130,7 @@ With an explicit chart:
 
 Once decomposed into a CDict, you can change charts:
 
-```python
+```pycon
 >>> d_sph = cxc.pt_map(d, cxc.cart3d, cxc.sph3d)
 >>> sorted(d_sph.keys())
 ['phi', 'r', 'theta']
@@ -140,7 +140,7 @@ Once decomposed into a CDict, you can change charts:
 
 Promote a quantity to a `Vector`:
 
-```python
+```pycon
 >>> q = u.Q([1, 2, 3], "m")
 
 >>> v = cx.Point.from_(q)
@@ -153,7 +153,7 @@ True
 
 With an explicit chart:
 
-```python
+```pycon
 >>> v = cx.Point.from_(q, cxc.cart3d)
 >>> v.chart
 Cart3D()
@@ -163,7 +163,7 @@ Cart3D()
 
 Go all the way from a quantity to a `Coordinate`:
 
-```python
+```pycon
 >>> q = u.Q([1, 2, 3], "km")
 
 >>> v = cx.Point.from_(q)
@@ -178,7 +178,7 @@ Cart3D()
 
 Standard `unxt` API:
 
-```python
+```pycon
 >>> q_m = u.Q([1000, 2000, 3000], "m")
 >>> q_km = u.uconvert("km", q_m)
 >>> q_km.unit
@@ -189,12 +189,13 @@ Unit("km")
 
 Quantities are Quax `ArrayValue` objects and work with JAX transformations:
 
-```python
+```pycon
 >>> rot90z = cxfm.Rotate.from_euler("z", u.Q(90, "deg"))
 
 >>> @jax.jit
 ... def rotate_qty(q):
 ...     return cxfm.act(rot90z, None, q)
+...
 
 >>> q = u.Q([1.0, 0.0, 0.0], "km")
 >>> result = rotate_qty(q)

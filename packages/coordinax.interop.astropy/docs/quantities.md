@@ -7,7 +7,7 @@ import importlib.util
 
 This guide demonstrates how to convert quantity-like objects between `coordinax` and `astropy` using `plum` dispatch and `from_` constructors.
 
-```python
+```pycon
 >>> import jax.numpy as jnp
 >>> import plum
 
@@ -22,7 +22,7 @@ This guide demonstrates how to convert quantity-like objects between `coordinax`
 
 Create a `coordinax.angles.Angle`:
 
-```python
+```pycon
 >>> angle = cx.Angle(jnp.array([1, 2, 3]), "rad")
 >>> angle
 Angle([1, 2, 3], 'rad')
@@ -30,7 +30,7 @@ Angle([1, 2, 3], 'rad')
 
 Convert `coordinax` to `astropy`:
 
-```python
+```pycon
 >>> plum.convert(angle, apyu.Quantity)
 <Quantity [1., 2., 3.] rad>
 
@@ -41,7 +41,7 @@ Convert `coordinax` to `astropy`:
 
 Convert `astropy` back to `coordinax`:
 
-```python
+```pycon
 >>> plum.convert(angle_apy, cx.Angle)
 Angle([1., 2., 3.], 'rad')
 
@@ -53,7 +53,7 @@ Angle([1., 2., 3.], 'rad')
 
 Create a `coordinax.distances.Distance`:
 
-```python
+```pycon
 >>> distance = cx.Distance(jnp.array([1, 2, 3]), "km")
 >>> distance
 Distance([1, 2, 3], 'km')
@@ -61,7 +61,7 @@ Distance([1, 2, 3], 'km')
 
 Convert `coordinax` to `astropy`:
 
-```python
+```pycon
 >>> plum.convert(distance, apyu.Quantity)
 <Quantity [1., 2., 3.] km>
 
@@ -72,7 +72,7 @@ Convert `coordinax` to `astropy`:
 
 Convert `astropy` back to `coordinax`:
 
-```python
+```pycon
 >>> plum.convert(distance_apy, cx.Distance)
 Distance([1., 2., 3.], 'km')
 
@@ -84,7 +84,7 @@ Distance([1., 2., 3.], 'km')
 
 Create a `coordinax.astro.DistanceModulus`:
 
-```python
+```pycon
 >>> distmod = cxastro.DistanceModulus(jnp.array([1, 2, 3]), "mag")
 >>> distmod
 DistanceModulus([1, 2, 3], 'mag')
@@ -92,7 +92,7 @@ DistanceModulus([1, 2, 3], 'mag')
 
 Convert `coordinax` to `astropy`:
 
-```python
+```pycon
 >>> distmod_apy = plum.convert(distmod, apyu.Quantity)
 >>> distmod_apy
 <Quantity [1., 2., 3.] mag>
@@ -100,7 +100,7 @@ Convert `coordinax` to `astropy`:
 
 Convert `astropy` back to `coordinax`:
 
-```python
+```pycon
 >>> plum.convert(distmod_apy, cxastro.DistanceModulus)
 DistanceModulus([1., 2., 3.], 'mag')
 
@@ -112,7 +112,7 @@ DistanceModulus([1., 2., 3.], 'mag')
 
 Create a `coordinax.astro.Parallax`:
 
-```python
+```pycon
 >>> parallax = cxastro.Parallax(jnp.array([1, 2, 3]), "rad")
 >>> parallax
 Parallax([1, 2, 3], 'rad')
@@ -120,7 +120,7 @@ Parallax([1, 2, 3], 'rad')
 
 Convert `coordinax` to `astropy`:
 
-```python
+```pycon
 >>> parallax_apy = plum.convert(parallax, apyu.Quantity)
 >>> parallax_apy
 <Quantity [1., 2., 3.] rad>
@@ -128,7 +128,7 @@ Convert `coordinax` to `astropy`:
 
 Convert `astropy` back to `coordinax`:
 
-```python
+```pycon
 >>> plum.convert(parallax_apy, cxastro.Parallax)
 Parallax([1., 2., 3.], 'rad')
 

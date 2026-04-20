@@ -28,7 +28,7 @@ You will learn how to:
 
 ## Setup
 
-```python
+```pycon
 >>> import coordinax.main as cx
 >>> import coordinax.charts as cxc
 >>> import coordinax.frames as cxf
@@ -62,7 +62,7 @@ Because all metadata is attached, `Vector` operations like `cconvert` and `act` 
 
 The chart is inferred from the array length (3 → `cart3d`):
 
-```python
+```pycon
 >>> v = cx.Point.from_([1, 2, 3], "m")
 >>> v.chart
 Cart3D()
@@ -79,7 +79,7 @@ Shape inference:
 
 ### From A Quantity
 
-```python
+```pycon
 >>> q = u.Q([1, 2, 3], "m")
 >>> v = cx.Point.from_(q)
 >>> v.chart
@@ -90,10 +90,8 @@ Cart3D()
 
 The most explicit pattern — every component is named:
 
-```python
->>> v = cx.Point.from_(
-...     {"x": u.Q(1, "m"), "y": u.Q(2, "m"), "z": u.Q(3, "m")}
-... )
+```pycon
+>>> v = cx.Point.from_({"x": u.Q(1, "m"), "y": u.Q(2, "m"), "z": u.Q(3, "m")})
 >>> v.chart
 Cart3D()
 ```
@@ -102,7 +100,7 @@ Cart3D()
 
 Override the inferred chart:
 
-```python
+```pycon
 >>> v = cx.Point.from_(
 ...     {"r": u.Q(1, "m"), "theta": u.Q(0.5, "rad"), "phi": u.Q(1.0, "rad")},
 ...     cxc.sph3d,
@@ -113,7 +111,7 @@ Spherical3D()
 
 ### With Explicit Chart And Representation
 
-```python
+```pycon
 >>> v = cx.Point.from_(
 ...     {"x": u.Q(1, "m"), "y": u.Q(2, "m"), "z": u.Q(3, "m")},
 ...     cxc.cart3d,
@@ -125,7 +123,7 @@ Representation(geom_kind=PointGeometry(), basis=NoBasis(), semantic_kind=Locatio
 
 ### Passthrough
 
-```python
+```pycon
 >>> v1 = cx.Point.from_([1, 2, 3], "m")
 >>> v2 = cx.Point.from_(v1)
 >>> v2 is v1
@@ -134,7 +132,7 @@ True
 
 ## Inspecting Vector Metadata
 
-```python
+```pycon
 >>> v = cx.Point.from_([1, 2, 3], "m")
 
 >>> v.chart
@@ -157,7 +155,7 @@ Q(1, 'm')
 
 Because a vector carries both its chart and its manifold, you can ask the manifold for the metric diagonal entries at the represented location:
 
-```python
+```pycon
 >>> v = cx.Point.from_(
 ...     {"r": u.Q(2, "km"), "theta": u.Angle(jnp.pi / 2, "rad"), "phi": u.Angle(0, "rad")},
 ...     cxc.sph3d,
@@ -176,10 +174,8 @@ Because a vector carries both its chart and its manifold, you can ask the manifo
 
 Use `cx.cconvert()` to transform between coordinate systems. The geometric point is preserved; the chart and component values change:
 
-```python
->>> v_cart = cx.Point.from_(
-...     {"x": u.Q(1, "km"), "y": u.Q(2, "km"), "z": u.Q(3, "km")}
-... )
+```pycon
+>>> v_cart = cx.Point.from_({"x": u.Q(1, "km"), "y": u.Q(2, "km"), "z": u.Q(3, "km")})
 
 >>> v_sph = cx.cconvert(v_cart, cxc.sph3d)
 >>> v_sph.chart
@@ -191,7 +187,7 @@ Spherical3D()
 
 Round-tripping:
 
-```python
+```pycon
 >>> v_back = cx.cconvert(v_sph, cxc.cart3d)
 >>> v_back.chart
 Cart3D()
@@ -199,7 +195,7 @@ Cart3D()
 
 ### Cartesian → Cylindrical → Spherical
 
-```python
+```pycon
 >>> v = cx.Point.from_({"x": u.Q(1, "km"), "y": u.Q(1, "km"), "z": u.Q(1, "km")})
 
 >>> v_cyl = cx.cconvert(v, cxc.cyl3d)
@@ -215,7 +211,7 @@ Spherical3D()
 
 Use `cxfm.act()` to apply a transform. Because `Vector` is self-contained, no extra arguments are needed:
 
-```python
+```pycon
 >>> rot90z = cxfm.Rotate.from_euler("z", u.Q(90, "deg"))
 >>> v = cx.Point.from_({"x": u.Q(1, "km"), "y": u.Q(0, "km"), "z": u.Q(0, "km")})
 
@@ -226,7 +222,7 @@ True
 
 Translation:
 
-```python
+```pycon
 >>> shift = cxfm.Translate.from_([1, 2, 3], "km")
 >>> v_origin = cx.Point.from_({"x": u.Q(0, "km"), "y": u.Q(0, "km"), "z": u.Q(0, "km")})
 
@@ -245,7 +241,7 @@ The second argument is `tau` (time parameter) — pass `None` for static transfo
 
 Convert units per-component with `u.uconvert()`:
 
-```python
+```pycon
 >>> v = cx.Point.from_([1000, 2000, 3000], "m")
 
 >>> v_km = u.uconvert({"x": "km", "y": "km", "z": "km"}, v)
@@ -259,7 +255,7 @@ Q(2., 'km')
 
 Vectors are immutable. To create a modified copy, use `equinox.tree_at()`:
 
-```python
+```pycon
 >>> import equinox as eqx
 
 >>> v = cx.Point.from_({"x": u.Q(1, "m"), "y": u.Q(2, "m"), "z": u.Q(3, "m")})
@@ -277,11 +273,12 @@ Vectors are JAX PyTrees (via Equinox), so all JAX transformations work out of th
 
 ### JIT Compilation
 
-```python
+```pycon
 >>> @jax.jit
 ... def rotate_to_spherical(v):
 ...     r = cxfm.act(cxfm.Rotate.from_euler("z", u.Q(90, "deg")), None, v)
 ...     return cx.cconvert(r, cxc.sph3d)
+...
 
 >>> v = cx.Point.from_({"x": u.Q(1.0, "km"), "y": u.Q(0.0, "km"), "z": u.Q(0.0, "km")})
 >>> result = rotate_to_spherical(v)
@@ -293,7 +290,7 @@ Spherical3D()
 
 Attach a reference frame to promote a vector to a coordinate:
 
-```python
+```pycon
 >>> v = cx.Point.from_({"x": u.Q(1, "km"), "y": u.Q(2, "km"), "z": u.Q(3, "km")})
 >>> coord = cx.Point.from_(v, cxf.alice)
 >>> coord.frame

@@ -27,7 +27,7 @@ You will learn how to:
 
 ## Setup
 
-```python
+```pycon
 >>> import coordinax.main as cx
 >>> import coordinax.charts as cxc
 >>> import coordinax.frames as cxf
@@ -42,7 +42,7 @@ You will learn how to:
 
 A CDict — short for **component dictionary** — is a plain Python dictionary with string keys (component names) and quantity or array values:
 
-```python
+```pycon
 >>> d = {"x": u.Q(1, "km"), "y": u.Q(2, "km"), "z": u.Q(3, "km")}
 >>> sorted(d.keys())
 ['x', 'y', 'z']
@@ -59,7 +59,7 @@ CDicts carry **component names** but no chart, representation, or frame metadata
 
 Simply create a dictionary:
 
-```python
+```pycon
 >>> d = {"x": u.Q(1, "km"), "y": u.Q(0, "km"), "z": u.Q(0, "km")}
 >>> sorted(d.keys())
 ['x', 'y', 'z']
@@ -69,7 +69,7 @@ Simply create a dictionary:
 
 `cxc.cdict()` splits a quantity's last axis into named components:
 
-```python
+```pycon
 >>> d = cxc.cdict(u.Q([1, 2, 3], "km"))
 >>> sorted(d.keys())
 ['x', 'y', 'z']
@@ -80,7 +80,7 @@ Q(1, 'km')
 
 With an explicit chart:
 
-```python
+```pycon
 >>> d = cxc.cdict(u.Q([1, 2, 3], "km"), cxc.cart3d)
 >>> sorted(d.keys())
 ['x', 'y', 'z']
@@ -88,7 +88,7 @@ With an explicit chart:
 
 ### From An Array + Unit Via `cdict()`
 
-```python
+```pycon
 >>> d = cxc.cdict(jnp.array([1.0, 2.0, 3.0]), "km", cxc.cart3d)
 >>> sorted(d.keys())
 ['x', 'y', 'z']
@@ -98,7 +98,7 @@ With an explicit chart:
 
 Passing an existing CDict returns it unchanged:
 
-```python
+```pycon
 >>> d = {"x": u.Q(1, "km"), "y": u.Q(0, "km"), "z": u.Q(0, "km")}
 >>> cxc.cdict(d) is d
 True
@@ -108,7 +108,7 @@ True
 
 Use `cxc.pt_map()` with explicit source and target charts:
 
-```python
+```pycon
 >>> d_cart = {"x": u.Q(1, "km"), "y": u.Q(2, "km"), "z": u.Q(3, "km")}
 
 >>> d_sph = cxc.pt_map(d_cart, cxc.cart3d, cxc.sph3d)
@@ -118,7 +118,7 @@ Use `cxc.pt_map()` with explicit source and target charts:
 
 Round-tripping:
 
-```python
+```pycon
 >>> d_back = cxc.pt_map(d_sph, cxc.sph3d, cxc.cart3d)
 >>> sorted(d_back.keys())
 ['x', 'y', 'z']
@@ -130,7 +130,7 @@ A CDict can also carry **tangent-vector components** when you provide that meani
 
 For example, `cxm.angle_between()` interprets two CDicts as tangent vectors in the coordinate basis of a chart and uses the manifold metric to compute the angle between them at a base point:
 
-```python
+```pycon
 >>> import coordinax.manifolds as cxm
 
 >>> M = cxm.EuclideanManifold(2)
@@ -149,7 +149,7 @@ This does **not** mean that arbitrary point CDicts are automatically tangent vec
 
 Use `cxfm.act()` with explicit chart and representation. A CDict alone does not know which chart it belongs to, so you must provide that context:
 
-```python
+```pycon
 >>> rot90z = cxfm.Rotate.from_euler("z", u.Q(90, "deg"))
 
 >>> d = {"x": u.Q(1, "km"), "y": u.Q(0, "km"), "z": u.Q(0, "km")}
@@ -160,7 +160,7 @@ Use `cxfm.act()` with explicit chart and representation. A CDict alone does not 
 
 Translation:
 
-```python
+```pycon
 >>> shift = cxfm.Translate.from_([1, 2, 3], "km")
 
 >>> d_origin = {"x": u.Q(0, "km"), "y": u.Q(0, "km"), "z": u.Q(0, "km")}
@@ -175,7 +175,7 @@ Q(3, 'km')
 
 Identity transform returns the exact same object:
 
-```python
+```pycon
 >>> d = {"x": u.Q(1, "km"), "y": u.Q(2, "km"), "z": u.Q(3, "km")}
 >>> result = cxfm.act(cxfm.Identity(), None, d)
 >>> result is d
@@ -186,7 +186,7 @@ True
 
 Promote a CDict to a `Point` by providing chart context:
 
-```python
+```pycon
 >>> d = {"x": u.Q(1, "km"), "y": u.Q(2, "km"), "z": u.Q(3, "km")}
 
 >>> v = cx.Point.from_(d, cxc.cart3d)
@@ -199,7 +199,7 @@ True
 
 With chart inference (keys are recognized as Cartesian):
 
-```python
+```pycon
 >>> v = cx.Point.from_(d)
 >>> v.chart
 Cart3D()
@@ -209,7 +209,7 @@ Cart3D()
 
 Go all the way to a `Coordinate` by providing chart and frame:
 
-```python
+```pycon
 >>> d = {"x": u.Q(1, "km"), "y": u.Q(2, "km"), "z": u.Q(3, "km")}
 
 >>> coord = cx.Point.from_(d, cxc.cart3d, cxf.alice)
@@ -223,7 +223,7 @@ Alice()
 
 CDicts support all standard dictionary operations:
 
-```python
+```pycon
 >>> d = {"x": u.Q(1, "km"), "y": u.Q(2, "km"), "z": u.Q(3, "km")}
 
 >>> d["x"]
@@ -243,11 +243,12 @@ True
 
 Python dicts are native JAX PyTrees, so CDicts work with `jit` and `vmap` directly:
 
-```python
+```pycon
 >>> @jax.jit
 ... def rotate_cdict(d):
 ...     rot = cxfm.Rotate.from_euler("z", u.Q(90, "deg"))
 ...     return cxfm.act(rot, None, d, cxc.cart3d, cxr.point)
+...
 
 >>> import jax
 

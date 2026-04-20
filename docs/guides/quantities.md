@@ -19,7 +19,7 @@ The `Angle` class in `coordinax.angles` is a specialized quantity for representi
 
 You can create an `Angle` just like a `unxt.quantity.Quantity`, by specifying a value and a unit with angular dimensions:
 
-```python
+```pycon
 >>> import coordinax.main as cx
 >>> a = cx.Angle(45, "deg")
 >>> a
@@ -28,7 +28,7 @@ Angle(45, 'deg')
 
 Just like `unxt.quantity.Quantity`, you can flexibly create `Angle` objects using the `from_` constructor:
 
-```python
+```pycon
 >>> cx.Angle.from_(45, "deg")
 Angle(45, 'deg')
 
@@ -44,7 +44,7 @@ Angle([10, 15, 20], 'deg')
 
 `Angle` objects support arithmetic operations, broadcasting, and most mathematical functions, just like `unxt.quantity.Quantity`:
 
-```python
+```pycon
 >>> b = cx.Angle(30, "deg")
 >>> a + b
 Angle(75, 'deg')
@@ -60,9 +60,12 @@ For more information on mathematical operations, see the unxt documentation.
 
 Unlike a generic `unxt.quantity.Quantity`, the `Angle` class enforces that the unit must be angular (e.g., degrees, radians). Attempting to use a non-angular unit will raise an error:
 
-```python
->>> try: cx.Angle(1, "m")
-... except ValueError as e: print(e)
+```pycon
+>>> try:
+...     cx.Angle(1, "m")
+... except ValueError as e:
+...     print(e)
+...
 Angle must have units with angular dimensions.
 ```
 
@@ -70,7 +73,7 @@ Angle must have units with angular dimensions.
 
 A key feature of `Angle` is the ability to wrap values to a specified range, which is useful for keeping angles within a branch cut:
 
-```python
+```pycon
 >>> import unxt as u
 >>> a = cx.Angle(370, "deg")
 >>> a.wrap_to(u.Q(0, "deg"), u.Q(360, "deg"))
@@ -79,7 +82,7 @@ Angle(10, 'deg')
 
 The `Angle.wrap_to` method has a function counterpart
 
-```python
+```pycon
 >>> import coordinax.angles as cxa
 >>> cxa.wrap_to(a, u.Q(0, "deg"), u.Q(360, "deg"))
 Angle(10, 'deg')
@@ -95,7 +98,7 @@ The `Distance` class in `coordinax.distances` is a specialized quantity for repr
 
 You can create a `Distance` just like a `unxt.quantity.Quantity`, by specifying a value and a unit with length dimensions:
 
-```python
+```pycon
 >>> d = cx.Distance(10, "kpc")
 >>> d
 Distance(10, 'kpc')
@@ -105,7 +108,7 @@ Distance(10, 'kpc')
 
 `coordinax.astro.Parallax` and `coordinax.astro.DistanceModulus` are alternative representations of distance:
 
-```python
+```pycon
 >>> import coordinax.astro as cxastro
 >>> p = cxastro.Parallax(0.1, "mas")
 >>> p
@@ -120,7 +123,7 @@ DistanceModulus(15, 'mag')
 
 Each of these classes has a property to convert to `Distance`:
 
-```python
+```pycon
 >>> p.distance.uconvert("kpc")
 Distance(10., 'kpc')
 

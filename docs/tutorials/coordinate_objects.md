@@ -30,7 +30,7 @@ You will learn how to:
 
 ## Setup
 
-```python
+```pycon
 >>> import coordinax.main as cx
 >>> import coordinax.charts as cxc
 >>> import coordinax.frames as cxf
@@ -65,10 +65,8 @@ This ensures that **every number carries its full context**: the values, the coo
 
 Pass an existing `Point` and a frame — the frame is attached to it:
 
-```python
->>> vec = cx.Point.from_(
-...     {"x": u.Q(1, "km"), "y": u.Q(2, "km"), "z": u.Q(3, "km")}
-... )
+```pycon
+>>> vec = cx.Point.from_({"x": u.Q(1, "km"), "y": u.Q(2, "km"), "z": u.Q(3, "km")})
 
 >>> coord = cx.Point.from_(vec, cxf.alice)
 >>> coord.chart
@@ -81,7 +79,7 @@ Alice()
 
 Pass a component dictionary, chart, and frame:
 
-```python
+```pycon
 >>> coord = cx.Point.from_(
 ...     {"x": u.Q(1, "km"), "y": u.Q(2, "km"), "z": u.Q(3, "km")},
 ...     cxc.cart3d,
@@ -97,7 +95,7 @@ Alice()
 
 The most compact form — the chart is inferred from the array shape (length 3 → `cart3d`):
 
-```python
+```pycon
 >>> coord = cx.Point.from_([1, 2, 3], "km", cxf.alice)
 >>> coord.chart
 Cart3D()
@@ -109,10 +107,12 @@ Alice()
 
 When you need to control every aspect:
 
-```python
+```pycon
 >>> coord = cx.Point.from_(
 ...     {"x": u.Q(1, "km"), "y": u.Q(2, "km"), "z": u.Q(3, "km")},
-...     cxc.cart3d, cxr.point, cxf.alice,
+...     cxc.cart3d,
+...     cxr.point,
+...     cxf.alice,
 ... )
 >>> coord.rep
 Representation(geom_kind=PointGeometry(), basis=NoBasis(), semantic_kind=Location())
@@ -122,7 +122,7 @@ Representation(geom_kind=PointGeometry(), basis=NoBasis(), semantic_kind=Locatio
 
 If no frame is given, `NoFrame` is used:
 
-```python
+```pycon
 >>> coord_noframe = cx.Point.from_(
 ...     cx.Point.from_({"x": u.Q(1, "km"), "y": u.Q(2, "km"), "z": u.Q(3, "km")})
 ... )
@@ -134,7 +134,7 @@ NoFrame()
 
 Passing an existing point returns it unchanged:
 
-```python
+```pycon
 >>> same = cx.Point.from_(coord)
 >>> same is coord
 True
@@ -144,10 +144,11 @@ True
 
 Access the components, chart, frame, representation, and manifold directly:
 
-```python
+```pycon
 >>> coord = cx.Point.from_(
 ...     {"x": u.Q(1, "km"), "y": u.Q(2, "km"), "z": u.Q(3, "km")},
-...     cxc.cart3d, cxf.alice,
+...     cxc.cart3d,
+...     cxf.alice,
 ... )
 
 >>> coord.chart
@@ -173,10 +174,11 @@ True
 
 Use `cconvert()` to change the chart while preserving the frame and the geometric point:
 
-```python
+```pycon
 >>> coord_cart = cx.Point.from_(
 ...     {"x": u.Q(1, "km"), "y": u.Q(2, "km"), "z": u.Q(3, "km")},
-...     cxc.cart3d, cxf.alice,
+...     cxc.cart3d,
+...     cxf.alice,
 ... )
 
 >>> coord_sph = coord_cart.cconvert(cxc.sph3d)
@@ -192,7 +194,7 @@ Alice()
 
 Round-tripping preserves the geometric point:
 
-```python
+```pycon
 >>> coord_back = coord_sph.cconvert(cxc.cart3d)
 >>> coord_back.chart
 Cart3D()
@@ -202,13 +204,14 @@ Cart3D()
 
 Use `to_frame()` to transform the point into a different observer's frame. First, build a frame that is rotated 90° about the z-axis relative to Alice:
 
-```python
+```pycon
 >>> rot90z = cxfm.Rotate.from_euler("z", u.Q(90, "deg"))
 >>> rotated_frame = cxf.TransformedReferenceFrame(cxf.alice, rot90z)
 
 >>> coord_alice = cx.Point.from_(
 ...     {"x": u.Q(1, "km"), "y": u.Q(0, "km"), "z": u.Q(0, "km")},
-...     cxc.cart3d, cxf.alice,
+...     cxc.cart3d,
+...     cxf.alice,
 ... )
 
 >>> coord_rotated = coord_alice.to_frame(rotated_frame)
@@ -218,7 +221,7 @@ TransformedReferenceFrame(base_frame=Alice(), xop=Rotate(R=f...[3,3]))
 
 Identity frame changes are no-ops:
 
-```python
+```pycon
 >>> same = coord_alice.to_frame(cxf.alice)
 >>> same is coord_alice
 True
@@ -228,10 +231,11 @@ True
 
 Real workflows often require both frame and chart changes.
 
-```python
+```pycon
 >>> coord = cx.Point.from_(
 ...     {"x": u.Q(1, "km"), "y": u.Q(2, "km"), "z": u.Q(3, "km")},
-...     cxc.cart3d, cxf.alice,
+...     cxc.cart3d,
+...     cxf.alice,
 ... )
 
 >>> rotated_frame = cxf.TransformedReferenceFrame(
@@ -257,12 +261,13 @@ When reading a pipeline, each step preserves the geometric point but changes one
 
 Use `cxfm.act()` to apply a transform directly to a point, without building a frame:
 
-```python
+```pycon
 >>> rot90z = cxfm.Rotate.from_euler("z", u.Q(90, "deg"))
 
 >>> coord = cx.Point.from_(
 ...     {"x": u.Q(1, "km"), "y": u.Q(0, "km"), "z": u.Q(0, "km")},
-...     cxc.cart3d, cxf.alice,
+...     cxc.cart3d,
+...     cxf.alice,
 ... )
 
 >>> rotated = cxfm.act(rot90z, None, coord)
@@ -276,10 +281,11 @@ The second argument (`None`) is the time parameter `tau` — pass `None` for tim
 
 Convert component units with `u.uconvert()`:
 
-```python
+```pycon
 >>> coord_m = cx.Point.from_(
 ...     {"x": u.Q(1000, "m"), "y": u.Q(2000, "m"), "z": u.Q(3000, "m")},
-...     cxc.cart3d, cxf.alice,
+...     cxc.cart3d,
+...     cxf.alice,
 ... )
 
 >>> coord_km = u.uconvert({"x": "km", "y": "km", "z": "km"}, coord_m)
@@ -293,17 +299,19 @@ Coordinates are JAX PyTrees by construction. They work with `jit` and `vmap`:
 
 ### JIT Compilation
 
-```python
+```pycon
 >>> rot90z = cxfm.Rotate.from_euler("z", u.Q(90, "deg"))
 >>> rotated_frame = cxf.TransformedReferenceFrame(cxf.alice, rot90z)
 
 >>> @jax.jit
 ... def to_rotated_spherical(c):
 ...     return c.to_frame(rotated_frame).cconvert(cxc.sph3d)
+...
 
 >>> coord = cx.Point.from_(
 ...     {"x": u.Q(1.0, "km"), "y": u.Q(2.0, "km"), "z": u.Q(3.0, "km")},
-...     cxc.cart3d, cxf.alice,
+...     cxc.cart3d,
+...     cxf.alice,
 ... )
 
 >>> result = to_rotated_spherical(coord)

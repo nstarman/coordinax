@@ -25,7 +25,7 @@ import importlib.util
 -->
 <!-- skip: start if(importlib.util.find_spec('coordinax.interop.astropy') is None, reason="coordinax.interop.astropy not installed") -->
 
-```python
+```pycon
 >>> import jax.numpy as jnp
 >>> import plum
 
@@ -35,14 +35,14 @@ import importlib.util
 >>> import astropy.coordinates as apyc
 ```
 
-```python
+```pycon
 >>> angle = cx.Angle(jnp.array([1, 2, 3]), "rad")
 >>> angle_apy = plum.convert(angle, apyc.Angle)
 >>> plum.convert(angle_apy, cx.Angle)
 Angle([1., 2., 3.], 'rad')
 ```
 
-```python
+```pycon
 >>> distance = cx.Distance(jnp.array([1, 2, 3]), "km")
 >>> distance_apy = plum.convert(distance, apyc.Distance)
 >>> cx.Distance.from_(distance_apy)

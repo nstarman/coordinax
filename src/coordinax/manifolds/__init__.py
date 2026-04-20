@@ -1,6 +1,7 @@
 r"""`coordinax.manifolds` module.
 
-The `coordinax.manifolds` module provides manifold and atlas objects, plus manifold-level point operations.
+The `coordinax.manifolds` module provides manifold and atlas objects, plus
+manifold-level point operations.
 
 ## Overview
 
@@ -9,7 +10,8 @@ In `coordinax`, a manifold is represented as a pair $(M, \mathcal{A})$:
 - $M$: the geometric manifold
 - $\mathcal{A}$: an atlas describing compatible charts
 
-Manifold objects are responsible for compatibility checks (which charts belong on the manifold) and for manifold-level wrappers around chart operations.
+Manifold objects are responsible for compatibility checks (which charts belong on
+the manifold) and for manifold-level wrappers around chart operations.
 
 For a step-by-step walkthrough, see [Working With Manifolds](../guides/manifolds.md).
 

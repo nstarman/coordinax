@@ -22,7 +22,7 @@ A representation is a triple $R = (K, B, S)$:
 - $B$: basis kind (`AbstractBasis`), for point data this is `NoBasis`
 - $S$: semantic kind (`AbstractSemanticKind`), for point data this is `Location`
 
-```python
+```pycon
 >>> import coordinax.representations as cxr
 
 >>> rep = cxr.Representation(cxr.PointGeometry(), cxr.NoBasis(), cxr.Location())
@@ -65,7 +65,7 @@ Use each API by intent:
 
 This example shows one point represented across chart, manifold, and representation layers.
 
-```python
+```pycon
 >>> import coordinax.charts as cxc
 >>> import coordinax.manifolds as cxm
 >>> import coordinax.representations as cxr
@@ -94,7 +94,7 @@ True
 
 Use `cmap` when you repeatedly apply the same conversion pattern.
 
-```python
+```pycon
 >>> import coordinax.charts as cxc
 >>> import coordinax.representations as cxr
 >>> import unxt as u
@@ -109,7 +109,7 @@ Use `cmap` when you repeatedly apply the same conversion pattern.
 
 When moving between intrinsic and ambient descriptions, use realization-style chart maps. This is where charts and manifolds meet most directly.
 
-```python
+```pycon
 >>> import coordinax.charts as cxc
 >>> import coordinax.manifolds as cxm
 >>> import unxt as u

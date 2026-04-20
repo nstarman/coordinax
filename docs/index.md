@@ -75,13 +75,15 @@ import coordinax.representations
 import coordinax.vectors
 -->
 
-```python
+```pycon
 >>> import coordinax
 >>> import sys
 
->>> sorted(name.removeprefix("coordinax.")
-...        for name in sys.modules
-...        if name.startswith("coordinax.") and name.count(".") == 1)
+>>> sorted(
+...     name.removeprefix("coordinax.")
+...     for name in sys.modules
+...     if name.startswith("coordinax.") and name.count(".") == 1
+... )
 ['angles', 'api', 'astro', 'charts', 'curveframes', 'distances', 'frames', 'hypothesis', 'internal', 'interop', 'main', 'manifolds', 'representations', 'transforms', 'vectors']
 ```
 
@@ -107,7 +109,7 @@ We recommend importing as needed:
 
 Let's start with angles, which are represented by [Angle][coordinax.angles.Angle]. This class enforces angular dimensionality and provides convenient utilities for working with branch cuts and wrapped ranges such as $[0, 2\pi)$ or $(-180^\circ, 180^\circ]$.
 
-```python
+```pycon
 >>> import coordinax.main as cx
 >>> import unxt as u
 
@@ -121,7 +123,7 @@ Angle(10, 'deg')
 
 Similarly, [Distance][coordinax.distances.Distance] represents distances in `coordinax`:
 
-```python
+```pycon
 >>> d = cx.Distance(10, "kpc")
 >>> d
 Distance(10, 'kpc')
@@ -129,7 +131,7 @@ Distance(10, 'kpc')
 
 Other distance-like objects can be represented with [`Parallax`][coordinax.astro.Parallax] and [`DistanceModulus`][coordinax.astro.DistanceModulus] from [`coordinax.astro`][coordinax.astro]. These classes validate their physical units and provide convenient conversions between distance representations.
 
-```python
+```pycon
 >>> import coordinax.astro as cxastro
 >>> import plum
 
