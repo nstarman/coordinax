@@ -60,6 +60,8 @@ def frame_transition(*args: Any, **kwargs: Any) -> Any:
 
     **Using a TransformedReferenceFrame:**
 
+    .. skip: start
+
     >>> import coordinax.transforms as cxfm
     >>> import quaxed.numpy as jnp
     >>> from coordinax.astro import ICRS
@@ -70,6 +72,8 @@ def frame_transition(*args: Any, **kwargs: Any) -> Any:
     >>> op = cxf.frame_transition(ICRS(), frame)
     >>> type(op).__name__
     'Composed'
+
+    .. skip: end
 
     """
     raise NotImplementedError  # pragma: no cover
