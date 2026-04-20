@@ -60,20 +60,21 @@ The `coordinax` package has powerful tools for representing, using, and transfor
 This functionality is organized into submodules available under the top-level `coordinax` namespace. You can import them directly, or for many objects use the `coordinax.main` namespace to access them.
 
 <!-- invisible-code-block: python
+import importlib.util
 import coordinax.angles
 import coordinax.api
-import coordinax.astro
 import coordinax.curveframes
 import coordinax.charts
 import coordinax.distances
 import coordinax.frames
 import coordinax.hypothesis
-import coordinax.interop
 import coordinax.main
 import coordinax.manifolds
 import coordinax.representations
 import coordinax.vectors
 -->
+
+<!-- skip: start if(importlib.util.find_spec('coordinax.astro') is None, reason="coordinax.astro not installed") -->
 
 ```pycon
 >>> import coordinax
@@ -86,6 +87,8 @@ import coordinax.vectors
 ... )
 ['angles', 'api', 'astro', 'charts', 'curveframes', 'distances', 'frames', 'hypothesis', 'internal', 'interop', 'main', 'manifolds', 'representations', 'transforms', 'vectors']
 ```
+
+<!-- skip: end -->
 
 We recommend importing as needed:
 
@@ -131,6 +134,8 @@ Distance(10, 'kpc')
 
 Other distance-like objects can be represented with [`Parallax`][coordinax.astro.Parallax] and [`DistanceModulus`][coordinax.astro.DistanceModulus] from [`coordinax.astro`][coordinax.astro]. These classes validate their physical units and provide convenient conversions between distance representations.
 
+<!-- skip: start if(importlib.util.find_spec('coordinax.astro') is None, reason="coordinax.astro not installed") -->
+
 ```pycon
 >>> import coordinax.astro as cxastro
 >>> import plum
@@ -141,6 +146,8 @@ Parallax(4.84813681e-10, 'rad')
 >>> plum.convert(d, cxastro.DistanceModulus)
 DistanceModulus(15., 'mag')
 ```
+
+<!-- skip: end -->
 
 ## Ecosystem
 

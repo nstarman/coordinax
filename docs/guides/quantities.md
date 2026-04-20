@@ -1,10 +1,9 @@
 # Specialized Quantities
 
 <!-- invisible-code-block: python
-
+import importlib.util
 import unxt as u
 import jax.numpy as jnp
-
 -->
 
 ## Working with `Angle` Objects
@@ -108,6 +107,8 @@ Distance(10, 'kpc')
 
 `coordinax.astro.Parallax` and `coordinax.astro.DistanceModulus` are alternative representations of distance:
 
+<!-- skip: start if(importlib.util.find_spec('coordinax.astro') is None, reason="coordinax.astro not installed") -->
+
 ```pycon
 >>> import coordinax.astro as cxastro
 >>> p = cxastro.Parallax(0.1, "mas")
@@ -130,6 +131,8 @@ Distance(10., 'kpc')
 >>> dm.distance.uconvert("kpc")
 Distance(10., 'kpc')
 ```
+
+<!-- skip: end -->
 
 All these classes enforce that their units are appropriate for their physical meaning (e.g., `Distance` must have length units, `Parallax` must have angular units, and `DistanceModulus` must have magnitude units).
 

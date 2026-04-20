@@ -336,6 +336,11 @@ Define domain-specific reference frames by subclassing:
 
 For astronomical applications, `coordinax.astro` provides pre-built frames:
 
+<!-- invisible-code-block: python
+import importlib.util
+-->
+<!-- skip: start if(importlib.util.find_spec('coordinax.astro') is None, reason="coordinax.astro not installed") -->
+
 ```python
 # (If coordinax.astro is installed)
 import coordinax.astro as cxastro
@@ -346,6 +351,8 @@ galactocentric = cxastro.Galactocentric()
 # Transition between them
 xform = cxf.frame_transition(icrs, galactocentric)
 ```
+
+<!-- skip: end -->
 
 ## Coordinate Objects In Frame Workflows
 
