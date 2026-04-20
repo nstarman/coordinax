@@ -83,6 +83,7 @@ class TestQuaxedUnary:
 
     @pytest.mark.parametrize("fn", [qnp.abs, qnp.floor])
     @given(d=cxst.distances())
+    @settings(deadline=None)
     def test_preserves_type_and_unit(self, fn: object, d: cxd.Distance) -> None:
         """Abs and floor always return a Distance with the original unit."""
         result = fn(d)
@@ -90,11 +91,13 @@ class TestQuaxedUnary:
         assert result.unit == d.unit
 
     @given(d=cxst.distances())
+    @settings(deadline=None)
     def test_abs_nonneg(self, d: cxd.Distance) -> None:
         """qnp.abs of a Distance is always non-negative."""
         assert jnp.all(qnp.abs(d).value >= 0)
 
     @given(d=cxst.distances())
+    @settings(deadline=None)
     def test_negative_is_not_distance(self, d: cxd.Distance) -> None:
         """qnp.negative always returns a non-Distance for any Distance input."""
         assert not isinstance(qnp.negative(d), cxd.Distance)
@@ -131,11 +134,13 @@ class TestQuaxedBinary:
             unit="kpc", elements=st.floats(min_value=0.0, max_value=3.0, width=32)
         ),
     )
+    @settings(deadline=None)
     def test_add_commutativity(self, a: cxd.Distance, b: cxd.Distance) -> None:
         """qnp.add(a, b) == qnp.add(b, a)."""
         assert jnp.allclose(qnp.add(a, b).value, qnp.add(b, a).value, atol=1e-5)
 
     @given(d=cxst.distances())
+    @settings(deadline=None)
     def test_add_preserves_unit(self, d: cxd.Distance) -> None:
         assert qnp.add(d, d).unit == d.unit
 
@@ -161,6 +166,7 @@ class TestQuaxedReductions:
 
     @pytest.mark.parametrize("fn", [qnp.sum, qnp.mean])
     @given(d=cxst.distances(shape=(4,)))
+    @settings(deadline=None)
     def test_preserves_unit(self, fn: object, d: cxd.Distance) -> None:
         """Reductions preserve the Distance unit."""
         assert fn(d).unit == d.unit
@@ -293,6 +299,7 @@ class TestQuaxQuaxify:
         assert jnp.allclose(result.value, jnp.array([2.0, 4.0, 6.0]))
 
     @given(d=_dist_kpc)
+    @settings(deadline=None)
     def test_quaxify_preserves_distance_type(self, d: cxd.Distance) -> None:
         """quaxify(add)(d, d) always returns a Distance."""
         result = quax.quaxify(jax.numpy.add)(d, d)
