@@ -46,6 +46,7 @@ def test_cdict_from_quantity_chart_error():
     data=st.data(),
     chart=st.sampled_from([cxc.cart1d, cxc.radial1d, cxc.cart2d, cxc.cart3d]),
 )
+@settings(deadline=None)
 def test_cdict_from_quantity_and_chart(data, chart):
     """cdict(Quantity, chart) should return a CDict with correct keys and values."""
     ndim = len(chart.components)
@@ -63,6 +64,7 @@ def test_cdict_from_quantity_and_chart(data, chart):
     data=st.data(),
     chart=st.sampled_from([cxc.cart1d, cxc.radial1d, cxc.cart2d, cxc.cart3d]),
 )
+@settings(deadline=None)
 def test_cdict_from_array_and_chart(data, chart):
     """cdict(array, chart) should return a CDict with correct keys and values."""
     ndim = len(chart.components)

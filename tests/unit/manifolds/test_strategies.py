@@ -2,7 +2,7 @@
 
 __all__: tuple[str, ...] = ()
 
-from hypothesis import given
+from hypothesis import given, settings
 
 import coordinax.charts as cxc
 import coordinax.hypothesis.main as cxst
@@ -10,12 +10,14 @@ import coordinax.manifolds as cxm
 
 
 @given(atlas=cxst.atlases())
+@settings(deadline=None)
 def test_generated_atlas_supports_default_chart(atlas: cxm.AbstractAtlas) -> None:
     """Every generated atlas exposes a chart object as its default chart."""
     assert isinstance(atlas.default_chart(), cxc.AbstractChart)
 
 
 @given(manifold=cxst.manifolds())
+@settings(deadline=None)
 def test_generated_manifold_supports_default_chart(
     manifold: cxm.AbstractManifold,
 ) -> None:

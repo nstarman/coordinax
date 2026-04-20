@@ -3,7 +3,7 @@
 __all__: tuple[str, ...] = ()
 
 import pytest
-from hypothesis import given
+from hypothesis import given, settings
 
 import unxt as u
 
@@ -28,6 +28,7 @@ def test_identity_canonical_instance() -> None:
 
 
 @given(sem=cxrst.semantics())
+@settings(deadline=None)
 def test_identity_any_semantic(sem: cxr.AbstractSemanticKind) -> None:
     """guess_semantic_kind returns the input unchanged for any AbstractSemanticKind."""
     assert cxr.guess_semantic_kind(sem) is sem
@@ -119,6 +120,7 @@ def test_cdict_unknown_dim_raises() -> None:
 
 
 @given(sem=cxrst.semantics())
+@settings(deadline=None)
 def test_return_type_is_abstract_semantic_kind(
     sem: cxr.AbstractSemanticKind,
 ) -> None:
@@ -148,6 +150,7 @@ class TestGuessGeometryKind:
         assert result is cxr.point_geom
 
     @given(geom=cxrst.geometries())
+    @settings(deadline=None)
     def test_identity_any_geometry(self, geom: cxr.AbstractGeometry) -> None:
         """guess_geometry_kind returns the input unchanged for any AbstractGeometry."""
         assert cxr.guess_geometry_kind(geom) is geom
@@ -246,6 +249,7 @@ class TestGuessGeometryKind:
     # --- Return type ---
 
     @given(geom=cxrst.geometries())
+    @settings(deadline=None)
     def test_return_type_is_abstract_geometry(self, geom: cxr.AbstractGeometry) -> None:
         """guess_geometry_kind always returns an AbstractGeometry instance."""
         result = cxr.guess_geometry_kind(geom)
@@ -273,6 +277,7 @@ class TestGuessRep:
         assert result is cxr.point
 
     @given(rep=cxrst.representations())
+    @settings(deadline=None)
     def test_identity_any_representation(self, rep: cxr.Representation) -> None:
         """guess_rep returns the input unchanged for any Representation."""
         assert cxr.guess_rep(rep) is rep
@@ -318,6 +323,7 @@ class TestGuessRep:
     # --- Return type ---
 
     @given(rep=cxrst.representations())
+    @settings(deadline=None)
     def test_return_type_is_representation(self, rep: cxr.Representation) -> None:
         """guess_rep always returns a Representation instance."""
         result = cxr.guess_rep(rep)

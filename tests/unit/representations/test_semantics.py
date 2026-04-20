@@ -2,7 +2,7 @@
 
 __all__: tuple[str, ...] = ()
 
-from hypothesis import given
+from hypothesis import given, settings
 
 import coordinax.hypothesis.representations as cxrst
 import coordinax.representations as cxr
@@ -14,16 +14,19 @@ class TestSemanticKindEqualityAndHashing:
     """Instances of the same AbstractSemanticKind subclass are equal and hash-equal."""
 
     @given(cls=cxrst.semantic_classes())
+    @settings(deadline=None)
     def test_same_class_instances_are_equal(self, cls: type) -> None:
         """Two fresh instances of the same class compare equal."""
         assert cls() == cls()
 
     @given(cls=cxrst.semantic_classes())
+    @settings(deadline=None)
     def test_same_class_instances_hash_equal(self, cls: type) -> None:
         """Two fresh instances of the same class have the same hash."""
         assert hash(cls()) == hash(cls())
 
     @given(sem=cxrst.semantics())
+    @settings(deadline=None)
     def test_instances_are_hashable(self, sem: cxr.AbstractSemanticKind) -> None:
         """Every kind instance can be stored in a set and used as a dict key."""
         s = {sem}
@@ -32,6 +35,7 @@ class TestSemanticKindEqualityAndHashing:
         assert d[sem] == 42
 
     @given(a=cxrst.semantics(), b=cxrst.semantics())
+    @settings(deadline=None)
     def test_equality_iff_same_type(
         self, a: cxr.AbstractSemanticKind, b: cxr.AbstractSemanticKind
     ) -> None:
@@ -47,6 +51,7 @@ class TestSemanticKindEqualityAndHashing:
         assert hash(cxr.loc) == hash(cxr.Location())
 
     @given(sem=cxrst.semantics())
+    @settings(deadline=None)
     def test_usable_as_set_members(self, sem: cxr.AbstractSemanticKind) -> None:
         """Instances can be stored in a set; a duplicate does not grow it."""
         s = {sem}

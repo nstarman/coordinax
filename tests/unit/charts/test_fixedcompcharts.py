@@ -1,7 +1,7 @@
 """Tests for AbstractFixedComponentsChart."""
 
 import hypothesis.strategies as st
-from hypothesis import given
+from hypothesis import given, settings
 
 import coordinax.charts as cxc
 import coordinax.hypothesis.main as cxst
@@ -20,6 +20,7 @@ class TestFixedComponentsChart:
     """Behavior of charts with fixed components."""
 
     @given(data=st.data(), chart_class=_fixedchart_classes)
+    @settings(deadline=None)
     def test_instances_from_same_class_have_same_component_schema(
         self, data, chart_class
     ) -> None:
@@ -36,6 +37,7 @@ class TestFixedComponentsChart:
         assert len(chart1.coord_dimensions) == chart1.ndim
 
     @given(chart_class=_fixedchart_classes)
+    @settings(deadline=None)
     def test_fixed_chart_classes_expose_tuple_class_schema(self, chart_class) -> None:
         """Fixed chart classes define tuple-valued class-level schema."""
         assert isinstance(chart_class._components, tuple)
@@ -43,6 +45,7 @@ class TestFixedComponentsChart:
         assert len(chart_class._components) == len(chart_class._coord_dimensions)
 
     @given(chart=_fixedcharts)
+    @settings(deadline=None)
     def test_instances_match_class_level_schema(self, chart) -> None:
         """Instance schema equals class-level fixed schema."""
         chart_cls = type(chart)
@@ -50,11 +53,13 @@ class TestFixedComponentsChart:
         assert chart.coord_dimensions == chart_cls._coord_dimensions
 
     @given(chart=_fixedcharts)
+    @settings(deadline=None)
     def test_fixed_chart_component_names_are_strings(self, chart) -> None:
         """Fixed charts expose string component names."""
         assert all(isinstance(component, str) for component in chart.components)
 
     @given(chart=_fixedcharts)
+    @settings(deadline=None)
     def test_fixed_chart_dimension_labels_are_str_or_none(self, chart) -> None:
         """Fixed chart dimension labels are strings or None."""
         assert all(

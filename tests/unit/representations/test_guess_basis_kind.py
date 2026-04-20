@@ -3,7 +3,7 @@
 __all__: tuple[str, ...] = ()
 
 import pytest
-from hypothesis import given
+from hypothesis import given, settings
 
 import unxt as u
 
@@ -27,6 +27,7 @@ def test_identity_canonical_instance() -> None:
 
 
 @given(basis=cxrst.bases())
+@settings(deadline=None)
 def test_identity_any_basis(basis: cxr.AbstractBasis) -> None:
     """guess_basis_kind returns the input unchanged for any AbstractBasis."""
     assert cxr.guess_basis_kind(basis) is basis

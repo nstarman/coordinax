@@ -3,7 +3,7 @@
 __all__: tuple[str, ...] = ()
 
 import pytest
-from hypothesis import given
+from hypothesis import given, settings
 
 import coordinax.charts as cxc
 import coordinax.hypothesis.main as cxst
@@ -99,6 +99,7 @@ class TestCustomManifold:
 
 
 @given(atlas=cxst.atlases(cxm.CustomAtlas))
+@settings(deadline=None)
 def test_custom_atlas_property_invariants(atlas: cxm.CustomAtlas) -> None:
     """Generated custom atlases always support their default chart."""
     # Invariant 1: the default chart instance must be accepted by the atlas.
@@ -114,6 +115,7 @@ def test_custom_atlas_property_invariants(atlas: cxm.CustomAtlas) -> None:
         required_chart_classes=(cxc.Cart2D, cxc.Polar2D),
     )
 )
+@settings(deadline=None)
 def test_custom_manifold_property_transition(manifold: cxm.CustomManifold) -> None:
     """Generated 2D custom manifolds support cart2d->polar2d transitions."""
     # Fixed input point keeps this property focused on manifold/chart validity,

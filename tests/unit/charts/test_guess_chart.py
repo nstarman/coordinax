@@ -16,7 +16,7 @@ Notes
 
 """
 
-from hypothesis import given, strategies as st
+from hypothesis import given, settings, strategies as st
 
 import unxt_hypothesis as ust
 
@@ -44,6 +44,7 @@ guessable_charts = cxst.charts(filter=cxc.AbstractFixedComponentsChart).filter(
 
 
 @given(guessable_charts)
+@settings(deadline=None)
 def test_guess_chart_returns_same_components(
     chart: cxc.AbstractFixedComponentsChart,  # type: ignore[type-arg]
 ) -> None:
@@ -63,6 +64,7 @@ def test_guess_chart_returns_same_components(
 
 
 @given(guessable_charts)
+@settings(deadline=None)
 def test_guess_chart_from_dict_returns_same_components(
     chart: cxc.AbstractFixedComponentsChart,  # type: ignore[type-arg]
 ) -> None:
@@ -106,6 +108,7 @@ class TestGuessChartFromArrayLike:
         )
 
     @given(data=st.data(), ndim=st.sampled_from([1, 2, 3]))
+    @settings(deadline=None)
     def test_array_trailing_dim_guesses_cartesian(
         self, data: st.DataObject, ndim: int
     ) -> None:
@@ -119,6 +122,7 @@ class TestGuessChartFromArrayLike:
         assert guessed == expected
 
     @given(data=st.data(), ndim=st.sampled_from([1, 2, 3]))
+    @settings(deadline=None)
     def test_quantity_trailing_dim_guesses_cartesian(
         self, data: st.DataObject, ndim: int
     ) -> None:

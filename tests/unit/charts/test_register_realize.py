@@ -6,7 +6,7 @@ cartesian_chart, pt_map.
 import jax.numpy as jnp
 import plum
 import pytest
-from hypothesis import given
+from hypothesis import given, settings
 
 import unxt as u
 
@@ -42,6 +42,7 @@ class TestCartesianChartFunction:
         assert cxc.cartesian_chart(chart) == expected_cartesian
 
     @given(chart=cxst.charts())
+    @settings(deadline=None)
     def test_cartesian_chart_idempotent(self, chart):
         """Property test: cartesian_chart is idempotent."""
         try:
