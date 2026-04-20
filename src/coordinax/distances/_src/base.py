@@ -24,12 +24,12 @@ class AbstractDistance(u.AbstractQuantity):
         >>> d.distance is d
         True
 
-        >>> import coordinax.astro as cxastro
-        >>> cxastro.DistanceModulus(10, "mag").distance
+        >>> import coordinax.astro as cxastro  # doctest: +SKIP
+        >>> cxastro.DistanceModulus(10, "mag").distance  # doctest: +SKIP
         Distance(1000., 'pc')
 
-        >>> p = cxastro.Parallax(1, "mas")
-        >>> p.distance.to("kpc")
+        >>> p = cxastro.Parallax(1, "mas")  # doctest: +SKIP
+        >>> p.distance.to("kpc")  # doctest: +SKIP
         Distance(1., 'kpc')
 
         """

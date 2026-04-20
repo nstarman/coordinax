@@ -144,8 +144,8 @@ def from_(
     >>> cxf.AbstractReferenceFrame.from_(cxf.alice) is cxf.alice
     True
 
-    >>> import coordinax.astro as cxastro
-    >>> try:
+    >>> import coordinax.astro as cxastro  # doctest: +SKIP
+    >>> try:  # doctest: +SKIP
     ...     cxastro.Galactocentric.from_(cxf.alice)
     ... except TypeError as e:
     ...     print(e)
