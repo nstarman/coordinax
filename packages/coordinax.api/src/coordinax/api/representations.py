@@ -36,6 +36,10 @@ def change_basis(*args: Any, **kwargs: Any) -> Any:
 def tangent_map(*args: Any, **kwargs: Any) -> Any:
     """Compute the tangent map (Jacobian) of a chart transition.
 
+    Pushes a tangent vector ``v`` (attached at base point ``at`` in
+    ``from_chart``) forward to ``to_chart`` via the Jacobian of the chart
+    transition map.
+
     This is an abstract API definition. See the main coordinax package for
     concrete implementations.
 
@@ -44,6 +48,23 @@ def tangent_map(*args: Any, **kwargs: Any) -> Any:
     >>> import jax.numpy as jnp
     >>> import coordinax.charts as cxc
     >>> import coordinax.representations as cxr
+
+    **Same-chart identity** - when ``from_chart`` and ``to_chart`` are the
+    same object the function returns ``v`` unchanged:
+
+    >>> v  = {"x": jnp.array(1.0), "y": jnp.array(2.0), "z": jnp.array(3.0)}
+    >>> at = {"x": jnp.array(1.0), "y": jnp.array(0.0), "z": jnp.array(0.0)}
+    >>> cxr.tangent_map(v, cxc.cart3d, cxr.coord_disp, cxc.cart3d, at=at)
+    {'x': Array(1., dtype=float64, ...), 'y': Array(2., dtype=float64, ...), 'z': Array(3., dtype=float64, ...)}
+
+    **Cartesian → spherical** - pushes a radial tangent vector at
+    ``(x=1, y=0, z=0)`` into spherical coordinate components.  At this base
+    point the only non-zero component is ``dr``:
+
+    >>> v  = {"x": jnp.array(1.0), "y": jnp.array(0.0), "z": jnp.array(0.0)}
+    >>> at = {"x": jnp.array(1.0), "y": jnp.array(0.0), "z": jnp.array(0.0)}
+    >>> cxr.tangent_map(v, cxc.cart3d, cxr.coord_disp, cxc.sph3d, at=at)
+    {'r': Array(1., dtype=float64, ...), 'theta': Array(0., dtype=float64, ...), 'phi': Array(0., dtype=float64, ...)}
 
     """
     raise NotImplementedError  # pragma: no cover
