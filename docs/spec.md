@@ -1870,23 +1870,6 @@ q_f = \tau(q_i) .$$ An important example is the **point geometry**.
     - Unregistered dimension -> `ValueError`.
     - Prolate spheroidal: dimensions not `{area, angle}` -> `ValueError`.
 
-!!! info `PointGeometry` and `point_geom`
-
-    Concrete geometric kind for manifold points, and its canonical instance.
-
-    - `PointGeometry` is the final concrete subclass of `AbstractGeometry` for point-like data.
-    - It encodes that components represent a point $p \in M$ (an affine object), not a vector in a tangent/cotangent space.
-    - Point coordinates therefore transform by the ordinary chart transition map (`pt_map` / `pt_map` point behavior), with the represented geometric object unchanged.
-
-    Affine semantics:
-
-    - Point data is location data: points do not add as vectors.
-    - Any vector-space operations require a separate geometric kind (for example tangent/cotangent kinds), not `PointGeometry`.
-
-    API instance:
-
-    - `point_geom` is the pre-defined canonical `PointGeometry()` instance used by the default point representation `point = Representation(point_geom, no_basis, loc)`.
-
 </br>
 
 ### Basis
