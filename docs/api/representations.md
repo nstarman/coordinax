@@ -40,8 +40,11 @@ This is separate from charts and manifolds:
 {'r': Array(3.74165739, dtype=float64, ...),
  'theta': Array(0.64052231, dtype=float64),
  'phi': Array(1.10714872, dtype=float64, ...)}
+```
 
-# Change tangent components between basis conventions in the same chart.
+For tangent data attached to a base point, `change_basis` changes only the basis convention in the current chart.
+
+```pycon
 >>> v = {"r": u.Q(1.0, "km/s"), "theta": u.Q(0.0, "rad/s"), "phi": u.Q(0.0, "rad/s")}
 >>> at = {"r": u.Q(2.0, "km"), "theta": u.Q(3.0, "rad"), "phi": u.Q(4.0, "rad")}
 >>> v2 = cxr.change_basis(v, cxc.sph3d, cxr.coord_basis, cxr.phys_basis, at=at)
@@ -49,17 +52,13 @@ This is separate from charts and manifolds:
 {'r': Q(1., 'km / s'), 'theta': Q(0., 'km / s'), 'phi': Q(0., 'km / s')}
 ```
 
-## Functional API
+Use `tangent_map` to move tangent components between charts. It applies the chart Jacobian at the source base point, supplied with `at=...`:
 
-- `cconvert`: representation-aware coordinate conversion API
-- `change_basis`: same-chart tangent basis conversion API
-- `cmap`: partial-function builder around `cconvert`
-- `guess_basis_kind`: infer basis kind from dimensions/data
-- `guess_geometry_kind`: infer geometric kind from dimensions/data
-- `guess_rep`: infer full representation from dimensions/data
-- `guess_semantic_kind`: infer semantic kind from dimensions/data
-
-For point data, `cconvert` dispatches through chart-level point conversion laws.
+```pycon
+>>> v_cart = cxr.tangent_map(v, cxc.sph3d, cxr.coord_disp, cxc.cart3d, at=at)
+>>> v_cart
+{'x': Q(-0.09224219, 'km / s'), 'y': Q(-0.10679997, 'km / s'), 'z': Q(-0.9899925, 'km / s')}
+```
 
 ## Available Objects
 
@@ -67,6 +66,7 @@ For point data, `cconvert` dispatches through chart-level point conversion laws.
 
 - `cconvert`: convert data across charts/representations
 - `change_basis`: change tangent basis without changing chart
+- `tangent_map`: move tangent components between charts using the Jacobian
 - `cmap`: build reusable conversion callables
 - `guess_basis_kind`: infer a basis kind
 - `guess_geometry_kind`: infer a geometry kind
