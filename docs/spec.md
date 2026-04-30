@@ -403,6 +403,8 @@ $$
 \left\{ \frac{\partial}{\partial q^1}, \dots, \frac{\partial}{\partial q^n} \right\}_p.
 $$
 
+This set is called the **coordinate basis** (also the **holonomic basis**) induced by the chart. It is not unique: different charts yield different bases, and different parameterizations of the same chart yield yet others. All coordinate bases are related by linear transformations — the Jacobian of the transition map between charts; see [Jacobian of the Transition Map](#math-spec-transition-maps-jacobian).
+
 Geometrically, $\partial/\partial q^i|_p$ is the velocity of a coordinate curve $\gamma_i(t)$ obtained by varying only the $i$-th coordinate while holding the others fixed:
 
 $$
@@ -418,6 +420,8 @@ Any tangent vector at $p$ can therefore be expanded as
 $$
 v = v^i \frac{\partial}{\partial q^i}\bigg|_p.
 $$
+
+Because $q^i$ carries physical units of $[q^i]$, the components satisfy $[v^i] = [v]/[q^i]$, so components in different coordinate directions are generally not directly comparable. (In Cartesian coordinates all $[q^i]$ are the same length unit, so this issue does not arise.)
 
 Importantly, while we have defined these tangent vectors we do not yet have a way to define a relationship between the components $v^i$, such as whether they are orthogonal. To give geometric meaning to tangent directions, we must add extra structure to the manifold.
 
@@ -522,10 +526,10 @@ Equivalently, the coordinate basis vectors $\partial/\partial q^i|_p$ are **mutu
 **Scale factors.** For a diagonal metric, the diagonal entries $g_{ii}(p)$ are the _squared scale factors_:
 
 $$
-h_i(p)^2 = g_{ii}(p).
+h_i(p)^2 = g_{ii}(p), \qquad h_i(p) = \left\|\frac{\partial}{\partial q^i}\right\|_g = \sqrt{g_{ii}(p)}.
 $$
 
-The scale factors $h_i$ measure how a unit coordinate increment $dq^i$ stretches into actual arc length. The infinitesimal line element simplifies to
+That is, $h_i(p)$ is exactly the metric length of the $i$-th coordinate basis vector at $p$. The scale factors $h_i$ measure how a unit coordinate increment $dq^i$ stretches into actual arc length. The infinitesimal line element simplifies to
 
 $$
 ds^2 = \sum_i g_{ii}(q)\,(dq^i)^2 = \sum_i h_i(q)^2\,(dq^i)^2.
@@ -611,7 +615,13 @@ For a diagonal metric $g = \operatorname{diag}(h_1^2, \ldots, h_n^2)$, the Chole
     = \begin{pmatrix} 2v^1 + v^2 \\ \sqrt{2}\, v^2 \end{pmatrix}.
     $$
 
-**Basis changes under chart transitions.** When transforming coordinates under a chart transition $\tau : q \to \tilde{q}$ with Jacobian $J^j{}_i$, coordinate components transform as $\tilde{v}^j = J^j{}_i v^i$. The effect on orthonormal-frame components combines the Jacobian with the vielbeins at each chart:
+**Basis changes under chart transitions.** When transforming coordinates under a chart transition $\tau : q \to \tilde{q}$ with Jacobian $J^j{}_i$, coordinate components transform as
+
+$$
+\tilde{v}^j = J^j{}_i\, v^i.
+$$
+
+This is the **pushforward** (or differential) $d\tau_p : T_p M \to T_p M$ applied to $v$. The effect on orthonormal-frame components combines the Jacobian with the vielbeins at each chart:
 
 $$
 \mathbf{v}'_{\rm frame} = \tilde{E}\,J\,E^{-1}\,\mathbf{v}_{\rm frame} \equiv R\,\mathbf{v}_{\rm frame},
