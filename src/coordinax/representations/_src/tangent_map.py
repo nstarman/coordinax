@@ -20,8 +20,7 @@ from coordinax.internal import QuantityMatrix, pack_nonuniform_unit
 from coordinax.internal.custom_types import CDict, OptUSys
 
 # ---------------------------------------------------------------------------
-# Validation helpers
-# ---------------------------------------------------------------------------
+# Helpers
 
 
 def _check_tangent_geom(geom: object, label: str) -> None:
@@ -37,11 +36,6 @@ def _check_linear_basis(rep: Representation, label: str) -> None:
             "tangent_map requires CoordinateBasis or PhysicalBasis for "
             f"{label}, got {rep.basis!r}"
         )
-
-
-# ---------------------------------------------------------------------------
-# Shared helper: apply a QuantityMatrix Jacobian to a tangent vector CDict
-# ---------------------------------------------------------------------------
 
 
 def _apply_jac(
