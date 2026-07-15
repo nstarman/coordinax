@@ -59,6 +59,7 @@ import coordinax.charts as cxc
 import coordinax.representations as cxr
 from .base import AbstractTransform, is_time_dependent
 from .custom_types import CDict, OptUSys
+from coordinax.internal import tree_cast_int_bool_to_float
 
 JetDict: TypeAlias = dict[int, CDict]
 """A jet of curve data: ``{0: q, 1: v, 2: a, ...}``.
@@ -134,6 +135,19 @@ def _tau_value_unit(tau: Any, /) -> tuple[Any, Any]:
     return tau_val, tau_unit
 
 
+def _jvp(fn: Callable[..., Any], primals: Any, tangents: Any, /) -> Any:
+    """`jax.jvp` with primal/tangent leaves promoted to inexact dtypes.
+
+    `jax.jvp` requires inexact (float/complex) primals *and* tangents; integer
+    or boolean leaves — common for integer `unxt.Quantity` inputs — otherwise
+    raise "primal and tangent arguments to jax.jvp do not match". Centralizing
+    the cast here keeps every jvp boundary in this module consistent.
+    """
+    primals = tree_cast_int_bool_to_float(primals)
+    tangents = tree_cast_int_bool_to_float(tangents)
+    return jax.jvp(fn, primals, tangents)
+
+
 # =============================================================================
 # tau_derivative: unit-aware d^n/dtau^n of a callable parameter
 
@@ -200,13 +214,14 @@ def tau_derivative(f: Callable[[Any], Any], tau: Any, /, *, n: int = 1) -> Any:
     def g(tv: Any, /) -> list[Any]:
         t = _attach_leaf(tau_unit, tv)
         leaves, _ = jtu.flatten(f(t), is_leaf=is_any_quantity)
-        return [_strip_leaf(un, leaf) for un, leaf in zip(units, leaves, strict=True)]
+        vals = [_strip_leaf(un, leaf) for un, leaf in zip(units, leaves, strict=True)]
+        return tree_cast_int_bool_to_float(vals)
 
     gn = g
     for _ in range(n):
 
         def gnext(tv: Any, /, *, _prev: Callable[[Any], list[Any]] = gn) -> list[Any]:
-            return jax.jvp(_prev, (tv,), (jax_np.ones_like(tv),))[1]
+            return _jvp(_prev, (tv,), (jax_np.ones_like(tv),))[1]
 
         gn = gnext
 
@@ -272,7 +287,7 @@ def pushforward_generic(
     v_vals = {k: _strip_leaf(_per_time(in_units[k], time_unit, order), v[k]) for k in v}
     at_vals = _strip_cdict(at, in_units)
 
-    _, dy = jax.jvp(f, (at_vals,), (v_vals,))
+    _, dy = _jvp(f, (at_vals,), (v_vals,))
     return _attach_cdict(
         dy, {k: _per_time(un, time_unit, order) for k, un in out_units.items()}
     )
@@ -497,7 +512,7 @@ def _total_derivative_chain(
             *a: Any, _prev: Callable[..., tuple[dict[str, Any], ...]] = chain
         ) -> tuple[dict[str, Any], ...]:
             primals, tangents = a[:-1], (jax_np.ones_like(a[0]), *a[2:])
-            p, t = jax.jvp(_prev, primals, tangents)
+            p, t = _jvp(_prev, primals, tangents)
             # p holds (y0..y_{m-1}); the last tangent is d/dtau y_{m-1} = y_m.
             return (*p, t[-1])
 
