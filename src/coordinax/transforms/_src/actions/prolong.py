@@ -90,6 +90,7 @@ _MSG_AT_VEL_REQUIRED = (
 _MSG_JET_SLOT_MISSING = (
     "prolong({op}, ...) requires all jet slots 1..{m}; slot {k} is missing."
 )
+_MSG_JET_SLOT0_MISSING = "prolong requires the base point at jet slot 0."
 
 
 # =============================================================================
@@ -148,6 +149,19 @@ def _jvp(fn: Callable[..., Any], primals: Any, tangents: Any, /) -> Any:
     return jax.jvp(fn, primals, tangents)
 
 
+def _eval_shape_or_call(f: Callable[..., Any], /, *args: Any) -> Any:
+    """Discover output structure/units via `jax.eval_shape`, else a real call.
+
+    Only `TypeError` (not abstractly traceable, e.g. concretization inside
+    the callable) triggers the real-call fallback; other errors (units,
+    shapes) propagate so genuine bugs are not masked.
+    """
+    try:
+        return jax.eval_shape(f, *args)
+    except TypeError:
+        return f(*args)
+
+
 # =============================================================================
 # tau_derivative: unit-aware d^n/dtau^n of a callable parameter
 
@@ -202,12 +216,7 @@ def tau_derivative(f: Callable[[Any], Any], tau: Any, /, *, n: int = 1) -> Any:
 
     # Discover the output structure and per-leaf units without a full
     # evaluation where possible (eval_shape preserves static unit metadata).
-    try:
-        y0 = jax.eval_shape(f, tau)
-    except TypeError:
-        # Not abstractly traceable (e.g. concretization inside f): fall back
-        # to a real call. Other errors (units, shapes) propagate.
-        y0 = f(tau)
+    y0 = _eval_shape_or_call(f, tau)
     leaves0, treedef = jtu.flatten(y0, is_leaf=is_any_quantity)
     units = [u.unit_of(leaf) for leaf in leaves0]
 
@@ -308,15 +317,9 @@ def _point_act_units(
     them without evaluating the action; a real evaluation is the fallback for
     non-traceable actions.
     """
-    try:
-        y0 = jax.eval_shape(
-            lambda q: cxfmapi.act(op, tau, q, chart, cxr.point, usys=usys), q0
-        )
-    except TypeError:
-        # Not abstractly traceable (e.g. concretization inside the point
-        # action): fall back to a real call. Other errors (units, shapes)
-        # propagate.
-        y0 = cxfmapi.act(op, tau, q0, chart, cxr.point, usys=usys)
+    y0 = _eval_shape_or_call(
+        lambda q: cxfmapi.act(op, tau, q, chart, cxr.point, usys=usys), q0
+    )
     return _cdict_units(cast("CDict", y0))
 
 
@@ -426,8 +429,7 @@ def prolong_jet(
 
     """
     if 0 not in jet:
-        msg = "prolong requires the base point at jet slot 0."
-        raise TypeError(msg)
+        raise TypeError(_MSG_JET_SLOT0_MISSING)
     q0 = jet[0]
     max_order = max(jet)
     for m in range(1, max_order + 1):

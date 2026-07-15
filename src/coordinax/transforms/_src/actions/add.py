@@ -2,6 +2,7 @@
 
 __all__ = ("AbstractAdd",)
 
+import functools as ft
 from dataclasses import KW_ONLY, replace
 
 from collections.abc import Callable
@@ -18,13 +19,15 @@ import unxt as u
 from dataclassish import field_items
 from unxt.quantity import AllowValue, is_any_quantity
 
+import coordinax.api.transforms as cxfmapi
 import coordinax.charts as cxc
 import coordinax.representations as cxr
 from .base import AbstractTransform
 from .composed import Composed
 from .custom_types import CDict
 from .identity import Identity, identity
-from .utils import Neg, is_flat_chart
+from .prolong import _MSG_JET_SLOT0_MISSING, prolong_jet, pushforward_generic
+from .utils import Neg, is_componentwise_offset
 from coordinax.internal import jax_scalar_handler, pos_named_objs
 
 
@@ -210,8 +213,9 @@ def from_(cls: type[AbstractAdd], x: ArrayLike, unit: str) -> AbstractAdd:
 # prolong
 
 
+@ft.cache
 def _slot_rep(m: int, /) -> Any:
-    """Return the coordinate-basis representation for jet slot ``m``."""
+    """Return the coordinate-basis representation for jet slot ``m`` (cached)."""
     if m == 0:
         return cxr.point
     kind: cxr.AbstractTangentSemanticKind = cxr.vel
@@ -258,16 +262,15 @@ def prolong(
     (Q(1., 'm'), Q(101., 'm / s'))
 
     """
-    import coordinax.api.transforms as cxfmapi  # noqa: PLC0415 - avoid cycle
-    from .prolong import prolong_jet  # noqa: PLC0415 - avoid cycle
-
-    k = getattr(op, "semantic_kind", cxr.dpl).order
-    if k != 0 or (chart == op.chart and is_flat_chart(chart)):
-        # The jet always supplies the base point, so fibre kicks (k >= 1)
-        # work even cross-chart: `act` pushes the offset through the chart
-        # Jacobian at jet[0] when the charts differ.
-        # The base point anchors the tangent slots only: slot 0 IS the point,
-        # so it gets no 'at' (a strict point dispatch need not accept one).
+    if is_componentwise_offset(op, chart):
+        # The jet supplies the base point, so fibre kicks (k >= 1) work even
+        # cross-chart: `act` pushes the offset through the chart Jacobian at
+        # jet[0] when needed. The anchor is only passed for tangent slots:
+        # slot 0 IS the point, so a strict point dispatch need not accept it.
+        # Any tangent slot indexes jet[0], so require it explicitly here — a
+        # bare KeyError would otherwise mask the same guard prolong_jet gives.
+        if 0 not in jet and any(m != 0 for m in jet):
+            raise TypeError(_MSG_JET_SLOT0_MISSING)
         return {
             m: cxfmapi.act(
                 op,
@@ -282,10 +285,7 @@ def prolong(
         }
 
     # A point-active offset (ladder order 0) outside the flat matching case
-    # is fully captured by the point action — whether the jet is in a
-    # different chart or the offset lives in a non-Cartesian chart (where the
-    # point action is base-point dependent and the slot-wise ladder rule does
-    # not apply) — so use the generic prolongation.
+    # is fully captured by the point action — use the generic prolongation.
     return prolong_jet(op, tau, jet, chart, usys=usys)
 
 
@@ -331,10 +331,7 @@ def pushforward(
     # A k=0 offset is a flat translation only when delta and the data live
     # in the same Cartesian-type chart; otherwise the differential is
     # base-point dependent. Defer to the generic engine.
-    k = getattr(op, "semantic_kind", cxr.dpl).order
-    if k == 0 and not (chart == op.chart and is_flat_chart(chart)):
-        from .prolong import pushforward_generic  # noqa: PLC0415 - avoid cycle
-
+    if not is_componentwise_offset(op, chart):
         return pushforward_generic(op, tau, v, chart, rep, at=at, usys=usys)
 
     del op, tau, chart, rep, at, usys
