@@ -28,6 +28,7 @@ import coordinax.representations as cxr
 from .base import AbstractTransform, materialize_transform
 from .custom_types import CDict, HasShape, OptUSys
 from .identity import identity
+from .prolong import _attach_leaf, _strip_leaf, prolong_slot
 from .utils import Neg
 from coordinax.internal import pack_uniform_unit
 from coordinax.transforms._src import groups
@@ -430,6 +431,18 @@ def from_(cls: type[Rotate], obj: jtransform.Rotation, /) -> Rotate:
     return cls(obj.as_matrix())
 
 
+_MSG_TAU_REQUIRED_R = (
+    "act/pushforward(Rotate, ...) with a time-dependent (callable) rotation "
+    "matrix requires a time parameter; got tau=None."
+)
+
+
+def _check_tau(op: "Rotate", tau: Any, /) -> None:
+    """Raise an informative TypeError before materializing a callable R."""
+    if tau is None and callable(op.R):
+        raise TypeError(_MSG_TAU_REQUIRED_R)
+
+
 # ============================================================================
 # Simplification
 
@@ -500,6 +513,7 @@ def act(
         raise TypeError(msg)
 
     # Process rotation
+    _check_tau(op, tau)
     op_eval = materialize_transform(op, tau)
     R = op_eval._get_R(chart)
 
@@ -537,6 +551,7 @@ def act(
         raise ValueError(msg)
 
     # Rotation matrix
+    _check_tau(op, tau)
     op_eval = materialize_transform(op, tau)
     R = op_eval._get_R(chart)
     return jnp.einsum("ij,...j->...i", R, x)  # ty: ignore[invalid-return-type]
@@ -597,6 +612,7 @@ def act(
     # print("CART", cart.__class__, chart.__class__)
     comps_cart = cart.components
 
+    _check_tau(op, tau)
     op_eval = materialize_transform(op, tau)
     R = op_eval._get_R(cart)
 
@@ -615,21 +631,18 @@ def act(
     return cast("CDict", out)
 
 
-@plum.dispatch
-def act(
-    op: Rotate,
+def _rotate_pushforward_cdict(
+    op: "Rotate",
     tau: Any,
     x: CDict,
     chart: cxc.AbstractChart,
-    geom: cxr.TangentGeometry,
     rep: cxr.Representation,
     /,
     *,
     at: CDict | None = None,
     usys: OptUSys = None,
-    **kw: Any,
 ) -> CDict:
-    """Apply a spatial rotation to a TangentGeometry coordinate dictionary.
+    """Frozen-tau Jacobian pushforward of tangent data under a rotation.
 
     Rotation acts on tangent vectors via the Jacobian pushforward, not as a
     direct coordinate substitution.  The algorithm is:
@@ -672,9 +685,8 @@ def act(
     1.0
 
     """
-    del geom, kw
-
     cart = chart.cartesian
+    _check_tau(op, tau)
     op_eval = materialize_transform(op, tau)
     R = op_eval._get_R(cart)
 
@@ -711,6 +723,134 @@ def act(
     return cxr.tangent_map(p_cart_rot, cart, rep, chart, at=at_cart_rot, usys=usys)  # ty: ignore[missing-argument]
 
 
+@plum.dispatch
+def pushforward(
+    op: Rotate,
+    tau: Any,
+    v: CDict,
+    chart: cxc.AbstractChart,
+    rep: cxr.Representation,
+    /,
+    *,
+    at: CDict | None = None,
+    usys: OptUSys = None,
+) -> CDict:
+    r"""Frozen-$\tau$ pushforward of tangent data under a rotation: $R(\tau) v$.
+
+    >>> import unxt as u
+    >>> import coordinax.charts as cxc
+    >>> import coordinax.representations as cxr
+    >>> import coordinax.transforms as cxfm
+
+    >>> op = cxfm.Rotate.from_euler("z", u.Q(90, "deg"))
+    >>> v = {"x": u.Q(1.0, "m/s"), "y": u.Q(0.0, "m/s"), "z": u.Q(0.0, "m/s")}
+    >>> out = cxfm.pushforward(op, None, v, cxc.cart3d, cxr.coord_vel)
+    >>> out["y"].round(3)
+    Q(1., 'm / s')
+
+    """
+    return _rotate_pushforward_cdict(op, tau, v, chart, rep, at=at, usys=usys)
+
+
+@plum.dispatch
+def act(
+    op: Rotate,
+    tau: Any,
+    x: CDict,
+    chart: cxc.AbstractChart,
+    geom: cxr.TangentGeometry,
+    rep: cxr.Representation,
+    /,
+    *,
+    at: CDict | None = None,
+    at_vel: CDict | None = None,
+    usys: OptUSys = None,
+    **kw: Any,
+) -> CDict:
+    r"""Apply a rotation to tangent data (kinematic prolongation).
+
+    - Displacement data and any data under a time-independent rotation
+      transform by the frozen-$\tau$ pushforward $v \mapsto R(\tau) v$.
+    - Under a time-dependent rotation $R(\tau)$, velocities gain the
+      $\dot R$ term of the prolongation, $v' = R v + \dot R x$, which
+      requires the base point ``at``; accelerations gain
+      $a' = R a + 2 \dot R v + \ddot R x$, requiring ``at`` and ``at_vel``.
+
+    Examples
+    --------
+    >>> import quaxed.numpy as jnp
+    >>> import unxt as u
+    >>> import coordinax.charts as cxc
+    >>> import coordinax.representations as cxr
+    >>> import coordinax.transforms as cxfm
+    >>> from jaxtyping import Array, Real
+
+    A uniformly rotating frame (angular speed 1 rad/s about z):
+
+    >>> def R_func(t) -> Real[Array, "3 3"]:
+    ...     th = t.ustrip("s")
+    ...     st, ct = jnp.sin(th), jnp.cos(th)
+    ...     return jnp.array([[ct, -st, 0.0], [st, ct, 0.0], [0.0, 0.0, 1.0]])
+    >>> op = cxfm.Rotate.from_(R_func)
+
+    At tau=0 the rotation is the identity but the velocity still gains the
+    $\dot R x$ (angular) term:
+
+    >>> at = {"x": u.Q(1.0, "m"), "y": u.Q(0.0, "m"), "z": u.Q(0.0, "m")}
+    >>> v = {"x": u.Q(0.0, "m/s"), "y": u.Q(0.0, "m/s"), "z": u.Q(0.0, "m/s")}
+    >>> out = cxfm.act(op, u.Q(0.0, "s"), v, cxc.cart3d, cxr.tangent_geom,
+    ...                cxr.coord_vel, at=at)
+    >>> out["y"].round(3)
+    Q(1., 'm / s')
+
+    """
+    del geom, kw
+
+    m = rep.semantic_kind.order
+    # Displacements and time-independent rotations: pure pushforward.
+    if m == 0 or not callable(op.R):
+        return _rotate_pushforward_cdict(op, tau, x, chart, rep, at=at, usys=usys)
+
+    cart = chart.cartesian
+    if m == 1 and chart == cart and tau is not None and at is not None:
+        # Closed form in Cartesian components: v' = R v + dR/dtau x.
+        # One jvp evaluates R(tau) and dR/dtau together.
+        tau_unit = u.unit_of(tau)
+        tau_val = u.ustrip(tau_unit, tau) if tau_unit is not None else jnp.asarray(tau)
+        R_fn = op.R
+        R, Rdot = jax.jvp(
+            lambda tv: R_fn(u.Q(tv, tau_unit) if tau_unit is not None else tv),  # ty: ignore[call-top-callable]
+            (tau_val,),
+            (jax.numpy.ones_like(tau_val),),
+        )
+        R = op._validate_shape_match(op._validate_square(R), cart)
+        comps = cart.components
+        v_arr, v_unit = pack_uniform_unit(x, keys=comps)
+        at_arr, at_unit = pack_uniform_unit(at, keys=comps)
+        # None units mean "stay raw" throughout, mirroring the generic
+        # engine's _attach_leaf/_strip_leaf policy for unitless data.
+        Rv = _attach_leaf(v_unit, jnp.einsum("ij,...j->...i", R, v_arr))
+        # dR/dtau is per tau's unit; for a raw (unitless) tau with unitful
+        # data, interpret it in the data's own time base T = at_unit/v_unit
+        # (the same policy as the generic engine's _common_time_unit), so
+        # Rdot@at carries at_unit/T = v_unit and the sum is consistent.
+        if tau_unit is not None:
+            rdot_unit = at_unit / tau_unit if at_unit is not None else None
+        elif at_unit is not None and v_unit is not None:
+            rdot_unit = v_unit
+        else:
+            rdot_unit = at_unit
+        Rdot_at = _attach_leaf(rdot_unit, jnp.einsum("ij,...j->...i", Rdot, at_arr))
+        out_arr = _strip_leaf(v_unit, Rv + Rdot_at)
+        if v_unit is None:
+            return {k: out_arr[..., i] for i, k in enumerate(comps)}
+        return cast("CDict", cxc.cdict(out_arr, v_unit, comps))
+
+    # General case (acceleration, or non-Cartesian chart): generic prolongation
+    # (which also owns the missing-tau / missing-anchor errors).
+    return prolong_slot(op, tau, x, chart, m, at=at, at_vel=at_vel, usys=usys)
+
+
 # -----------------------------------------------
 # On CDict with Cartesian-product charts
 
@@ -744,6 +884,7 @@ def act(
       base-point.
 
     """
+    _check_tau(op, tau)
     op_eval = materialize_transform(op, tau)
     n = op_eval._validate_square(op_eval.R).shape[-1]
 

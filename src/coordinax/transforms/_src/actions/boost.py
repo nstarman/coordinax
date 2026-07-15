@@ -1,58 +1,94 @@
-"""Boost (velocity-offset) operator."""
+"""Boost (Galilean boost) operator."""
 
 __all__ = ("Boost",)
 
-from typing import Any, cast, final
+from typing import TYPE_CHECKING, Any, cast, final
 
 import jax.tree as jtu
 import plum
 
 import quaxed.numpy as jnp
 import unxt as u
+from unxt.quantity import is_any_quantity
 
+import coordinax.api.transforms as cxfmapi
 import coordinax.charts as cxc
 import coordinax.representations as cxr
 from .add import AbstractAdd
-from .base import materialize_transform
 from .custom_types import CDict, OptUSys
-from coordinax.transforms._src.groups import DiffeomorphismGroup
+from .utils import is_flat_chart
+from coordinax.transforms._src.groups import AffineGroup, DiffeomorphismGroup
+
+if TYPE_CHECKING:
+    from .translate import Translate
+
+_MSG_TAU_REQUIRED_POINT = (
+    "act(Boost, ...) on point data requires a time parameter: the Galilean "
+    "boost moves points by delta_v * tau. Got tau=None."
+)
+_MSG_TAU_REQUIRED_TANGENT = (
+    "act(Boost, ...) with a time-dependent delta on order-{m} tangent data "
+    "requires a time parameter; got tau=None."
+)
 
 
 @final
 class Boost(AbstractAdd):
-    r"""Operator for boosting velocities (Galilean velocity offset).
+    r"""Operator for Galilean boosts.
 
-    A Boost operator adds a constant velocity offset :math:`\Delta v` to the
-    velocity components of a phase-space point.  It acts trivially on position
-    (point) data, displacement data, and acceleration data.
+    A Galilean boost is the change to a frame moving at constant velocity
+    $\Delta v$ (see the inhomogeneous Galilean group):
 
-    Formally, in a Cartesian chart:
-    :math:`B_{\Delta v}:\; \dot{x} \mapsto \dot{x} + \Delta v`.
+    $$ B_{\Delta v}:\; (\tau, x) \mapsto (\tau,\, x + \Delta v\, \tau). $$
+
+    Its kinematic prolongation follows: points move by $\Delta v\,\tau$,
+    velocities shift by $\Delta v$, and accelerations are unchanged (for a
+    constant $\Delta v$). Displacements (same-$\tau$ point differences) are
+    invariant.
+
+    Equivalently, ``Boost(dv)`` is the time-dependent translation
+    ``Translate(delta=lambda tau: dv * tau)`` — the closed forms here are the
+    prolongation of exactly that point action.
+
+    Contrast with ``Translate(semantic_kind=vel)``: that operator is a pure
+    velocity *kick* (an impulse) that shifts only the velocity fibre and does
+    not move points.
 
     Parameters
     ----------
     delta : CDict | Callable[[tau], CDict]
-        The velocity offset to apply.
-        If callable, will be evaluated at the time parameter ``tau``.
+        The boost velocity. If callable, it is evaluated at the time
+        parameter ``tau`` and the prolongation gains the corresponding
+        derivative terms.
 
     Examples
     --------
-    >>> import jax.numpy as jnp
+    >>> import unxt as u
     >>> import coordinax.charts as cxc
     >>> import coordinax.representations as cxr
     >>> import coordinax.transforms as cxfm
 
     Create a boost operator:
 
-    >>> delta_v = {"x": jnp.array(1.0), "y": jnp.array(0.0), "z": jnp.array(0.0)}
-    >>> boost = cxfm.Boost(delta_v, chart=cxc.cart3d)
-    >>> boost
-    Boost({'x': 1.0, 'y': 0.0, 'z': 0.0}, chart=Cart3D(M=Rn(3)))
+    >>> dv = {"x": u.Q(1.0, "km/s"), "y": u.Q(0.0, "km/s"), "z": u.Q(0.0, "km/s")}
+    >>> boost = cxfm.Boost(dv, chart=cxc.cart3d)
 
-    The inverse negates the velocity offset:
+    The boost moves points by ``dv * tau``:
 
-    >>> boost.inverse
-    Boost({'x': -1.0, 'y': -0.0, 'z': -0.0}, chart=Cart3D(M=Rn(3)))
+    >>> p = {"x": u.Q(0.0, "km"), "y": u.Q(2.0, "km"), "z": u.Q(0.0, "km")}
+    >>> cxfm.act(boost, u.Q(3.0, "s"), p, cxc.cart3d, cxr.point)
+    {'x': Q(3., 'km'), 'y': Q(2., 'km'), 'z': Q(0., 'km')}
+
+    and shifts velocities by ``dv``:
+
+    >>> v = {"x": u.Q(2.0, "km/s"), "y": u.Q(0.0, "km/s"), "z": u.Q(0.0, "km/s")}
+    >>> cxfm.act(boost, u.Q(3.0, "s"), v, cxc.cart3d, cxr.coord_vel)
+    {'x': Q(3., 'km / s'), 'y': Q(0., 'km / s'), 'z': Q(0., 'km / s')}
+
+    The inverse negates the boost velocity:
+
+    >>> boost.inverse.delta["x"]
+    Q(-1., 'km / s')
 
     """
 
@@ -61,7 +97,25 @@ class Boost(AbstractAdd):
     def groups(cls) -> frozenset[type]:
         """Return the groups to which this map belongs."""
         del cls
-        return frozenset((DiffeomorphismGroup,))
+        return frozenset((AffineGroup, DiffeomorphismGroup))
+
+
+def _boost_displacement(op: Boost, /) -> Any:
+    r"""Return the boost's displacement function $g(\tau) = \Delta v(\tau)\tau$."""
+    delta = op.delta
+
+    def g(tau: Any, /) -> CDict:
+        dv = delta(tau) if callable(delta) else delta  # ty: ignore[call-top-callable]
+        return jtu.map(lambda c: c * tau, dv, is_leaf=is_any_quantity)
+
+    return g
+
+
+def _as_translate(op: Boost, /) -> "Translate":
+    """Return the equivalent displacement Translate: delta = dv(tau) * tau."""
+    from .translate import Translate  # noqa: PLC0415 - avoid module cycle
+
+    return Translate(_boost_displacement(op), chart=op.chart, right_add=op.right_add)
 
 
 # ============================================================================
@@ -79,56 +133,82 @@ def act(
     usys: OptUSys = None,
     **kw: Any,
 ) -> CDict:
-    """Apply Boost to a component dictionary.
+    r"""Apply a Galilean boost to a component dictionary.
 
-    A Boost only affects velocity vectors; it is the identity for points,
-    displacements, and accelerations.
+    The point action is $x \mapsto x + \Delta v\,\tau$; tangent data of
+    ladder order $m$ gains $d^m(\Delta v\,\tau)/d\tau^m$ (so $\Delta v$ for
+    velocities and, for constant $\Delta v$, nothing for accelerations).
+    Displacements are invariant.
 
     Examples
     --------
-    >>> import jax.numpy as jnp
+    >>> import unxt as u
     >>> import coordinax.charts as cxc
     >>> import coordinax.representations as cxr
     >>> import coordinax.transforms as cxfm
 
-    Boost acts on velocity (shifts components):
+    >>> dv = {"x": u.Q(1.0, "km/s"), "y": u.Q(0.0, "km/s"), "z": u.Q(0.0, "km/s")}
+    >>> boost = cxfm.Boost(dv, chart=cxc.cart3d)
 
-    >>> boost = cxfm.Boost(
-    ...     {"x": jnp.array(1.0), "y": jnp.array(0.0), "z": jnp.array(0.0)},
-    ...     chart=cxc.cart3d,
-    ... )
-    >>> v = {"x": jnp.array(2.0), "y": jnp.array(3.0), "z": jnp.array(0.0)}
-    >>> cxfm.act(boost, None, v, cxc.cart3d, cxr.coord_vel)
-    {'x': Array(3., dtype=float64, ...), 'y': Array(3., dtype=float64, ...),
-     'z': Array(0., dtype=float64, ...)}
+    Boost shifts velocity components:
 
-    Boost is identity for positions:
+    >>> v = {"x": u.Q(2.0, "km/s"), "y": u.Q(3.0, "km/s"), "z": u.Q(0.0, "km/s")}
+    >>> cxfm.act(boost, u.Q(0.0, "s"), v, cxc.cart3d, cxr.coord_vel)
+    {'x': Q(3., 'km / s'), 'y': Q(3., 'km / s'), 'z': Q(0., 'km / s')}
 
-    >>> p = {"x": jnp.array(1.0), "y": jnp.array(2.0), "z": jnp.array(3.0)}
-    >>> cxfm.act(boost, None, p, cxc.cart3d, cxr.point)
-    {'x': Array(1., dtype=float64, ...), 'y': Array(2., dtype=float64, ...),
-     'z': Array(3., dtype=float64, ...)}
+    A static boost leaves accelerations unchanged:
+
+    >>> a = {"x": u.Q(1.0, "km/s2"), "y": u.Q(0.0, "km/s2"), "z": u.Q(0.0, "km/s2")}
+    >>> cxfm.act(boost, u.Q(0.0, "s"), a, cxc.cart3d, cxr.coord_acc)
+    {'x': Q(1., 'km / s2'), 'y': Q(0., 'km / s2'), 'z': Q(0., 'km / s2')}
 
     """
-    del kw, usys
+    # --- Point input: x + dv * tau, via the Translate ladder machinery.
+    if rep == cxr.point:
+        if tau is None:
+            raise TypeError(_MSG_TAU_REQUIRED_POINT)
+        return cast(
+            "CDict",
+            cxfmapi.act(_as_translate(op), tau, x, chart, rep, usys=usys, **kw),
+        )
 
-    op_eval = materialize_transform(op, tau)
+    # The closed forms below hold only when dv and the data live in the same
+    # Cartesian-type (flat) chart, where the boost's point action is a flat
+    # translation at each tau. Otherwise the action is base-point dependent
+    # in the data's coordinates — delegate everything (including
+    # displacements) to the equivalent displacement Translate, whose generic
+    # fallback handles the anchors (at=, at_vel=) and raises informative
+    # errors when they are missing.
+    if not (chart == op.chart and is_flat_chart(chart)):
+        return cast(
+            "CDict",
+            cxfmapi.act(_as_translate(op), tau, x, chart, rep, usys=usys, **kw),
+        )
 
-    if isinstance(rep.semantic_kind, cxr.Velocity):
-        if chart != op_eval.chart:
-            msg = (
-                "Boost requires the input chart to match the boost chart. "
-                f"Got input chart={chart!r} and boost chart={op_eval.chart!r}."
-            )
-            raise ValueError(msg)
+    # --- Tangent input of ladder order m, flat matching chart.
+    m = rep.semantic_kind.order
+    # Displacements are invariant (the Jacobian of a flat translation is I).
+    if m == 0:
+        return x
+
+    # Static dv: closed forms that need no time parameter.
+    if not callable(op.delta):
+        if m != 1:
+            # Constant dv: higher derivatives of dv*tau vanish.
+            return x
         return cast(
             "CDict",
             jtu.map(
                 jnp.add,
-                *((x, op_eval.delta) if op_eval.right_add else (op_eval.delta, x)),
+                *((x, op.delta) if op.right_add else (op.delta, x)),
                 is_leaf=u.quantity.is_any_quantity,
             ),
         )
 
-    # Identity for points, displacements, and accelerations.
-    return x
+    # Time-dependent dv: delegate to the equivalent displacement Translate,
+    # whose ladder rule computes d^m (dv(tau) * tau) / dtau^m.
+    if tau is None:
+        raise TypeError(_MSG_TAU_REQUIRED_TANGENT.format(m=m))
+    return cast(
+        "CDict", cxfmapi.act(_as_translate(op), tau, x, chart, rep, usys=usys, **kw)
+    )

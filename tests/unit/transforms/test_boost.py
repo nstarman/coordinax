@@ -57,26 +57,34 @@ class TestBoostConstruction:
         for k in boost.delta:
             assert jnp.allclose(combined.delta[k], 2 * boost.delta[k])
 
-    def test_groups_is_diffeomorphism_only(self, boost):
-        assert boost.groups() == frozenset((cxfm.DiffeomorphismGroup,))
+    def test_groups_is_affine(self, boost):
+        # A Galilean boost is an affine (time-parameterized translation) map.
+        assert boost.groups() == frozenset((cxfm.AffineGroup, cxfm.DiffeomorphismGroup))
 
     def test_composed_groups_with_translate(self, boost):
         shift = cxfm.Translate.from_([1, 2, 3], "m")
         op = cxfm.Composed((shift, boost))
-        assert op.groups() == frozenset((cxfm.DiffeomorphismGroup,))
+        # Least common supergroup of Euclidean (Translate) and Affine (Boost).
+        assert op.groups() == frozenset((cxfm.AffineGroup, cxfm.DiffeomorphismGroup))
 
 
 # ============================================================================
 
 
 class TestBoostOnPoint:
-    """Boost should not affect points."""
+    """A Galilean boost moves points by delta_v * tau."""
 
-    def test_identity(self, boost):
+    def test_moves_point_by_dv_tau(self, boost, delta_v):
         p = {"x": jnp.array(1.0), "y": jnp.array(2.0), "z": jnp.array(3.0)}
-        result = cxfm.act(boost, None, p, cxc.cart3d, cxr.point)
+        tau = jnp.array(2.0)
+        result = cxfm.act(boost, tau, p, cxc.cart3d, cxr.point)
         for k, v in p.items():
-            assert jnp.allclose(result[k], v)
+            assert jnp.allclose(result[k], v + delta_v[k] * tau)
+
+    def test_raises_without_tau(self, boost):
+        p = {"x": jnp.array(1.0), "y": jnp.array(2.0), "z": jnp.array(3.0)}
+        with pytest.raises(TypeError, match="requires a time parameter"):
+            cxfm.act(boost, None, p, cxc.cart3d, cxr.point)
 
 
 class TestBoostOnDisplacement:
@@ -121,9 +129,14 @@ class TestBoostOnVelocity:
             # right_add=False: delta + x
             assert jnp.allclose(result[k], delta_v[k] + vel_cdict[k])
 
-    def test_raises_on_chart_mismatch(self, boost):
+    def test_chart_mismatch_defers_to_generic(self, boost):
+        """A mismatched data chart is well-defined via the generic engine.
+
+        It requires the base point (and a time, since the boost's point
+        action is time-dependent) rather than raising a chart error.
+        """
         v = {"rho": jnp.array(2.0), "phi": jnp.array(3.0), "z": jnp.array(4.0)}
-        with pytest.raises(ValueError, match="input chart to match the boost chart"):
+        with pytest.raises(TypeError, match=r"requires the base point|time parameter"):
             cxfm.act(boost, None, v, cxc.cyl3d, cxr.coord_vel)
 
 
