@@ -1,10 +1,18 @@
 """Shared utilities for the quantity_matrix package."""
 
-from typing import Any, TypeAlias, cast
+from typing import TYPE_CHECKING, Any, TypeAlias, cast
 
 import unxt as u
 
-CDict: TypeAlias = dict[str, Any]
+if TYPE_CHECKING:
+    # Typed for static checkers only.
+    CDict: TypeAlias = dict[str, Any]
+else:
+    # A parametric `dict[...]` annotation makes every plum signature
+    # using CDict "unfaithful", disabling plum's method cache (a full
+    # ~200x slower resolution per call). The bare `dict` keeps the cache;
+    # the TYPE_CHECKING branch above preserves the static type.
+    CDict: TypeAlias = dict
 _DMLS = u.unit("")
 
 PackedUnitOutput: TypeAlias = tuple[u.AbstractUnit | None, ...]

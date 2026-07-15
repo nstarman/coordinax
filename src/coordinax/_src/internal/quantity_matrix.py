@@ -38,7 +38,7 @@ import functools as ft
 import operator
 
 from jaxtyping import Array, Shaped
-from typing import Any, NoReturn, TypeAlias, TypeVar, cast, final
+from typing import TYPE_CHECKING, Any, NoReturn, TypeAlias, TypeVar, cast, final
 
 import equinox as eqx
 import jax
@@ -55,7 +55,15 @@ from jax.interpreters import ad as jax_ad, batching as jax_batching, mlir as jax
 import unxt as u
 from unxt.quantity import AllowValue
 
-CDict: TypeAlias = dict[str, Any]
+if TYPE_CHECKING:
+    # Typed for static checkers only.
+    CDict: TypeAlias = dict[str, Any]
+else:
+    # A parametric `dict[...]` annotation makes every plum signature
+    # using CDict "unfaithful", disabling plum's method cache (a full
+    # ~200x slower resolution per call). The bare `dict` keeps the cache;
+    # the TYPE_CHECKING branch above preserves the static type.
+    CDict: TypeAlias = dict
 _DMLS = u.unit("")
 
 
