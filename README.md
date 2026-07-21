@@ -42,13 +42,13 @@ pip install coordinax
 The most common import is the high-level user API:
 
 ```python
-import coordinax.main as cx
+import coordinax as cx
 ```
 
 ### Specialized Quantities
 
 ```pycon
->>> import coordinax.main as cx
+>>> import coordinax as cx
 >>> import unxt as u
 
 >>> a = cx.Angle(30.0, "deg")
@@ -69,7 +69,7 @@ Angle(0.52359878, 'rad')
 Transform point coordinates between charts with `pt_map`:
 
 ```pycon
->>> import coordinax.main as cx
+>>> import coordinax as cx
 >>> import unxt as u
 
 >>> q = {"x": u.Q(1.0, "km"), "y": u.Q(2.0, "km"), "z": u.Q(3.0, "km")}
@@ -83,7 +83,7 @@ Transform point coordinates between charts with `pt_map`:
 `Point` carries chart + representation metadata, so conversions preserve semantics:
 
 ```pycon
->>> import coordinax.main as cx
+>>> import coordinax as cx
 
 >>> vec = cx.Point.from_([1, 2, 3], "m")
 >>> print(vec)
@@ -101,7 +101,7 @@ Transform point coordinates between charts with `pt_map`:
 Common representation constants are available from the high-level module:
 
 ```python
-import coordinax.main as cx
+import coordinax as cx
 
 cx.point  # point location data
 cx.coord_vel  # coordinate-basis velocity components
@@ -134,14 +134,14 @@ Angle(1.57079633, 'rad')
 
 ### Astronomy Frames
 
-Astronomy frames require the `[astro]` extra (`pip install "coordinax[astro]"`) or to separately install the `coordinax-astro` package.
+Astronomy frames require the `[astro]` extra (`pip install "coordinax[astro]"`) or to separately install the `coordinaxs.astro` package.
 
 `to_frame` composes the full transformation chain automatically. The example below converts from ICRS to the Galactic bar frame, which co-rotates at pattern speed $\Omega_b$ relative to Galactocentric. A time-dependent `Rotate` operator captures the rotation; `TransformedReferenceFrame` wraps the base frame with it; `frame_transition` fuses the resulting ICRS -> GCF -> bar chain on-the-fly:
 
 ```pycon
 >>> import jax.numpy as jnp
->>> import coordinax.main as cx
->>> import coordinax.astro as cxastro
+>>> import coordinax as cx
+>>> import coordinaxs.astro as cxastro
 >>> import coordinax.frames as cxf
 >>> import coordinax.transforms as cxfm
 >>> import unxt as u

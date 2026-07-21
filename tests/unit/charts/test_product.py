@@ -7,7 +7,7 @@ import pytest
 from hypothesis import given, settings
 
 import coordinax.charts as cxc
-import coordinax.hypothesis.main as cxst
+import coordinaxs.hypothesis.main as cxst
 
 # =============================================================================
 # CartesianProductChart construction
@@ -102,7 +102,7 @@ class TestNamespacedSplitMerge:
 
 
 # =============================================================================
-# Property tests using coordinax-hypothesis
+# Property tests using coordinaxs-hypothesis
 # =============================================================================
 
 

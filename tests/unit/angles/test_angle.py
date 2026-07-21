@@ -2,7 +2,7 @@
 
 Covers construction, unit conversion, wrapping, arithmetic, and JAX
 compatibility. Property-based tests use hypothesis strategies from
-``coordinax.hypothesis``.
+``coordinaxs.hypothesis``.
 """
 
 __all__: tuple[str, ...] = ()
@@ -17,7 +17,7 @@ import unxt as u
 from unxt.quantity import AbstractAngle
 
 import coordinax.angles as cxa
-import coordinax.hypothesis.main as cxst
+import coordinaxs.hypothesis.main as cxst
 
 # ---------------------------------------------------------------------------
 # Reusable hypothesis strategies
@@ -150,6 +150,10 @@ class TestAngleWrapTo:
         ],
     )
     @given(data=st.data())
+    # JAX traces/compiles `wrap_to` on the first call, which can exceed the
+    # default per-example deadline when this test happens to run first under
+    # random ordering (cf. `test_wrap_idempotent` below).
+    @settings(deadline=None)
     def test_wrap_to_range(
         self, unit_str: str, lo: u.Q, hi: u.Q, data: st.DataObject
     ) -> None:
