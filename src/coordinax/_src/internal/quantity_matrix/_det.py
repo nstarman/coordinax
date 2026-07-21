@@ -157,8 +157,11 @@ def _det_jvp(primals: tuple, tangents: tuple) -> tuple:
     if type(dx) is jax_ad.Zero:
         tangent_out = lax.full_like(primal_out, 0.0)
     else:
-        # tr(A⁻¹ dA) via solve — avoids explicit matrix inversion
-        tangent_out = primal_out * jnp.trace(jnp.linalg.solve(x, dx))
+        # tr(A⁻¹ dA) via solve — avoids explicit matrix inversion.
+        # Trace the matrix axes (-2, -1), not any leading batch axes.
+        tangent_out = primal_out * jnp.trace(
+            jnp.linalg.solve(x, dx), axis1=-2, axis2=-1
+        )
     return primal_out, tangent_out
 
 

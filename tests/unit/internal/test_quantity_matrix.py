@@ -1610,6 +1610,21 @@ class TestDetPrimitive:
         result = qm_det(A)
         assert result.shape == (3, 4)
 
+    def test_det_grad_through_batch(self):
+        """Grad differentiating *through* a batched det (not vmap) is correct.
+
+        The JVP must trace over the matrix axes, not the leading batch axis.
+        """
+        A = jnp.stack(
+            [jnp.diag(jnp.array([2.0, 3.0])), jnp.diag(jnp.array([4.0, 5.0]))]
+        )
+        grad_A = jax.grad(lambda a: jnp.sum(qm_det(a)))(A)
+        # ∂det/∂A = det(A)·A⁻ᵀ; for diag(a,b) this is diag(b, a)
+        expected = jnp.stack(
+            [jnp.diag(jnp.array([3.0, 2.0])), jnp.diag(jnp.array([5.0, 4.0]))]
+        )
+        assert jnp.allclose(grad_A, expected)
+
 
 class TestDetQMatrix:
     """Tests for det_p Quax dispatch on QMatrix."""
