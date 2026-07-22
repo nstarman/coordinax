@@ -531,9 +531,9 @@ override-dependencies = [
 "coordinaxs.hypothesis"      = { workspace = true }
 "coordinaxs.interop.astropy" = { workspace = true }
 unxt                         = { git = "https://github.com/GalacticDynamics/unxt.git", branch = "main" }
-"unxts.linalg"               = { git = "https://github.com/GalacticDynamics/unxt.git", subdirectory = "packages/unxts.linalg", branch = "main" }
-"unxts.hypothesis"           = { git = "https://github.com/GalacticDynamics/unxt.git", subdirectory = "packages/unxts.hypothesis", branch = "main" }
 "unxt-hypothesis"            = { git = "https://github.com/GalacticDynamics/unxt.git", subdirectory = "packages/unxt-hypothesis", branch = "main" }
+"unxts.hypothesis"           = { git = "https://github.com/GalacticDynamics/unxt.git", subdirectory = "packages/unxts.hypothesis", branch = "main" }
+"unxts.linalg"               = { git = "https://github.com/GalacticDynamics/unxt.git", subdirectory = "packages/unxts.linalg", branch = "main" }
 "unxts.parametric"           = { git = "https://github.com/GalacticDynamics/unxt.git", subdirectory = "packages/unxts.parametric", branch = "main" }
 
 [tool.uv.workspace]
