@@ -5,10 +5,9 @@ from typing import Annotated
 
 import hypothesis.strategies as st
 import jax.numpy as jnp
-import unxt as u
 from beartype.vale import Is
 from hypothesis import given
-from unxts.parametric import ParametricQuantity as PQ
+from unxts.parametric import PQ
 
 from coordinaxs.hypothesis.utils import annotations
 

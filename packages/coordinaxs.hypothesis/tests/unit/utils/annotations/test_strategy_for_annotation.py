@@ -5,7 +5,7 @@ import jaxtyping
 import jax.numpy as jnp
 import unxt as u
 from hypothesis import given, strategies as st
-from unxts.parametric import ParametricQuantity as PQ
+from unxts.parametric import PQ
 
 import coordinax.charts as cxc
 
