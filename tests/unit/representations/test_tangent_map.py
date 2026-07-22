@@ -57,6 +57,18 @@ class TestTangentMapSameChart:
         np.testing.assert_allclose(result["theta"], v["theta"])
         np.testing.assert_allclose(result["phi"], v["phi"])
 
+    def test_equal_but_distinct_chart_instances(self) -> None:
+        """Charts are non-singleton: equal-but-distinct instances take the same path."""
+        fresh = type(cxc.cart3d)(M=cxc.cart3d.M)
+        assert fresh == cxc.cart3d
+        assert fresh is not cxc.cart3d
+        v = {"x": jnp.array(1), "y": jnp.array(2), "z": jnp.array(3)}
+        at = {"x": jnp.array(0.5), "y": jnp.array(0.5), "z": jnp.array(0)}
+        result = cxr.tangent_map(v, fresh, cxr.coord_disp, cxc.cart3d, at=at, usys=usys)
+        np.testing.assert_allclose(result["x"], v["x"])
+        np.testing.assert_allclose(result["y"], v["y"])
+        np.testing.assert_allclose(result["z"], v["z"])
+
 
 class TestTangentMapCart3dToSph3d:
     """Cart3D → Sph3D CoordinateBasis: Jacobian pushforward at (x=1, y=0, z=0).
@@ -210,6 +222,43 @@ class TestTangentMapPhysicalBasis:
         np.testing.assert_allclose(
             via_cc_cdict["phi"].value, direct["phi"].value, atol=1e-6
         )
+
+    def test_cross_chart_and_basis_one_shot(self) -> None:
+        """One call changing both chart and basis matches the two-step result.
+
+        Converting a Cartesian coordinate-basis vector to a spherical
+        physical-basis vector in a single ``tangent_map`` call must equal
+        first pushing the chart forward (keeping the basis) and then changing
+        the basis at the *destination-chart* base point.
+        """
+        v = {
+            "x": u.Q(jnp.array(1.0), "m/s"),
+            "y": u.Q(jnp.array(2.0), "m/s"),
+            "z": u.Q(jnp.array(0.5), "m/s"),
+        }
+        at = {
+            "x": u.Q(jnp.array(2.0), "m"),
+            "y": u.Q(jnp.array(1.0), "m"),
+            "z": u.Q(jnp.array(0.5), "m"),
+        }
+
+        one_shot = cxr.tangent_map(
+            v, cxc.cart3d, cxr.coord_disp, cxc.sph3d, cxr.phys_disp, at=at, usys=usys
+        )
+
+        # Reference: chart pushforward (keeps coord basis) then basis change.
+        mid = cxr.tangent_map(
+            v, cxc.cart3d, cxr.coord_disp, cxc.sph3d, at=at, usys=usys
+        )
+        at_sph = cxc.pt_map(at, cxc.cart3d, cxc.sph3d, usys=usys)
+        ref = cxr.change_basis(
+            mid, cxc.sph3d, cxr.coord_basis, cxr.phys_basis, at=at_sph, usys=usys
+        )
+
+        for k in ("r", "theta", "phi"):
+            # Physical-basis output must match in both magnitude and unit.
+            assert one_shot[k].unit == ref[k].unit
+            np.testing.assert_allclose(one_shot[k].value, ref[k].value, atol=1e-6)
 
 
 class TestTangentMapCart2dToPolar2d:
