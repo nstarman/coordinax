@@ -36,8 +36,26 @@ Contents:
 
 """
 
+# The heterogeneous-unit matrix machinery lives in ``unxts.linalg`` as of
+# unxt v2.0. ``QMatrix`` is retained as a back-compat alias for the renamed
+# ``QuantityMatrix``.
+from unxts.linalg import (
+    QM,  # noqa: F401
+    QuantityMatrix,  # noqa: F401
+    QuantityMatrix as QMatrix,  # noqa: F401
+    UnitsMatrix,  # noqa: F401
+    cdict_units,  # noqa: F401
+    det,  # noqa: F401
+    det_p,  # noqa: F401
+    inv,  # noqa: F401
+    inv_p,  # noqa: F401
+    matmul,  # noqa: F401
+    matvec,  # noqa: F401
+    vecdot,  # noqa: F401
+    vecmat,  # noqa: F401
+)
+
 from . import custom_types  # noqa: F401
 from .dtype_utils import *
 from .pack_utils import *
-from .quantity_matrix import *
 from .wl_utils import *

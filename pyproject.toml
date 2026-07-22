@@ -35,7 +35,8 @@ dependencies = [
   "quax-blocks>=0.4.1",
   "quaxed>=0.10.5",
   "typing-extensions>=4.13.2",
-  "unxt>=1.11.2",
+  "unxt>=2.0",
+  "unxts.linalg>=2.0",
   "wadler-lindig>=0.1.6",
   "xmmutablemap>=0.1",
 ]
@@ -494,7 +495,7 @@ invalid-argument-type = "ignore"
 [tool.ty.terminal]
 output-format = "concise"
 
-[tool.unxt]
+[tool.unxts.unxt]
 quantity.repr.named_unit     = false
 quantity.repr.short_arrays   = "compact"
 quantity.repr.use_short_name = true
@@ -509,6 +510,10 @@ constraint-dependencies = [
   "starlette>=1.0.1",
   "tornado>=6.5.6",
 ]
+# unxt v2.0 (which ships `unxts.linalg`) is not yet released; track the GitHub
+# main branch and drop the `>=2.0` floors during resolution until it lands.
+# TODO: remove once unxt v2.0 is on PyPI.
+override-dependencies = ["unxt", "unxts.linalg"]
 
 [tool.uv.sources]
 "coordinaxs.api"             = { workspace = true }
@@ -516,6 +521,8 @@ constraint-dependencies = [
 "coordinaxs.curveframes"     = { workspace = true }
 "coordinaxs.hypothesis"      = { workspace = true }
 "coordinaxs.interop.astropy" = { workspace = true }
+unxt                         = { git = "https://github.com/GalacticDynamics/unxt.git", branch = "main" }
+"unxts.linalg"               = { git = "https://github.com/GalacticDynamics/unxt.git", subdirectory = "packages/unxts.linalg", branch = "main" }
 
 [tool.uv.workspace]
 members = ["packages/*"]

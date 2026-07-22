@@ -20,12 +20,13 @@ __all__ = (
 from jaxtyping import Array, ArrayLike
 from typing import Any, Final, overload
 
+from unxts.linalg import QuantityMatrix as QMatrix
+
 import quaxed.numpy as jnp
 import unxt as u
 from unxt.quantity import AllowValue
 
 from .custom_types import CDict, CKey
-from .quantity_matrix import QMatrix
 
 DMLS: Final = u.unit("")
 
