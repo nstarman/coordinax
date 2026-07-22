@@ -10,7 +10,7 @@ from hypothesis.strategies import data as st_data
 import coordinax.charts as cxc
 
 import coordinaxs.hypothesis.main as cxst
-from coordinaxs.hypothesis._src.utils import get_all_subclasses
+from coordinaxs.hypothesis.utils import get_all_subclasses
 
 # =============================================================================
 # Benchmark: chart_classes strategy

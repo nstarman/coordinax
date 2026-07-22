@@ -117,6 +117,9 @@ test = [
   "pytest-env>=1.1.5",
   "pytest-github-actions-annotate-failures>=0.3.0",
   "sybil[pytest]>=8.0.0",
+  # unxt v2.0 moved dimension-parametrized quantities into unxts.parametric;
+  # the hypothesis annotation-strategy tests use ParametricQuantity["length"].
+  "unxts.parametric",
 ]
 test-all = [{ include-group = "test" }]
 
@@ -518,6 +521,7 @@ override-dependencies = [
   "unxts.linalg",
   "unxts.hypothesis",
   "unxt-hypothesis",
+  "unxts.parametric",
 ]
 
 [tool.uv.sources]
@@ -530,6 +534,7 @@ unxt                         = { git = "https://github.com/GalacticDynamics/unxt
 "unxts.linalg"               = { git = "https://github.com/GalacticDynamics/unxt.git", subdirectory = "packages/unxts.linalg", branch = "main" }
 "unxts.hypothesis"           = { git = "https://github.com/GalacticDynamics/unxt.git", subdirectory = "packages/unxts.hypothesis", branch = "main" }
 "unxt-hypothesis"            = { git = "https://github.com/GalacticDynamics/unxt.git", subdirectory = "packages/unxt-hypothesis", branch = "main" }
+"unxts.parametric"           = { git = "https://github.com/GalacticDynamics/unxt.git", subdirectory = "packages/unxts.parametric", branch = "main" }
 
 [tool.uv.workspace]
 members = ["packages/*"]
