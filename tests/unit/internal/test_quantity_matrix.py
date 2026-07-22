@@ -1623,7 +1623,11 @@ class TestDetPrimitive:
         expected = jnp.stack(
             [jnp.diag(jnp.array([3.0, 2.0])), jnp.diag(jnp.array([5.0, 4.0]))]
         )
-        np.testing.assert_allclose(np.asarray(grad_A), np.asarray(expected))
+        # Cofactors of diagonal matrices are exact integers, so tolerate no
+        # relative error and only float round-off.
+        np.testing.assert_allclose(
+            np.asarray(grad_A), np.asarray(expected), rtol=0, atol=1e-6
+        )
 
 
 class TestDetQMatrix:
