@@ -43,7 +43,7 @@ def polar_range(polar: AbcQ, _l: AbcQ = _0d, _u: AbcQ = _pid, /) -> AbcQ:
     )
     return eqx.error_if(
         polar,
-        jnp.any(jnp.logical_or((polar < _l), (polar > _u))),
+        u.ustrip("", jnp.any(jnp.logical_or((polar < _l), (polar > _u)))),
         "The inclination angle must be in the range [0, pi].",
     )
 
@@ -73,7 +73,7 @@ def strictly_positive(
 
     """
     name = f" {name}" if name else name
-    pred = jnp.any(x <= 0)
+    pred = u.ustrip("", jnp.any(x <= 0))
     # TODO: enable error_if to work on non-tracers.
     if isinstance(pred, jax.core.Tracer):  # ty: ignore[possibly-missing-submodule]
         return eqx.error_if(
@@ -111,7 +111,7 @@ def leq(
     """
     name = f" {name}" if name else name
     msg = f"The input{name} must be less than or equal to {comp_name}."
-    return eqx.error_if(x, jnp.any(x > max_val), msg)
+    return eqx.error_if(x, u.ustrip("", jnp.any(x > max_val)), msg)
 
 
 def geq(
@@ -140,4 +140,4 @@ def geq(
     """
     name = f" {name}" if name else name
     msg = f"The input{name} must be greater than or equal to {comp_name}."
-    return eqx.error_if(x, jnp.any(x < min_val), msg)
+    return eqx.error_if(x, u.ustrip("", jnp.any(x < min_val)), msg)
