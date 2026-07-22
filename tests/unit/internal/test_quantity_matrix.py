@@ -1623,7 +1623,7 @@ class TestDetPrimitive:
         expected = jnp.stack(
             [jnp.diag(jnp.array([3.0, 2.0])), jnp.diag(jnp.array([5.0, 4.0]))]
         )
-        assert jnp.allclose(grad_A, expected)
+        np.testing.assert_allclose(np.asarray(grad_A), np.asarray(expected))
 
 
 class TestDetQMatrix:
