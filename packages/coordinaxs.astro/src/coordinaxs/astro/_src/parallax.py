@@ -12,7 +12,7 @@ import jax.numpy as jnp
 
 import quaxed.numpy as jnp
 import unxt as u
-from unxt.quantity import BareQuantity
+from unxt.quantity import Quantity
 
 import coordinax.distances as cxd
 from .constants import ANGLE
@@ -169,7 +169,7 @@ def from_(cls: type[Parallax], dm: u.Q["mag"], /, **kw: Any) -> Parallax:
     Parallax(1., 'mas')
 
     """
-    d = BareQuantity(10 ** (1 + dm.ustrip("mag") / 5), "pc")
+    d = Quantity(10 ** (1 + dm.ustrip("mag") / 5), "pc")
     p = jnp.atan2(parallax_base_length, d)
     unit = u.unit_of(p)
     return cls(jnp.asarray(p.ustrip(unit), **kw), unit)  # ty: ignore[unresolved-attribute]
