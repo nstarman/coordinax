@@ -15,7 +15,7 @@ import unxt as u
 from unxt.quantity import Quantity
 
 import coordinax.distances as cxd
-from .constants import ANGLE
+from .constants import ANGLE, LENGTH
 
 parallax_base_length = u.Q(jnp.array(1), "AU")
 
@@ -117,32 +117,25 @@ def from_(cls: type[Parallax], p: Parallax, /, **kw: Any) -> Parallax:
 
 
 @Parallax.from_.dispatch  # ty: ignore[unresolved-attribute]
-def from_(cls: type[Parallax], p: u.Q["angle"], /, **kw: Any) -> Parallax:
-    """Compute parallax from parallax.
+def from_(cls: type[Parallax], q: u.AbstractQuantity, /, **kw: Any) -> Parallax:
+    """Construct a parallax from a quantity, dispatching on its dimensions.
+
+    unxt v2.0's default `unxt.Quantity` is no longer parametrized by physical
+    type, so overloads can no longer be dispatched on ``Quantity["angle"]`` vs
+    ``Quantity["length"]`` vs ``Quantity["mag"]``. Branch on the runtime
+    dimension instead (the unit -- and hence the dimension -- is static).
+
+    From a parallax angle:
 
     >>> import unxt as u
+    >>> import coordinax.distances as cxd
     >>> from coordinaxs.astro import Parallax
 
     >>> q = u.Q(1, "mas")
     >>> Parallax.from_(q, dtype=float)
     Parallax(1., 'mas')
 
-    """
-    unit = u.unit_of(p)
-    return cls(jnp.asarray(p.ustrip(unit), **kw), unit)
-
-
-@Parallax.from_.dispatch  # ty: ignore[unresolved-attribute]
-def from_(
-    cls: type[Parallax],
-    d: cxd.Distance | u.Q["length"],
-    /,
-    **kw: Any,
-) -> Parallax:
-    """Compute parallax from distance.
-
-    >>> import unxt as u
-    >>> from coordinaxs.astro import Parallax
+    From a distance:
 
     >>> d = cxd.Distance(10, "pc")
     >>> Parallax.from_(d).uconvert("mas").round(2)
@@ -152,24 +145,25 @@ def from_(
     >>> Parallax.from_(q).uconvert("mas").round(2)
     Parallax(100., 'mas')
 
-    """
-    p = jnp.atan2(parallax_base_length, d)
-    return cls(jnp.asarray(p.value, **kw), p.unit)  # ty: ignore[unresolved-attribute]
-
-
-@Parallax.from_.dispatch  # ty: ignore[unresolved-attribute]
-def from_(cls: type[Parallax], dm: u.Q["mag"], /, **kw: Any) -> Parallax:
-    """Convert distance modulus to parallax.
-
-    >>> import unxt as u
-    >>> from coordinaxs.astro import Parallax
+    From a distance modulus:
 
     >>> dm = u.Q(10, "mag")
     >>> Parallax.from_(dm).uconvert("mas").round(2)
     Parallax(1., 'mas')
 
     """
-    d = Quantity(10 ** (1 + dm.ustrip("mag") / 5), "pc")
+    dim = u.dimension_of(q)
+
+    if dim == ANGLE:  # already a parallax angle
+        unit = u.unit_of(q)
+        return cls(jnp.asarray(q.ustrip(unit), **kw), unit)
+
+    if dim == LENGTH:  # distance
+        p = jnp.atan2(parallax_base_length, q)
+        return cls(jnp.asarray(p.value, **kw), p.unit)  # ty: ignore[unresolved-attribute]
+
+    # otherwise: distance modulus
+    d = Quantity(10 ** (1 + q.ustrip("mag") / 5), "pc")
     p = jnp.atan2(parallax_base_length, d)
     unit = u.unit_of(p)
     return cls(jnp.asarray(p.ustrip(unit), **kw), unit)  # ty: ignore[unresolved-attribute]

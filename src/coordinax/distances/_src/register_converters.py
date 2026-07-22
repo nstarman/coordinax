@@ -20,7 +20,7 @@ def convert_quantity_to_distance(q: u.AbstractQuantity, /) -> Distance:
     >>> from coordinax.distances import Distance
     >>> q = Quantity(1, "m")
     >>> q
-    Quantity(1, 'm')
+    Q(1, 'm')
 
     >>> convert(q, Distance)
     Distance(1, 'm')

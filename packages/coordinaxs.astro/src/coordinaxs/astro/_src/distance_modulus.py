@@ -13,6 +13,7 @@ import quaxed.numpy as jnp
 import unxt as u
 
 import coordinax.distances as cxd
+from .constants import ANGLE, LENGTH
 
 parallax_base_length = u.Q(jnp.array(1), "AU")
 
@@ -89,30 +90,19 @@ def from_(
 
 
 @DistanceModulus.from_.dispatch  # ty: ignore[unresolved-attribute]
-def from_(cls: type[DistanceModulus], dm: u.Q["mag"], /, **kw: Any) -> DistanceModulus:
-    """Compute parallax from parallax.
+def from_(
+    cls: type[DistanceModulus], q: u.AbstractQuantity, /, **kw: Any
+) -> DistanceModulus:
+    """Construct a distance modulus from a quantity, dispatching on dimensions.
+
+    unxt v2.0's default `unxt.Quantity` is no longer parametrized by physical
+    type, so overloads can no longer be dispatched on ``Quantity["mag"]`` vs
+    ``Quantity["length"]`` vs ``Quantity["angle"]``. Branch on the runtime
+    dimension instead (the unit -- and hence the dimension -- is static).
+
+    From a distance:
 
     >>> import unxt as u
-    >>> from coordinaxs.astro import DistanceModulus
-
-    >>> q = u.Q(1, "mag")
-    >>> DistanceModulus.from_(q)
-    DistanceModulus(1, 'mag')
-
-    """
-    unit = u.unit_of(dm)
-    return cls(jnp.asarray(u.ustrip(unit, dm), **kw), unit)
-
-
-@DistanceModulus.from_.dispatch  # ty: ignore[unresolved-attribute]
-def from_(
-    cls: type[DistanceModulus],
-    d: cxd.Distance,
-    /,
-    **kw: Any,
-) -> DistanceModulus:
-    """Compute distance modulus from distance.
-
     >>> import coordinax.distances as cxd
     >>> from coordinaxs.astro import DistanceModulus
 
@@ -120,44 +110,37 @@ def from_(
     >>> DistanceModulus.from_(d)
     DistanceModulus(-5., 'mag')
 
-    """
-    dm = 5 * jnp.log10(d.ustrip("pc")) - 5
-    return cls(jnp.asarray(dm, **kw), "mag")
-
-
-@DistanceModulus.from_.dispatch  # ty: ignore[unresolved-attribute]
-def from_(
-    cls: type[DistanceModulus], d: u.Q["length"], /, **kw: Any
-) -> DistanceModulus:
-    """Compute distance modulus from distance.
-
-    >>> import unxt as u
-    >>> from coordinaxs.astro import DistanceModulus
-
     >>> q = u.Q(1, "pc")
     >>> DistanceModulus.from_(q)
     DistanceModulus(-5., 'mag')
 
-    """
-    dm = 5 * jnp.log10(d.ustrip("pc")) - 5
-    return cls(jnp.asarray(dm, **kw), "mag")
-
-
-@DistanceModulus.from_.dispatch  # ty: ignore[unresolved-attribute]
-def from_(cls: type[DistanceModulus], p: u.Q["angle"], /, **kw: Any) -> DistanceModulus:
-    """Compute distance modulus from parallax.
-
-    >>> import unxt as u
-    >>> from coordinaxs.astro import DistanceModulus
+    From a parallax angle:
 
     >>> q = u.Q(1, "mas")
     >>> DistanceModulus.from_(q)
     DistanceModulus(10., 'mag')
 
+    From a distance modulus (magnitude):
+
+    >>> q = u.Q(1, "mag")
+    >>> DistanceModulus.from_(q)
+    DistanceModulus(1, 'mag')
+
     """
-    d = parallax_base_length / jnp.tan(p)  # [AU]
-    dm = 5 * jnp.log10(d.ustrip("pc")) - 5
-    return cls(jnp.asarray(dm, **kw), "mag")
+    dim = u.dimension_of(q)
+
+    if dim == LENGTH:  # distance
+        dm = 5 * jnp.log10(q.ustrip("pc")) - 5
+        return cls(jnp.asarray(dm, **kw), "mag")
+
+    if dim == ANGLE:  # parallax
+        d = parallax_base_length / jnp.tan(q)  # [AU]
+        dm = 5 * jnp.log10(d.ustrip("pc")) - 5
+        return cls(jnp.asarray(dm, **kw), "mag")
+
+    # otherwise: already a distance modulus (magnitude)
+    unit = u.unit_of(q)
+    return cls(jnp.asarray(u.ustrip(unit, q), **kw), unit)
 
 
 @cxd.Distance.from_.dispatch  # ty: ignore[unresolved-attribute]

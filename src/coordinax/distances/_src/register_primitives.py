@@ -51,7 +51,7 @@ def cbrt_p_abstractdistance(x: AbstractDistance, /, *, accuracy: Any) -> Quantit
     >>> from coordinax.distances import Distance
     >>> d = Distance(8, "m")
     >>> jnp.cbrt(d)
-    Quantity(2., 'm(1/3)')
+    Q(2., 'm(1/3)')
 
     """
     value = lax.cbrt_p.bind(x.value, accuracy=accuracy)
@@ -95,9 +95,9 @@ def dot_general_p_abstractdistances(
     >>> q1 = Distance([1, 2, 3], "m")
     >>> q2 = Distance([4, 5, 6], "m")
     >>> jnp.vecdot(q1, q2)
-    Quantity(32, 'm2')
+    Q(32, 'm2')
     >>> q1 @ q2
-    Quantity(32, 'm2')
+    Q(32, 'm2')
 
     This rule is also used by `jnp.matmul` for quantities.
 
@@ -126,7 +126,7 @@ def integer_pow_p_abstractdistance(x: AbstractDistance, /, *, y: Any) -> Quantit
     >>> from coordinax.distances import Distance
     >>> q = Distance(2, "m")
     >>> q ** 3
-    Quantity(8, 'm3')
+    Q(8, 'm3')
 
     """
     return Quantity(lax.integer_pow(x.value, y), unit=x.unit**y)
@@ -161,7 +161,7 @@ def pow_p_abstractdistance_arraylike(x: AbstractDistance, y: ArrayLike, /) -> Qu
     >>> q1 = Distance(10.0, "m")
     >>> y = 3.0
     >>> q1 ** y
-    Quantity(1000., 'm3')
+    Q(1000., 'm3')
 
     """
     # TODO: better call to power
@@ -180,12 +180,12 @@ def sqrt_p_abstractdistance(x: AbstractDistance, /, *, accuracy: Any) -> Quantit
     >>> from coordinax.distances import Distance
     >>> q = Distance(9, "m")
     >>> jnp.sqrt(q)
-    Quantity(3., 'm(1/2)')
+    Q(3., 'm(1/2)')
 
     >>> from coordinaxs.astro import Parallax
     >>> q = Parallax(9, "mas")
     >>> jnp.sqrt(q)
-    Quantity(3., 'mas(1/2)')
+    Q(3., 'mas(1/2)')
 
     """
     # Promote to something that supports sqrt units.
