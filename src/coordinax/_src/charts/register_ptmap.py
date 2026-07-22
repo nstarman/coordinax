@@ -83,7 +83,7 @@ def pt_map(q: None, /, *fixed_args: Any, **fixed_kw: Any) -> Callable[..., Any]:
     >>> p = u.Q([1.0, 0.0, 0.0], "m")
     >>> map = cxc.pt_map(None, cxc.cart3d, cxc.sph3d)
     >>> map(p)
-    QMatrix([1.        , 1.57079633, 0.        ], '(m, rad, rad)')
+    QuantityMatrix([1.        , 1.57079633, 0.        ], '(m, rad, rad)')
 
     Array-Like inputs are interpreted as Cartesian coordinates with units from
     the required `unxt.AbstractUnitSystem`.
@@ -132,7 +132,7 @@ def pt_map(
     >>> p = u.Q([1.0, 0.0, 0.0], "m")
     >>> map = cxc.pt_map(cxc.cart3d, cxc.sph3d)
     >>> map(p)
-    QMatrix([1.        , 1.57079633, 0.        ], '(m, rad, rad)')
+    QuantityMatrix([1.        , 1.57079633, 0.        ], '(m, rad, rad)')
 
     Array-Like inputs are interpreted as Cartesian coordinates with units from
     the required `unxt.AbstractUnitSystem`.

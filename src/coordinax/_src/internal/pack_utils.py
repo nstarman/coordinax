@@ -148,7 +148,7 @@ def pack_to_qmatrix(
 
     >>> p = {"x": u.Q(1.0, "km"), "y": u.Q(2.0, "km"), "z": u.Q(3.0, "km")}
     >>> pack_to_qmatrix(p, ("x", "y", "z"))
-    QMatrix([1., 2., 3.], '(km, km, km)')
+    QuantityMatrix([1., 2., 3.], '(km, km, km)')
 
     """
     # Dict sorter

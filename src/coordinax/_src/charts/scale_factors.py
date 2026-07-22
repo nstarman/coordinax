@@ -44,7 +44,7 @@ def scale_factors(
     ...     "z": u.Q(jnp.array(3.0), "m"),
     ... }
     >>> cxm.scale_factors(metric, cxc.cart3d, at=at)
-    QMatrix([1., 1., 1.], '(, , )')
+    QuantityMatrix([1., 1., 1.], '(, , )')
 
     """
     del metric, at, usys

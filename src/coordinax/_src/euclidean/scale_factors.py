@@ -42,7 +42,7 @@ def scale_factors(
     ...     "phi": u.Angle(jnp.array(0.0), "rad"),
     ... }
     >>> cxm.scale_factors(metric, cxc.sph3d, at=at)
-    QMatrix([1., 4., 4.], '(, km2 / rad2, km2 / rad2)')
+    QuantityMatrix([1., 4., 4.], '(, km2 / rad2, km2 / rad2)')
 
     """
     del metric

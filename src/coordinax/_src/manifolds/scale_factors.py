@@ -46,7 +46,7 @@ def scale_factors(
     ...     "phi": u.Angle(jnp.array(0.0), "rad"),
     ... }
     >>> cxm.scale_factors(cxc.sph3d, at=at)
-    QMatrix([1., 4., 4.], '(, km2 / rad2, km2 / rad2)')
+    QuantityMatrix([1., 4., 4.], '(, km2 / rad2, km2 / rad2)')
 
     """
     return cxmapi.scale_factors(chart.M.metric, chart, at=at, usys=usys)  # ty: ignore[invalid-return-type]
@@ -73,7 +73,7 @@ def scale_factors(
     >>> metric = cxm.RoundMetric(2)
     >>> at = {"theta": jnp.array(jnp.pi / 2), "phi": jnp.array(0.0)}
     >>> cxm.scale_factors(metric, cxc.sph2, at=at)
-    QMatrix([1., 1.], '(, )')
+    QuantityMatrix([1., 1.], '(, )')
 
     """
     mm = cxmapi.metric_matrix(chart.M, at, chart)
@@ -123,7 +123,7 @@ def scale_factors(
     ... )
     >>> at = {"theta": u.Angle(jnp.pi / 2, "rad"), "phi": u.Angle(0.0, "rad")}
     >>> cxm.scale_factors(M.metric, cxc.sph2, at=at)
-    QMatrix([4., 4.], '(m2 / rad2, m2 / rad2)')
+    QuantityMatrix([4., 4.], '(m2 / rad2, m2 / rad2)')
 
     """
     embed_map = metric.embed_map

@@ -232,7 +232,7 @@ def metric_matrix(
     >>> at = {"r": u.Q(2.0, "m")}
     >>> g = metric_matrix(cxm.R1, at, cxc.radial1d)
     >>> g.diagonal
-    QMatrix([1.], '(,)')
+    QuantityMatrix([1.], '(,)')
 
     """
     del M, point, chart
@@ -260,14 +260,14 @@ def metric_matrix(
     >>> at = {"r": jnp.array(3.0), "theta": jnp.array(0.5)}
     >>> g = metric_matrix(cxm.R2, at, cxc.polar2d)
     >>> g.diagonal
-    QMatrix([1., 9.], '(, )')
+    QuantityMatrix([1., 9.], '(, )')
 
     Length-valued ``r`` and angle-valued ``theta``:
 
     >>> at = {"r": u.Q(3.0, "m"), "theta": u.Angle(0.5, "rad")}
     >>> g = metric_matrix(cxm.R2, at, cxc.polar2d)
     >>> g.diagonal
-    QMatrix([1., 9.], '(, m2 / rad2)')
+    QuantityMatrix([1., 9.], '(, m2 / rad2)')
 
     """
     del M, chart
@@ -297,7 +297,7 @@ def metric_matrix(
     >>> at = {"rho": u.Q(3.0, "m"), "phi": u.Angle(0.0, "rad"), "z": u.Q(1.0, "m")}
     >>> g = metric_matrix(cxm.R3, at, cxc.cyl3d)
     >>> g.diagonal
-    QMatrix([1., 9., 1.], '(, m2 / rad2, )')
+    QuantityMatrix([1., 9., 1.], '(, m2 / rad2, )')
 
     """
     del M, chart
@@ -336,7 +336,7 @@ def metric_matrix(
     >>> isinstance(g, DiagonalMetric)
     True
     >>> g.diagonal
-    QMatrix([1., 4., 4.], '(, m2 / rad2, m2 / rad2)')
+    QuantityMatrix([1., 4., 4.], '(, m2 / rad2, m2 / rad2)')
 
     """
     del M, chart
@@ -378,7 +378,7 @@ def metric_matrix(
     >>> isinstance(g, DiagonalMetric)
     True
     >>> g.diagonal
-    QMatrix([1., 4., 4.], '(, m2 / rad2, m2 / rad2)')
+    QuantityMatrix([1., 4., 4.], '(, m2 / rad2, m2 / rad2)')
 
     """
     del M, chart
@@ -419,7 +419,7 @@ def metric_matrix(
     >>> isinstance(g, DiagonalMetric)
     True
     >>> g.diagonal
-    QMatrix([4., 4., 1.], '(m2 / rad2, m2 / rad2, )')
+    QuantityMatrix([4., 4., 1.], '(m2 / rad2, m2 / rad2, )')
 
     """
     del M, chart
