@@ -513,7 +513,12 @@ constraint-dependencies = [
 # unxt v2.0 (which ships `unxts.linalg`) is not yet released; track the GitHub
 # main branch and drop the `>=2.0` floors during resolution until it lands.
 # TODO: remove once unxt v2.0 is on PyPI.
-override-dependencies = ["unxt", "unxts.linalg"]
+override-dependencies = [
+  "unxt",
+  "unxts.linalg",
+  "unxts.hypothesis",
+  "unxt-hypothesis",
+]
 
 [tool.uv.sources]
 "coordinaxs.api"             = { workspace = true }
@@ -523,6 +528,8 @@ override-dependencies = ["unxt", "unxts.linalg"]
 "coordinaxs.interop.astropy" = { workspace = true }
 unxt                         = { git = "https://github.com/GalacticDynamics/unxt.git", branch = "main" }
 "unxts.linalg"               = { git = "https://github.com/GalacticDynamics/unxt.git", subdirectory = "packages/unxts.linalg", branch = "main" }
+"unxts.hypothesis"           = { git = "https://github.com/GalacticDynamics/unxt.git", subdirectory = "packages/unxts.hypothesis", branch = "main" }
+"unxt-hypothesis"            = { git = "https://github.com/GalacticDynamics/unxt.git", subdirectory = "packages/unxt-hypothesis", branch = "main" }
 
 [tool.uv.workspace]
 members = ["packages/*"]
