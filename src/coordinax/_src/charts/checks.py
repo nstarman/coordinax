@@ -79,7 +79,7 @@ def strictly_positive(
         return eqx.error_if(
             x, pred, f"The input{name} must be non-negative and non-zero."
         )
-    if pred:
+    if bool(pred):  # concrete 0-d array -> Python bool
         msg = f"The input{name} must be non-negative and non-zero."
         raise ValueError(msg)
     return x
