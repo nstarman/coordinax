@@ -113,7 +113,7 @@ Passing a component dictionary with `unxt.Quantity` values returns a `QMatrix` w
 >>> at = {"x": u.Q(1.0, "m"), "y": u.Q(0.0, "m"), "z": u.Q(0.0, "m")}
 >>> J = cxc.jac_pt_map(at, cxc.cart3d, cxc.sph3d)
 >>> J
-QMatrix(
+QuantityMatrix(
     [[ 1.,  0.,  0.],
      [-0., -0., -1.],
      [ 0.,  1.,  0.]],
