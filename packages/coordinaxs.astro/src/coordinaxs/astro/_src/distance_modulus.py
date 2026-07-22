@@ -13,7 +13,7 @@ import quaxed.numpy as jnp
 import unxt as u
 
 import coordinax.distances as cxd
-from .constants import ANGLE, LENGTH
+from .constants import ANGLE, LENGTH, MAGNITUDE
 
 parallax_base_length = u.Q(jnp.array(1), "AU")
 
@@ -138,9 +138,12 @@ def from_(
         dm = 5 * jnp.log10(d.ustrip("pc")) - 5
         return cls(jnp.asarray(dm, **kw), "mag")
 
-    # otherwise: already a distance modulus (magnitude)
-    unit = u.unit_of(q)
-    return cls(jnp.asarray(u.ustrip(unit, q), **kw), unit)
+    if dim == MAGNITUDE:  # already a distance modulus (magnitude)
+        unit = u.unit_of(q)
+        return cls(jnp.asarray(u.ustrip(unit, q), **kw), unit)
+
+    msg = f"cannot build a DistanceModulus from a quantity with dimension {dim}"
+    raise ValueError(msg)
 
 
 @cxd.Distance.from_.dispatch  # ty: ignore[unresolved-attribute]

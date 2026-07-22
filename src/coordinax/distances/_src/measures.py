@@ -14,7 +14,7 @@ import quaxed.numpy as jnp
 import unxt as u
 
 from .base import AbstractDistance
-from .constants import ANGLE, LENGTH
+from .constants import ANGLE, LENGTH, MAGNITUDE
 
 parallax_base_length = u.Q(jnp.array(1), "AU")
 
@@ -142,6 +142,9 @@ def from_(cls: type[Distance], q: u.AbstractQuantity, /, **kw: Any) -> Distance:
         unit = u.unit_of(d)
         return cls(jnp.asarray(d.ustrip(unit), **kw), unit)
 
-    # otherwise: distance modulus
-    d = 10 ** (1 + q.ustrip("mag") / 5)
-    return cls(jnp.asarray(d, **kw), "pc")
+    if dim == MAGNITUDE:  # distance modulus
+        d = 10 ** (1 + q.ustrip("mag") / 5)
+        return cls(jnp.asarray(d, **kw), "pc")
+
+    msg = f"cannot build a Distance from a quantity with dimension {dim}"
+    raise ValueError(msg)
