@@ -2261,7 +2261,7 @@ Separating semantics from geometry provides two advantages:
       - ``(V, *args, **kwargs) -> uconvert(*args, V, **kwargs)`` redispatch
       - ``(V, u.AbstractUnitSystem) -> uconvert(u.AbstractUnitSystem, V)`` redispatch
     - ``__array_namespace__``: the array API namespace -- `quax.numpy`. This delegates to `quax` primitives.
-    - ``__eq__``: strict equality — requires the same type, chart, and frame, then compares component data via the `quax` equality primitive. Chart and frame are static metadata, so a mismatch short-circuits to ``False`` as a plain Python bool (safe under `jit`) and never raises on differing component keys.
+    - ``__eq__``: strict equality — requires the same type, chart, and frame, then compares component data via the `quax` equality primitive. Chart and frame are static metadata, so the chart/frame comparison is a plain Python bool (safe under `jit`); on a mismatch it short-circuits to a scalar boolean array (``jnp.zeros((), dtype=bool)``), matching ``==``'s array-valued result, and never raises on differing component keys.
     - ``copy()``: call `dataclass.replace`.
     - ``flatten()``: flatten the vector.
     - ``ravel()``: return a flattened vector.
