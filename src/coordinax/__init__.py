@@ -86,6 +86,8 @@ __all__ = (  # distances
     "Coordinate",
     "Tangent",
     "ToUnitsOptions",
+    "separation",
+    "separation_3d",
 )
 
 import warnings
@@ -174,7 +176,14 @@ from coordinax.transforms import (
     identity,
     simplify,
 )
-from coordinax.vectors import Coordinate, Point, Tangent, ToUnitsOptions
+from coordinax.vectors import (
+    Coordinate,
+    Point,
+    Tangent,
+    ToUnitsOptions,
+    separation,
+    separation_3d,
+)
 
 # ============================================================================
 # Optional interop registration
