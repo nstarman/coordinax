@@ -2262,6 +2262,7 @@ Separating semantics from geometry provides two advantages:
       - ``(V, u.AbstractUnitSystem) -> uconvert(u.AbstractUnitSystem, V)`` redispatch
     - ``__array_namespace__``: the array API namespace -- `quax.numpy`. This delegates to `quax` primitives.
     - ``__eq__``: equality check, based on type equality and `quax` equality primitive.
+    - ``equivalent(a, b, *, rtol, atol)``: the relaxed, coordinate-free counterpart to ``__eq__`` — whether two vectors denote the *same geometric point*, invariant to the chart and component units but frame-strict. Compared in a common Cartesian chart, tolerance-based, and never raising (mismatched frame, manifold, or unit-vs-unitless leaves ⇒ ``False``). Registered on the global `plum` ``dispatch`` (shared with `unxt`'s quantity-level ``equivalent``).
     - ``copy()``: call `dataclass.replace`.
     - ``flatten()``: flatten the vector.
     - ``ravel()``: return a flattened vector.
