@@ -10,7 +10,7 @@ import unxt as u
 import coordinax as cx
 import coordinax.frames as cxf
 import coordinax.transforms as cxfm
-from coordinax.internal import QMatrix
+from coordinax.internal import QuantityMatrix
 
 # ===================================================================
 # Transform fixtures
@@ -76,8 +76,8 @@ def quantity_3d():
 
 @pytest.fixture
 def qmatrix_3d():
-    """QMatrix [1, 0, 0] with uniform km units."""
-    return QMatrix(
+    """QuantityMatrix [1, 0, 0] with uniform km units."""
+    return QuantityMatrix(
         jnp.array([1, 0, 0]), unit=(u.unit("km"), u.unit("km"), u.unit("km"))
     )
 

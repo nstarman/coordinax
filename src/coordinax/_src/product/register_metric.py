@@ -23,7 +23,7 @@ import unxt as u
 from .chart import AbstractCartesianProductChart
 from .manifold import CartesianProductManifold
 from coordinax._src.metric.matrix import DenseMetric, DiagonalMetric
-from coordinax.internal import QMatrix, UnitsMatrix
+from coordinax.internal import QuantityMatrix, UnitsMatrix
 from coordinaxs.api.manifolds import metric_matrix, metric_representation
 
 # =====================================================================
@@ -31,18 +31,18 @@ from coordinaxs.api.manifolds import metric_matrix, metric_representation
 # =====================================================================
 
 
-def _mm_to_qm(mm: DenseMetric | DiagonalMetric) -> QMatrix:
-    """Convert an AbstractMetricMatrix to a QMatrix."""
+def _mm_to_qm(mm: DenseMetric | DiagonalMetric) -> QuantityMatrix:
+    """Convert an AbstractMetricMatrix to a QuantityMatrix."""
     if isinstance(mm, DiagonalMetric):
         dense = mm.to_dense()
         mat = dense.matrix
     else:
         mat = mm.matrix
-    if isinstance(mat, QMatrix):
+    if isinstance(mat, QuantityMatrix):
         return mat
     n = mat.shape[0]
     unit_tup = tuple(tuple(u.unit("") for _ in range(n)) for _ in range(n))
-    return QMatrix(mat, unit=UnitsMatrix(unit_tup))
+    return QuantityMatrix(mat, unit=UnitsMatrix(unit_tup))
 
 
 # =====================================================================
@@ -151,5 +151,5 @@ def metric_matrix(
             units[i][j] = units[j][i] = sqrt_diag[i] * sqrt_diag[j]
 
     unit_tup = tuple(tuple(row) for row in units)
-    G = QMatrix(value=value, unit=UnitsMatrix(unit_tup))
+    G = QuantityMatrix(value=value, unit=UnitsMatrix(unit_tup))
     return DenseMetric(G)

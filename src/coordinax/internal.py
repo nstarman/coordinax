@@ -11,7 +11,7 @@
 
 Contents:
 
-- ``QMatrix``
+- ``QuantityMatrix``
     An N-D quantity matrix/vector where every element carries its own unit.
     Supports both 1-D (vector) and 2-D (matrix) cases.
     Useful for Jacobians and metric tensors whose entries have
@@ -37,7 +37,7 @@ Contents:
 """
 
 __all__ = (
-    "QMatrix",
+    "QuantityMatrix",
     "UnitsMatrix",
     "tree_cast_int_bool_to_float",
     "pack_uniform_unit",
@@ -61,7 +61,7 @@ from ._src.setup_package import install_import_hook
 with install_import_hook("coordinax.internal"):
     from coordinax._src.custom_types import CDict, OptUSys
     from coordinax._src.internal import (
-        QMatrix,
+        QuantityMatrix,
         UnitsMatrix,
         cdict_units,
         det,

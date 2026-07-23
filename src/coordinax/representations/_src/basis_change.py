@@ -28,7 +28,7 @@ from .custom_types import CDict, OptUSys
 from .geom import TangentGeometry
 from .rep import Representation
 from coordinax._src.metric.matrix import DenseMetric, DiagonalMetric
-from coordinax.internal import QMatrix, UnitsMatrix
+from coordinax.internal import QuantityMatrix, UnitsMatrix
 
 T = TypeVar("T", bound=u.Q)
 
@@ -45,7 +45,7 @@ def _add_rad_unit(q: ArrayLike | u.AbstractQuantity) -> ArrayLike | u.AbstractQu
     return Quantity(q.value, unit=q.unit * _RAD) if is_any_quantity(q) else q
 
 
-def _qm_triangular_solve(E: QMatrix, b: QMatrix) -> QMatrix:
+def _qm_triangular_solve(E: QuantityMatrix, b: QuantityMatrix) -> QuantityMatrix:
     """Solve upper-triangular system E @ x = b for x, respecting units.
 
     Uses the fact that E is upper-triangular (vielbein = L^T from Cholesky).
@@ -69,7 +69,7 @@ def _qm_triangular_solve(E: QMatrix, b: QMatrix) -> QMatrix:
     x_vals = jax.scipy.linalg.solve_triangular(
         E_norm, b_norm[..., None], lower=False
     ).squeeze(-1)
-    return QMatrix(x_vals, unit=x_units)
+    return QuantityMatrix(x_vals, unit=x_units)
 
 
 ##############################################################################
@@ -134,20 +134,20 @@ def change_basis(
     # General case: Cholesky vielbein E = L^T, hat_v = E @ v
     assert isinstance(mm, DenseMetric)  # noqa: S101
     mat = mm.matrix
-    if isinstance(mat, QMatrix):
+    if isinstance(mat, QuantityMatrix):
         L_val = jnp.linalg.cholesky(mat.value)
         L_units = UnitsMatrix(mat.unit._units**0.5)
-        L = QMatrix(L_val, unit=L_units)
+        L = QuantityMatrix(L_val, unit=L_units)
     else:
         L_raw = jnp.linalg.cholesky(mat)
         n = mat.shape[-1]
         _dmls = u.unit("")
-        L = QMatrix(
+        L = QuantityMatrix(
             L_raw,
             unit=UnitsMatrix(tuple(tuple(_dmls for _ in range(n)) for _ in range(n))),
         )
     E = jnp.transpose(L, axes=(-2, -1))  # E = L^T, upper-triangular vielbein
-    v_vec = QMatrix.from_cdict(v, keys)
+    v_vec = QuantityMatrix.from_cdict(v, keys)
     hat_v_vec = jnp.matmul(E, v_vec)
     return cxc.cdict(hat_v_vec, keys)  # ty: ignore[invalid-return-type]
 
@@ -209,20 +209,20 @@ def change_basis(
     # General case: Cholesky vielbein E = L^T, v = E^{-1} hat_v (triangular solve)
     assert isinstance(mm, DenseMetric)  # noqa: S101
     mat = mm.matrix
-    if isinstance(mat, QMatrix):
+    if isinstance(mat, QuantityMatrix):
         L_val = jnp.linalg.cholesky(mat.value)
         L_units = UnitsMatrix(mat.unit._units**0.5)
-        L = QMatrix(L_val, unit=L_units)
+        L = QuantityMatrix(L_val, unit=L_units)
     else:
         L_raw = jnp.linalg.cholesky(mat)
         n = mat.shape[-1]
         _dmls = u.unit("")
-        L = QMatrix(
+        L = QuantityMatrix(
             L_raw,
             unit=UnitsMatrix(tuple(tuple(_dmls for _ in range(n)) for _ in range(n))),
         )
     E = jnp.transpose(L, axes=(-2, -1))  # E = L^T, upper-triangular vielbein
-    hat_v_vec = QMatrix.from_cdict(v, keys)
+    hat_v_vec = QuantityMatrix.from_cdict(v, keys)
     v_vec = _qm_triangular_solve(E, hat_v_vec)
     return cxc.cdict(v_vec, keys)  # ty: ignore[invalid-return-type]
 

@@ -13,7 +13,7 @@ import plum
 import unxt as u
 
 from .point import Point
-from coordinax.internal import QMatrix, pack_nonuniform_unit
+from coordinax.internal import QuantityMatrix, pack_nonuniform_unit
 
 
 @final
@@ -224,4 +224,4 @@ def point_to_q(obj: Point, /) -> u.AbstractQuantity:
         unit = u.unit("") if units[0] is None else units[0]
         return u.Q(vals, unit)
 
-    return QMatrix(vals, units)
+    return QuantityMatrix(vals, units)

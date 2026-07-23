@@ -10,13 +10,13 @@ import unxt as u
 from .charts import MinkowskiCT
 from .metric import MinkowskiMetric
 from coordinax._src.custom_types import CDict, OptUSys
-from coordinax.internal import QMatrix, UnitsMatrix
+from coordinax.internal import QuantityMatrix, UnitsMatrix
 
 
 @plum.dispatch
 def scale_factors(
     metric: MinkowskiMetric, chart: MinkowskiCT, /, *, at: CDict, usys: OptUSys = None
-) -> QMatrix:
+) -> QuantityMatrix:
     r"""Return the Minkowski metric diagonal $\eta = \operatorname{diag}(-1,1,1,1)$.
 
     In the canonical `coordinax.charts.MinkowskiCT` chart the metric is
@@ -38,4 +38,4 @@ def scale_factors(
     n = metric.ndim
     value = jnp.array(list(metric.signature), dtype=float)
     units = UnitsMatrix(tuple(u.unit("") for _ in range(n)))
-    return QMatrix(value, unit=units)
+    return QuantityMatrix(value, unit=units)

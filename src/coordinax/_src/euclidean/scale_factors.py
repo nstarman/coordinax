@@ -14,7 +14,7 @@ import coordinaxs.api.charts as cxcapi
 from .metric import FlatMetric
 from coordinax._src.base import AbstractChart
 from coordinax._src.custom_types import CDict, OptUSys
-from coordinax.internal import QMatrix, UnitsMatrix
+from coordinax.internal import QuantityMatrix, UnitsMatrix
 
 DMLS = u.unit("")
 
@@ -27,7 +27,7 @@ def scale_factors(
     *,
     at: CDict,
     usys: OptUSys = None,
-) -> QMatrix:
+) -> QuantityMatrix:
     """Compute only the Euclidean metric diagonal instead of forming ``J.T @ J``.
 
     >>> import jax.numpy as jnp
@@ -50,7 +50,7 @@ def scale_factors(
 
     if chart == cart_chart:
         n = len(chart.components)
-        return QMatrix(
+        return QuantityMatrix(
             jnp.ones((n,)), unit=UnitsMatrix(tuple(u.unit("") for _ in range(n)))
         )
 
@@ -58,22 +58,22 @@ def scale_factors(
     return _column_squared_norms(J)
 
 
-def _column_squared_norms(J: QMatrix | Array, /) -> QMatrix:
+def _column_squared_norms(J: QuantityMatrix | Array, /) -> QuantityMatrix:
     """Return ``diag(J.T @ J)`` without forming the full Gram matrix."""
-    if isinstance(J, QMatrix):
+    if isinstance(J, QuantityMatrix):
         return _quantity_column_squared_norms(J)
     return _array_column_squared_norms(J)
 
 
-def _array_column_squared_norms(J: Array, /) -> QMatrix:
+def _array_column_squared_norms(J: Array, /) -> QuantityMatrix:
     """Return squared column norms for a dimensionless Jacobian array."""
     value = jnp.einsum("...ji,...ji->...i", J, J)
     n = value.shape[-1]
     unit = UnitsMatrix(tuple(DMLS for _ in range(n)))
-    return QMatrix(value, unit)
+    return QuantityMatrix(value, unit)
 
 
-def _quantity_column_squared_norms(J: QMatrix) -> QMatrix:
+def _quantity_column_squared_norms(J: QuantityMatrix) -> QuantityMatrix:
     """Return squared column norms for a heterogeneous-unit Jacobian."""
     xs = tuple(_colnorm2(J[:, i]) for i in range(J.shape[-1]))
     units = tuple(u.unit_of(x) if is_any_quantity(x) else DMLS for x in xs)
@@ -81,9 +81,9 @@ def _quantity_column_squared_norms(J: QMatrix) -> QMatrix:
         [u.ustrip(AllowValue, unit, x) for x, unit in zip(xs, units, strict=True)],
         axis=-1,
     )
-    return QMatrix(value, unit=UnitsMatrix(units))
+    return QuantityMatrix(value, unit=UnitsMatrix(units))
 
 
-def _colnorm2(column: QMatrix) -> u.AbstractQuantity | Array:
+def _colnorm2(column: QuantityMatrix) -> u.AbstractQuantity | Array:
     """Return the squared norm of a single Jacobian column."""
     return jnp.dot(column, column)

@@ -25,9 +25,9 @@ These utilities are primarily useful when implementing downstream transforms, Ja
 ```python
 import jax.numpy as jnp
 import unxt as u
-from coordinax.internal import QMatrix
+from coordinax.internal import QuantityMatrix
 
-J = QMatrix(
+J = QuantityMatrix(
     value=jnp.eye(3),
     unit=(
         (u.unit("m/m"), u.unit("m/rad"), u.unit("m/rad")),
@@ -37,7 +37,7 @@ J = QMatrix(
 )
 ```
 
-`QMatrix` supports both 1-D and 2-D cases. This makes it suitable for heterogeneous vectors as well as Jacobians and metric tensors whose entries do not all share the same unit.
+`QuantityMatrix` supports both 1-D and 2-D cases. This makes it suitable for heterogeneous vectors as well as Jacobians and metric tensors whose entries do not all share the same unit.
 
 ## Packing Helpers
 
@@ -66,7 +66,7 @@ Use `pack_uniform_unit` when all components should be expressed in a shared unit
 
 ### Heterogeneous Unit Containers
 
-- `QMatrix`: N-D quantity container with per-element units; currently supports 1-D vectors and 2-D matrices
+- `QuantityMatrix`: N-D quantity container with per-element units; currently supports 1-D vectors and 2-D matrices
 - `UnitsMatrix`: immutable nested tuple of units with tuple-style indexing and shape metadata
 
 ### Packing Utilities

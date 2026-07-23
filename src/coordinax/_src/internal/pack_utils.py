@@ -20,7 +20,7 @@ __all__ = (
 from jaxtyping import Array, ArrayLike
 from typing import Any, Final, overload
 
-from unxts.linalg import QuantityMatrix as QMatrix
+from unxts.linalg import QuantityMatrix
 
 import quaxed.numpy as jnp
 import unxt as u
@@ -120,12 +120,12 @@ def pack_with_usys(
 
 def pack_to_qmatrix(
     p: CDict, /, keys: tuple[CKey, ...] | None = None
-) -> Array | QMatrix:
-    """Pack a component dictionary into a QMatrix or plain Array.
+) -> Array | QuantityMatrix:
+    """Pack a component dictionary into a QuantityMatrix or plain Array.
 
     Components are ordered according to ``keys``. If the values
     are {class}`~unxt.AbstractQuantity`, a 1-D
-    {class}`~coordinax.internal.QMatrix` is returned with per-component
+    {class}`~coordinax.internal.QuantityMatrix` is returned with per-component
     units. If the values are plain arrays, a stacked JAX array is returned.
 
     Parameters
@@ -137,7 +137,7 @@ def pack_to_qmatrix(
 
     Returns
     -------
-    Array | QMatrix
+    Array | QuantityMatrix
         Packed representation of the component dictionary.
 
     Examples
@@ -161,5 +161,5 @@ def pack_to_qmatrix(
     vals = [
         u.ustrip(AllowValue, unit, p[k]) for k, unit in zip(keys, units, strict=True)
     ]
-    # Return as QMatrix
-    return QMatrix(jnp.stack(vals, axis=-1), unit=units)
+    # Return as QuantityMatrix
+    return QuantityMatrix(jnp.stack(vals, axis=-1), unit=units)

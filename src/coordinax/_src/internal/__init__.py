@@ -11,7 +11,7 @@
 
 Contents:
 
-- ``QMatrix``
+- ``QuantityMatrix``
     An N-D quantity matrix/vector where every element carries its own unit.
     Supports both 1-D (vector) and 2-D (matrix) cases.
     Useful for Jacobians and metric tensors whose entries have
@@ -37,12 +37,10 @@ Contents:
 """
 
 # The heterogeneous-unit matrix machinery lives in ``unxts.linalg`` as of
-# unxt v2.0. ``QMatrix`` is retained as a back-compat alias for the renamed
-# ``QuantityMatrix``.
+# unxt v2.0.
 from unxts.linalg import (
     QM,  # noqa: F401
     QuantityMatrix,  # noqa: F401
-    QuantityMatrix as QMatrix,  # noqa: F401
     UnitsMatrix,  # noqa: F401
     cdict_units,  # noqa: F401
     det,  # noqa: F401

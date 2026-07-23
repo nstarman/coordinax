@@ -104,7 +104,7 @@ Product-chart transitions are factorwise.
 
 ### Direct call — quantity-valued dictionary input
 
-Passing a component dictionary with `unxt.Quantity` values returns a `QuantityMatrix` (available as `coordinax.internal.QMatrix`, a back-compat alias) whose element `[j, i]` carries the unit `output_unit_j / input_unit_i`:
+Passing a component dictionary with `unxt.Quantity` values returns a `QuantityMatrix` whose element `[j, i]` carries the unit `output_unit_j / input_unit_i`:
 
 ```{code-block} python
 >>> import coordinax.charts as cxc

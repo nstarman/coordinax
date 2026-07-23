@@ -18,7 +18,7 @@ from coordinax._src.charts import Cart0D, Cart1D, Cart2D, Cart3D, CartND
 from coordinax._src.custom_types import CDict, OptUSys
 from coordinax._src.euclidean import FlatMetric
 from coordinax._src.internal import (
-    QMatrix,
+    QuantityMatrix,
     pack_nonuniform_unit,
     pack_uniform_unit,
 )
@@ -80,7 +80,7 @@ def norm(G: Array, v: u.AbstractQuantity, /) -> u.AbstractQuantity:
 
 
 @plum.dispatch
-def norm(G: QMatrix, v: u.AbstractQuantity, /) -> u.AbstractQuantity:
+def norm(G: QuantityMatrix, v: u.AbstractQuantity, /) -> u.AbstractQuantity:
     r"""Compute the norm of a vector using a general (possibly curved) metric.
 
     This assumes ``G`` is evaluated at the correct chart and position, and
@@ -143,11 +143,11 @@ def norm(G: Array, v: CDict, /) -> Array | u.AbstractQuantity:
         v_vec = jnp.stack([jnp.asarray(v[k]) for k in keys], axis=-1)
         return array_norm(G, v_vec)
 
-    # Pack CDict of quantities into a QMatrix, preserving per-component
-    # units.  Then compute v^T G v via QMatrix ops, which handle all unit
+    # Pack CDict of quantities into a QuantityMatrix, preserving per-component
+    # units.  Then compute v^T G v via QuantityMatrix ops, which handle all unit
     # conversions correctly (including mixed-unit components like m/s and 1/s).
     v_vec, units = pack_nonuniform_unit(v, keys)
-    v_qm = QMatrix(v_vec, unit=units)
+    v_qm = QuantityMatrix(v_vec, unit=units)
     return jnp.sqrt(jnp.dot(v_qm, jnp.matmul(G, v_qm)))
 
 
@@ -171,7 +171,7 @@ def norm(
       The result is an ``AbstractQuantity`` whose unit reflects the physical
       dimensions of the norm (e.g. ``m / s`` when components mix ``m/s``
       and ``1/s``).  Mixed-unit components are handled correctly via
-      {class}`~coordinax.internal.QMatrix` arithmetic.
+      {class}`~coordinax.internal.QuantityMatrix` arithmetic.
     * **Bare jax.Array values**: ``usys`` is **required** (raises
       ``TypeError`` if omitted); a plain ``jax.Array`` is returned.
 
@@ -246,12 +246,12 @@ def norm(
         v_vec = jnp.stack([jnp.asarray(v[k]) for k in keys], axis=-1)
         return array_norm(mm.to_dense().matrix, v_vec)  # ty: ignore[unresolved-attribute]
 
-    # Pack CDict of quantities into a QMatrix, preserving per-component units,
-    # then compute sqrt(vᵀ G v) via QMatrix/AbstractMetricMatrix arithmetic,
+    # Pack CDict of quantities into a QuantityMatrix, preserving per-component units,
+    # then compute sqrt(vᵀ G v) via QuantityMatrix/AbstractMetricMatrix arithmetic,
     # which handles all unit conversions correctly (including mixed-unit
     # components like m/s and rad/s).
     v_vec, units = pack_nonuniform_unit(v, keys)
-    v_qm = QMatrix(v_vec, unit=units)
+    v_qm = QuantityMatrix(v_vec, unit=units)
     return jnp.sqrt(v_qm @ (mm @ v_qm))
 
 

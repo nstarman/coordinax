@@ -1,7 +1,7 @@
 """Tests for ``coordinax.transforms.act`` dispatches.
 
 The dispatch matrix — {Identity, Rotate, Reflect, Translate, Composed} ×
-{Array, Quantity, QMatrix, CDict, Vector, Point+Frame, Point+XfmFrame} — is
+{Array, Quantity, QuantityMatrix, CDict, Vector, Point+Frame, Point+XfmFrame} — is
 covered by parametrized tests for:
   - correctness: known-value checks (also serves as cross-level consistency,
     since every level is compared to the same expected result)
@@ -10,7 +10,7 @@ covered by parametrized tests for:
   - jit compat: wrapping in jit works
 
 Level-specific structural checks (frame/chart preservation, mixed-unit
-QMatrix) and the non-Cartesian tangent-geometry paths follow as their own
+QuantityMatrix) and the non-Cartesian tangent-geometry paths follow as their own
 tests.
 """
 
@@ -37,7 +37,7 @@ from .conftest import (
     EXPECTED_ROTATE,
     EXPECTED_TRANSLATE,
 )
-from coordinax.internal import QMatrix
+from coordinax.internal import QuantityMatrix
 
 ATOL = 1e-5
 
@@ -62,7 +62,7 @@ def _extract_xyz(result):
         z = float(u.ustrip("km", d["z"]))
         return (x, y, z)
 
-    if isinstance(result, QMatrix):
+    if isinstance(result, QuantityMatrix):
         x = float(u.ustrip("km", u.Q(result.value[0], result.unit[0])))
         y = float(u.ustrip("km", u.Q(result.value[1], result.unit[1])))
         z = float(u.ustrip("km", u.Q(result.value[2], result.unit[2])))
@@ -96,7 +96,7 @@ USYS = u.unitsystem("km", "s", "kg", "rad")
 INPUT_LEVELS = [
     ("array_3d", jax.Array),
     ("quantity_3d", u.AbstractQuantity),
-    ("qmatrix_3d", QMatrix),
+    ("qmatrix_3d", QuantityMatrix),
     ("cdict_3d", dict),
     ("vector_3d", cx.Point),
     ("coord_3d", cx.Point),
@@ -185,11 +185,11 @@ def test_act_under_jit(request, rotate_op, level_fixture):
 
 
 def test_qmatrix_heterogeneous_units_identity(identity_op):
-    """A QMatrix with per-component (heterogeneous) units passes through Identity."""
+    """A QuantityMatrix with heterogeneous per-component units survives Identity."""
     units = (u.unit("km"), u.unit("m"), u.unit("cm"))
-    qm = QMatrix(jnp.array([1.0, 2.0, 3.0]), unit=units)
+    qm = QuantityMatrix(jnp.array([1.0, 2.0, 3.0]), unit=units)
     result = cxfm.act(identity_op, None, qm)
-    assert isinstance(result, QMatrix)
+    assert isinstance(result, QuantityMatrix)
     np.testing.assert_allclose(np.asarray(result.value), [1.0, 2.0, 3.0])
     assert result.unit == units
 

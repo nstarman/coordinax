@@ -24,7 +24,7 @@ from .charts import MinkowskiCT
 from .manifold import MinkowskiManifold
 from coordinax._src.base import AbstractChart  # type: ignore[type-arg]
 from coordinax._src.metric.matrix import DenseMetric, DiagonalMetric
-from coordinax.internal import QMatrix, UnitsMatrix
+from coordinax.internal import QuantityMatrix, UnitsMatrix
 from coordinaxs.api.manifolds import metric_matrix, metric_representation
 
 # =====================================================================
@@ -138,7 +138,7 @@ def metric_matrix(
     cart_chart = chart.cartesian
     J = cxc.jac_pt_map(point, chart, cart_chart, usys=None)
     JT = J.T
-    eta = QMatrix(
+    eta = QuantityMatrix(
         jnp.diag(jnp.array([-1.0, 1.0, 1.0, 1.0])), unit=UnitsMatrix(unit_tup)
     )
     return DenseMetric(JT @ eta @ J)

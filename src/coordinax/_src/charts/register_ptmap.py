@@ -35,7 +35,7 @@ from coordinax._src.base.manifold import AbstractManifold
 from coordinax._src.custom_types import CDict, OptUSys
 from coordinax._src.euclidean import RN, EuclideanManifold, Rn
 from coordinax._src.utils import uconvert_to_rad
-from coordinax.internal import QMatrix, UnitsMatrix, cdict_units
+from coordinax.internal import QuantityMatrix, UnitsMatrix, cdict_units
 
 
 @final
@@ -1577,10 +1577,10 @@ def pt_map(
     /,
     *,
     usys: OptUSys = None,
-) -> QMatrix:
-    """Transform a QMatrix between charts.
+) -> QuantityMatrix:
+    """Transform a QuantityMatrix between charts.
 
-    Converts the components of a QMatrix from one chart to another,
+    Converts the components of a QuantityMatrix from one chart to another,
     preserving the matrix structure with potentially different units per component.
 
     >>> import coordinax.charts as cxc
@@ -1617,8 +1617,8 @@ def pt_map(
     p_to = cxcapi.pt_map(p_dict, from_M, from_chart, to_M, to_chart, usys=usys)
     p_to = cast("dict[str, u.AbstractQuantity]", p_to)
 
-    # Stack the transformed components into an QMatrix
-    p_out = QMatrix(
+    # Stack the transformed components into an QuantityMatrix
+    p_out = QuantityMatrix(
         jnp.stack([u.ustrip(p_to[k]) for k in to_chart.components], axis=-1),
         unit=UnitsMatrix(cdict_units(p_to, to_chart.components)),
     )

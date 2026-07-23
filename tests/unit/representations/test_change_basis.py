@@ -13,7 +13,7 @@ import coordinax as cx
 import coordinax.charts as cxc
 import coordinax.manifolds as cxm
 import coordinax.representations as cxr
-from coordinax.internal import QMatrix, UnitsMatrix
+from coordinax.internal import QuantityMatrix, UnitsMatrix
 from coordinax.representations._src.basis_change import _qm_triangular_solve
 
 
@@ -380,11 +380,11 @@ class TestTriangularSolveBatching:
     def test_qm_triangular_solve_batched_rows_scaled_correctly(self):
         e_val = jnp.array([[[2, 1], [0, 4]], [[3, 2], [0, 5]]])
         e_unit = UnitsMatrix(((u.unit("m"), u.unit("m")), (u.unit("m"), u.unit("m"))))
-        e = QMatrix(e_val, unit=e_unit)
+        e = QuantityMatrix(e_val, unit=e_unit)
 
         b_val = jnp.array([[5, 8], [7, 10]])
         b_unit = UnitsMatrix((u.unit("m/s"), u.unit("m/s")))
-        b = QMatrix(b_val, unit=b_unit)
+        b = QuantityMatrix(b_val, unit=b_unit)
 
         out = _qm_triangular_solve(e, b)
 

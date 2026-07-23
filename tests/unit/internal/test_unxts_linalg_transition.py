@@ -9,12 +9,20 @@ import unxt as u
 
 import coordinax.charts as cxc
 import coordinax.manifolds as cxm
-from coordinax.internal import QMatrix, UnitsMatrix, cdict_units, det, det_p, inv, inv_p
+from coordinax.internal import (
+    QuantityMatrix,
+    UnitsMatrix,
+    cdict_units,
+    det,
+    det_p,
+    inv,
+    inv_p,
+)
 
 
 def test_internal_reexports_unxts_linalg():
-    """`coordinax.internal` re-exports the unxts.linalg types (QMatrix alias)."""
-    assert QMatrix is ul.QuantityMatrix
+    """`coordinax.internal` re-exports the unxts.linalg types."""
+    assert QuantityMatrix is ul.QuantityMatrix
     assert UnitsMatrix is ul.UnitsMatrix
     assert det is ul.det
     assert det_p is ul.det_p

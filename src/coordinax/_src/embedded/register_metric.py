@@ -28,7 +28,7 @@ from .manifold import EmbeddedManifold
 from coordinax._src.base import AbstractChart  # type: ignore[type-arg]
 from coordinax._src.metric.matrix import DenseMetric
 from coordinax.internal import (
-    QMatrix,
+    QuantityMatrix,
     UnitsMatrix,
     cdict_units,
     pack_nonuniform_unit,
@@ -97,7 +97,7 @@ def metric_matrix(
     -------
     DenseMetric
         Induced metric matrix at ``point``, backed by a
-        :class:`~coordinax.internal.QMatrix` with units
+        :class:`~coordinax.internal.QuantityMatrix` with units
         ``cart_unit^2 / (intrinsic_unit_i * intrinsic_unit_j)``.
 
     Examples
@@ -179,4 +179,4 @@ def metric_matrix(
             for i in range(n)
         )
     )
-    return DenseMetric(QMatrix(result_vals, unit=result_unit))
+    return DenseMetric(QuantityMatrix(result_vals, unit=result_unit))

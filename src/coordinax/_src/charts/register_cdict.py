@@ -14,7 +14,7 @@ import unxt as u
 import coordinaxs.api.charts as cxcapi
 from coordinax._src.base import AbstractChart
 from coordinax._src.custom_types import CDict
-from coordinax.internal import QMatrix, UnitsMatrix
+from coordinax.internal import QuantityMatrix, UnitsMatrix
 
 # ===================================================================
 # CDict
@@ -109,12 +109,12 @@ def cdict(obj: u.AbstractQuantity, keys: tuple[str, ...], /) -> CDict:
 
 
 @plum.dispatch
-def cdict(obj: QMatrix, keys: tuple[str, ...], /) -> CDict:
-    """Extract component dictionary from a 1D ``QMatrix``.
+def cdict(obj: QuantityMatrix, keys: tuple[str, ...], /) -> CDict:
+    """Extract component dictionary from a 1D ``QuantityMatrix``.
 
     This overload supports heterogeneous per-component units by constructing
     one quantity per chart component from the corresponding numeric slice and
-    unit in the ``QMatrix``.
+    unit in the ``QuantityMatrix``.
 
     Raises
     ------
@@ -126,21 +126,21 @@ def cdict(obj: QMatrix, keys: tuple[str, ...], /) -> CDict:
     --------
     >>> import jax.numpy as jnp
     >>> import unxt as u
-    >>> from coordinax.internal import QMatrix
+    >>> from coordinax.internal import QuantityMatrix
 
-    >>> q = QMatrix(jnp.array([1.0, 2.0, 3.0]),
+    >>> q = QuantityMatrix(jnp.array([1.0, 2.0, 3.0]),
     ...                    unit=("m", "km/s", "rad"))
     >>> cxc.cdict(q, ('x', 'y', 'z'))
     {'x': Q(1., 'm'), 'y': Q(2., 'km / s'), 'z': Q(3., 'rad')}
 
     """
     if obj.unit.ndim != 1:
-        msg = f"QMatrix must be 1D for cdict, got ndim={obj.ndim}."
+        msg = f"QuantityMatrix must be 1D for cdict, got ndim={obj.ndim}."
         raise ValueError(msg)
 
     if obj.shape[-1] != len(keys):
         msg = (
-            f"QMatrix last dimension {obj.shape[-1]} does not match "
+            f"QuantityMatrix last dimension {obj.shape[-1]} does not match "
             f"provided keys {len(keys)}."
         )
         raise ValueError(msg)
@@ -173,19 +173,19 @@ def cdict(obj: u.AbstractQuantity, chart: AbstractChart, /) -> CDict:
 
 
 @plum.dispatch
-def cdict(obj: QMatrix, chart: AbstractChart, /) -> CDict:
-    """Extract component dictionary from a 1D ``QMatrix``.
+def cdict(obj: QuantityMatrix, chart: AbstractChart, /) -> CDict:
+    """Extract component dictionary from a 1D ``QuantityMatrix``.
 
     This overload supports heterogeneous per-component units by constructing
     one quantity per chart component from the corresponding numeric slice and
-    unit in the ``QMatrix``.
+    unit in the ``QuantityMatrix``.
 
     >>> import jax.numpy as jnp
     >>> import coordinax.charts as cxc
     >>> import unxt as u
-    >>> from coordinax.internal import QMatrix
+    >>> from coordinax.internal import QuantityMatrix
 
-    >>> q = QMatrix(
+    >>> q = QuantityMatrix(
     ...     jnp.array([1.0, 2.0, 3.0]),
     ...     unit=(u.unit("m"), u.unit("km/s"), u.unit("rad")),
     ... )

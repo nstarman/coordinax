@@ -15,21 +15,21 @@ import coordinax.representations as cxr
 import coordinaxs.api.transforms as cxfmapi
 from .base import AbstractTransform
 from .custom_types import CDict
-from coordinax.internal import QMatrix, pack_nonuniform_unit, pack_uniform_unit
+from coordinax.internal import QuantityMatrix, pack_nonuniform_unit, pack_uniform_unit
 
 # A "point-like" input the entry funnel accepts. Faithful (each member and the
 # union), so the normalizer methods below stay in plum's method cache.
 # `guess_chart` accepts all of these directly (JAX and NumPy arrays, Quantities,
-# QMatrix, CDicts). A Python list is not an `ArrayLike`, so it never matches this
+# QuantityMatrix, CDicts). A Python list is not an `ArrayLike`, so it never matches this
 # union at all (see test_act_rejects_python_list).
-PointLike: TypeAlias = ArrayLike | AbcQ | QMatrix | CDict
+PointLike: TypeAlias = ArrayLike | AbcQ | QuantityMatrix | CDict
 
 
 # ===================================================================
 # Per-input-type representation default
 #
 # When ``rep`` is omitted the default depends only on the INPUT TYPE, not the
-# operator: a bare array / QMatrix carries no unit information to infer a role
+# operator: a bare array / QuantityMatrix carries no unit information to infer a role
 # from, so it defaults to ``point``; a Quantity / CDict carries units, so the
 # role is guessed from them.
 
@@ -48,7 +48,7 @@ def _default_rep(x: ArrayLike, /) -> Any:
 
 
 @plum.dispatch
-def _default_rep(x: QMatrix, /) -> Any:
+def _default_rep(x: QuantityMatrix, /) -> Any:
     return cxr.point
 
 
@@ -218,39 +218,39 @@ def act(
 
 
 # ===================================================================
-# On QMatrix inputs
+# On QuantityMatrix inputs
 #
-# Precedence=2 so QMatrix (a subclass of AbstractQuantity) prefers this typed
+# Precedence=2 so QuantityMatrix (a subclass of AbstractQuantity) prefers this typed
 # path over the (SpecificTransform, AbstractQuantity) fast paths in rotate.py /
 # translate.py / composed.py (precedence 0) AND over the Identity catch-all
-# (precedence 1). Without it, e.g. (Composed, tau, QMatrix) is ambiguous between
-# (Composed, tau, AbcQ) and (AbstractTransform, tau, QMatrix).
+# (precedence 1). Without it, e.g. (Composed, tau, QuantityMatrix) is ambiguous between
+# (Composed, tau, AbcQ) and (AbstractTransform, tau, QuantityMatrix).
 
 
 @plum.dispatch(precedence=2)  # ty: ignore[no-matching-overload]
 def act(
     op: AbstractTransform,
     tau: Any,
-    x: QMatrix,
+    x: QuantityMatrix,
     chart: cxc.AbstractChart,
     rep: cxr.Representation,
     /,
     **kw: Any,
-) -> QMatrix:
-    """Apply an operator to a ``QMatrix`` with explicit chart and rep.
+) -> QuantityMatrix:
+    """Apply an operator to a ``QuantityMatrix`` with explicit chart and rep.
 
     Routes through the CDict-based implementation, then repacks the result
-    into a ``QMatrix``.
+    into a ``QuantityMatrix``.
 
     >>> import jax.numpy as jnp
     >>> import unxt as u
     >>> import coordinax.charts as cxc
     >>> import coordinax.transforms as cxfm
     >>> import coordinax.representations as cxr
-    >>> from coordinax.internal import QMatrix
+    >>> from coordinax.internal import QuantityMatrix
 
     >>> op = cxfm.Rotate.from_euler("z", u.Q(90, "deg"))
-    >>> qm = QMatrix(
+    >>> qm = QuantityMatrix(
     ...     jnp.array([1.0, 0.0, 0.0]),
     ...     unit=("km", "km", "km"),
     ... )
@@ -259,10 +259,10 @@ def act(
     Array([0., 1., 0.], dtype=float64)
 
     """
-    # Convert QMatrix → CDict
+    # Convert QuantityMatrix → CDict
     v = cxc.cdict(x, chart)
     # Act on the CDict
     nv = cxfmapi.act(op, tau, v, chart, rep, **kw)
-    # Repack CDict → QMatrix
+    # Repack CDict → QuantityMatrix
     arr, units = pack_nonuniform_unit(nv, keys=chart.components)
-    return QMatrix(arr, unit=units)
+    return QuantityMatrix(arr, unit=units)

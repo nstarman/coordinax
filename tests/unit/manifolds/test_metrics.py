@@ -12,14 +12,14 @@ import unxt as u
 import coordinax.charts as cxc
 import coordinax.manifolds as cxm
 from coordinax._src.metric.matrix import DenseMetric, DiagonalMetric
-from coordinax.internal import QMatrix
+from coordinax.internal import QuantityMatrix
 from coordinaxs.api.manifolds import metric_matrix as mm_dispatch
 
 
 def _mat_val(dense_metric, /):
     """Extract numeric array from DenseMetric, regardless of matrix type."""
     mat = dense_metric.matrix
-    return mat.value if isinstance(mat, QMatrix) else mat
+    return mat.value if isinstance(mat, QuantityMatrix) else mat
 
 
 # =============================================================================

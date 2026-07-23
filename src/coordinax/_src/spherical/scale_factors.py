@@ -11,13 +11,13 @@ from unxt.quantity import AllowValue
 from .metric import RoundMetric
 from coordinax._src.base import AbstractChart
 from coordinax._src.custom_types import CDict, OptUSys
-from coordinax.internal import QMatrix, UnitsMatrix
+from coordinax.internal import QuantityMatrix, UnitsMatrix
 
 
 @plum.dispatch
 def scale_factors(
     metric: RoundMetric, chart: AbstractChart, /, *, at: CDict, usys: OptUSys = None
-) -> QMatrix:
+) -> QuantityMatrix:
     r"""Return round-metric diagonal directly without forming the nxn matrix.
 
     Computes the cumulative-sine diagonal $g_{kk} = \prod_{j<k} \sin^2\theta_j$
@@ -28,14 +28,14 @@ def scale_factors(
     >>> import coordinax.charts as cxc
     >>> import coordinax.manifolds as cxm
 
-    Bare angles (no units) → dimensionless QMatrix:
+    Bare angles (no units) → dimensionless QuantityMatrix:
 
     >>> metric = cxm.RoundMetric(2)
     >>> at = {"theta": jnp.array(jnp.pi / 2), "phi": jnp.array(0.0)}
     >>> cxm.scale_factors(metric, cxc.sph2, at=at)
     QuantityMatrix([1., 1.], '(, )')
 
-    Quantity angles → dimensionless QMatrix:
+    Quantity angles → dimensionless QuantityMatrix:
 
     >>> at = {"theta": u.Angle(jnp.pi / 2, "rad"), "phi": u.Angle(0.0, "rad")}
     >>> cxm.scale_factors(metric, cxc.sph2, at=at)
@@ -55,4 +55,4 @@ def scale_factors(
     value = jnp.concatenate([jnp.ones(1, dtype=sin2.dtype), jnp.cumprod(sin2)])
     n = len(components)
     units = UnitsMatrix(tuple(u.unit("") for _ in range(n)))
-    return QMatrix(value, unit=units)
+    return QuantityMatrix(value, unit=units)

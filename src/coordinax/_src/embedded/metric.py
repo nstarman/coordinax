@@ -15,7 +15,7 @@ from .embedmap import AbstractEmbeddingMap
 from coordinax._src.base import AbstractMetricField
 from coordinax._src.custom_types import CDict, OptUSys
 from coordinax.internal import (
-    QMatrix,
+    QuantityMatrix,
     UnitsMatrix,
     cdict_units,
     pack_nonuniform_unit,
@@ -26,8 +26,8 @@ DMLS = u.unit("")
 
 def _jacobian_embed_map(
     embed_map: AbstractEmbeddingMap, at: CDict, usys: OptUSys
-) -> QMatrix:
-    """Compute the Jacobian of ``embed_map`` at ``at`` as a ``QMatrix``.
+) -> QuantityMatrix:
+    """Compute the Jacobian of ``embed_map`` at ``at`` as a ``QuantityMatrix``.
 
     Mirrors the general fallback of ``jac_pt_map`` but differentiates
     the embedding function instead of a chart transition map.
@@ -43,8 +43,8 @@ def _jacobian_embed_map(
 
     Returns
     -------
-    QMatrix
-        2-D ``QMatrix`` of shape ``(n_ambient, n_intrinsic)`` where
+    QuantityMatrix
+        2-D ``QuantityMatrix`` of shape ``(n_ambient, n_intrinsic)`` where
         ``J.value[j, i] = \u2202(ambient_j) / \u2202(intrinsic_i)``.
 
     """
@@ -79,7 +79,7 @@ def _jacobian_embed_map(
         return qnp.stack(vals)
 
     J_arr = jax.jacfwd(embed_fn_arr)(xat)  # shape (n_ambient, n_intrinsic)
-    return QMatrix(J_arr, unit=unit_matrix)
+    return QuantityMatrix(J_arr, unit=unit_matrix)
 
 
 @jax.tree_util.register_static

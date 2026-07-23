@@ -16,7 +16,7 @@ import coordinaxs.api.manifolds as cxmapi
 from coordinax._src.base import AbstractChart, AbstractMetricField
 from coordinax._src.custom_types import CDict, OptUSys
 from coordinax._src.metric.matrix import DenseMetric
-from coordinax.internal import QMatrix, UnitsMatrix, pack_to_qmatrix
+from coordinax.internal import QuantityMatrix, UnitsMatrix, pack_to_qmatrix
 
 
 @plum.dispatch
@@ -111,14 +111,14 @@ def angle_between(
     return cxa.Angle(qnp.arccos(cosine_value), "rad")
 
 
-def _as_quantity_matrix(x: QMatrix | Array) -> QMatrix:
-    """Convert a numeric matrix into a dimensionless QMatrix."""
-    if isinstance(x, QMatrix):
+def _as_quantity_matrix(x: QuantityMatrix | Array) -> QuantityMatrix:
+    """Convert a numeric matrix into a dimensionless QuantityMatrix."""
+    if isinstance(x, QuantityMatrix):
         return x
 
     n_rows, n_cols = x.shape[-2:]
     units = UnitsMatrix(np.full((n_rows, n_cols), u.unit("")))
-    return QMatrix(value=x, unit=units)
+    return QuantityMatrix(value=x, unit=units)
 
 
 def _check_nonzero_norm(*norms: u.AbstractQuantity) -> None:
