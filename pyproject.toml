@@ -87,6 +87,7 @@ docs = [
   "jaxmore>=0.3.0",
   "jupyter-cache>=1.0.0",
   "jupytext>=1.16.4",
+  "matplotlib>=3.9.0",
   "myst-nb>=1.1.2",
   "myst_parser>=0.13",
   "pytz>=2024.2",                    # for copyright date
@@ -280,13 +281,14 @@ similarities.ignore-imports = "yes"
 [tool.pytest.ini_options]
 addopts = [
   "--arraydiff",
-  "--ignore-glob=docs/spec.md", # exclude the spec file
+  "--ignore-glob=docs/spec.md",                                 # exclude the spec file
+  "--ignore-glob=*/coordinaxs.curveframes/docs/visualizing.md", # executed by the docs build (matplotlib), not sybil
   "--import-mode=importlib",
   "--showlocals",
   "--strict-config",
   "--strict-markers",
-  "-p no:doctest",              # using sybil
-  "-ra",                        # Display extra test summary info for all outcomes
+  "-p no:doctest",                                              # using sybil
+  "-ra",                                                        # Display extra test summary info for all outcomes
 ]
 filterwarnings = [
   "error",

@@ -63,6 +63,8 @@ exclude_patterns = [
     ".env",
     ".venv",
     "guides/perf.md",  # Excluded: converted to perf.ipynb by jupytext
+    # Excluded: converted to visualizing.ipynb by jupytext
+    "packages/coordinaxs.curveframes/visualizing.md",
 ]
 
 source_suffix = [".md", ".rst", ".ipynb"]
