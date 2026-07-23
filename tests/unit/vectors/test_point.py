@@ -173,3 +173,11 @@ class TestPointSeparation:
         q = cx.Point.from_({"x": 0.0, "y": 4.0, "z": 0.0}, cxc.cart3d)
         assert bool(qnp.isclose(cx.separation_3d(p, q), 5.0))
         assert bool(qnp.isclose(cx.separation(p, q).ustrip("deg"), 90.0))
+
+    def test_separation_at_origin_is_nan(self):
+        """A point at the origin has no direction: angular separation is nan."""
+        origin = cx.Point.from_([0.0, 0.0, 0.0], "m")
+        q = cx.Point.from_([0.0, 4.0, 0.0], "m")
+        assert bool(qnp.isnan(cx.separation(origin, q).ustrip("rad")))
+        # The straight-line distance remains well-defined.
+        assert bool(qnp.isclose(cx.separation_3d(origin, q).ustrip("m"), 4.0))
