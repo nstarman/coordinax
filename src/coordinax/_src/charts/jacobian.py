@@ -84,7 +84,7 @@ def jac_pt_map(at: None, /, *fixed_args: Any, **fixed_kw: Any) -> Any:
     >>> map = cxc.jac_pt_map(None, cxc.cart3d, cxc.sph3d, usys=u.unitsystems.si)
     >>> at = {"x": u.Q(1.0, "m"), "y": u.Q(0.0, "m"), "z": u.Q(0.0, "m")}
     >>> map(at)
-    QuantityMatrix(
+    QM(
         [[ 1.,  0.,  0.],
          [-0., -0., -1.],
          [ 0.,  1.,  0.]],
@@ -114,7 +114,7 @@ def jac_pt_map(
     >>> map = cxc.jac_pt_map(cxc.cart3d, cxc.sph3d, usys=u.unitsystems.si)
     >>> at = {"x": u.Q(1.0, "m"), "y": u.Q(0.0, "m"), "z": u.Q(0.0, "m")}
     >>> map(at)
-    QuantityMatrix(
+    QM(
         [[ 1.,  0.,  0.],
          [-0., -0., -1.],
          [ 0.,  1.,  0.]],
@@ -343,8 +343,8 @@ def jac_pt_map(
 
     >>> x = u.Q(jnp.array([1.0, 1.0]), "m")
     >>> cxc.jac_pt_map(cxc.cart2d, cxc.polar2d, usys=u.unitsystems.si)(x)
-    QuantityMatrix([[ 0.70710678,  0.70710678],
-                    [-0.5       ,  0.5       ]], '((, ), (rad / m, rad / m))')
+    QM([[ 0.70710678,  0.70710678],
+        [-0.5       ,  0.5       ]], '((, ), (rad / m, rad / m))')
 
     """
     x, y = at[..., 0], at[..., 1]

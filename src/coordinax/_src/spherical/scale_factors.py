@@ -33,13 +33,13 @@ def scale_factors(
     >>> metric = cxm.RoundMetric(2)
     >>> at = {"theta": jnp.array(jnp.pi / 2), "phi": jnp.array(0.0)}
     >>> cxm.scale_factors(metric, cxc.sph2, at=at)
-    QuantityMatrix([1., 1.], '(, )')
+    QM([1., 1.], '(, )')
 
     Quantity angles → dimensionless QuantityMatrix:
 
     >>> at = {"theta": u.Angle(jnp.pi / 2, "rad"), "phi": u.Angle(0.0, "rad")}
     >>> cxm.scale_factors(metric, cxc.sph2, at=at)
-    QuantityMatrix([1., 1.], '(, )')
+    QM([1., 1.], '(, )')
 
     """
     del metric

@@ -40,7 +40,7 @@ Contents:
 # unxt v2.0.
 from unxts.linalg import (
     QM,  # noqa: F401
-    QuantityMatrix,  # noqa: F401
+    QuantityMatrix,
     UnitsMatrix,  # noqa: F401
     cdict_units,  # noqa: F401
     det,  # noqa: F401
@@ -57,3 +57,9 @@ from . import custom_types  # noqa: F401
 from .dtype_utils import *
 from .pack_utils import *
 from .wl_utils import *
+
+# ``QuantityMatrix`` ships without a short name upstream. Give it one so it
+# prints as ``QM(...)`` (matching the ``QM`` alias) under coordinax's
+# ``use_short_name`` repr/str config (see ``[tool.unxts.unxt]`` in
+# ``pyproject.toml``).
+QuantityMatrix.short_name = "QM"  # ty: ignore[unresolved-attribute]

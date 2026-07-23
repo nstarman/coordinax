@@ -206,13 +206,13 @@ def point_to_q(obj: Point, /) -> u.AbstractQuantity:
     ...     {"r": u.Q(1, "km"), "theta": u.Q(2, "deg"), "phi": u.Q(3, "deg")},
     ...     cx.sph3d)
     >>> convert(vec, u.AbstractQuantity)
-    QuantityMatrix([1, 2, 3], '(km, deg, deg)')
+    QM([1, 2, 3], '(km, deg, deg)')
 
     >>> vec = cx.Point.from_(
     ...     {"rho": u.Q(1, "km"), "phi": u.Q(2, "deg"), "z": u.Q(3, "m")},
     ...     cx.cyl3d)
     >>> convert(vec, u.AbstractQuantity)
-    QuantityMatrix([1, 2, 3], '(km, deg, m)')
+    QM([1, 2, 3], '(km, deg, m)')
 
     """
     # Pack the the data into value, unit tuple

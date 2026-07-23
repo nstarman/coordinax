@@ -31,7 +31,7 @@ def scale_factors(
     >>> at = {"ct": jnp.array(0.0), "x": jnp.array(1.0),
     ...       "y": jnp.array(0.0), "z": jnp.array(0.0)}
     >>> cxm.scale_factors(metric, cxc.minkowskict, at=at)
-    QuantityMatrix([-1.,  1.,  1.,  1.], '(, , , )')
+    QM([-1.,  1.,  1.,  1.], '(, , , )')
 
     """
     del chart, at, usys
