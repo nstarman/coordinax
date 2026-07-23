@@ -153,6 +153,10 @@ nitpick_ignore = [
     ("py:class", "Ts"),
     ("py:class", "Rep"),
     ("py:class", "StaticValue"),
+    # ``StaticQuantity`` leaks bare from a jaxtyping annotation
+    # (``Float[u.StaticQuantity, ""]`` in ``product.galilean_ct``); unxt does not
+    # publish an inventory entry under this bare name.
+    ("py:class", "StaticQuantity"),
     ("py:class", "3"),
     ("py:class", "'N N'"),
     # ``ChartT`` is a TypeVar; ``TypeIs`` leaks in bare and from typing_extensions
@@ -183,11 +187,19 @@ nitpick_ignore_regex = [
     # (class/data/obj/…) since ``_src`` symbols are never intentionally
     # documented in any role. Removes ~940 warnings.
     (r"py:.*", r"^coordinaxs?(\.\w+)*\._src(\.\w+)+$"),
+    # Same private ``_src`` targets, but with a generic subscript leaked into the
+    # signature (e.g. ``AbstractFixedComponentsChart[~typing.Any]``); the trailing
+    # ``[...]`` prevents the anchored form above from matching.
+    (r"py:.*", r"^coordinaxs?(\.\w+)*\._src(\.\w+)+\[.*"),
     # External libraries without a resolvable Sphinx inventory (MkDocs sites or
     # no published objects.inv): render their type references as plain text.
     (r"py:.*", r"wadler_lindig\..*"),
     (r"py:.*", r"unxt_hypothesis\..*"),
     (r"py:.*", r"optype\..*"),
+    # ``unxts.linalg`` (unxt v2 heterogeneous-unit linalg) is pinned from git and
+    # publishes no objects.inv; its ``QuantityMatrix`` reference leaks from the
+    # re-exported ``det``/``inv`` docstrings.
+    (r"py:.*", r"unxts\.linalg\..*"),
     # quax-blocks mixins are private (``_src``) implementation details with no
     # published inventory; they leak into base-class signatures.
     (r"py:.*", r"quax_blocks\._src\..*"),
