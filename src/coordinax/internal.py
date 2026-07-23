@@ -51,6 +51,10 @@ __all__ = (
     "det_p",
     "inv",
     "inv_p",
+    "matmul",
+    "matvec",
+    "vecdot",
+    "vecmat",
     # Types
     "CDict",
     "OptUSys",
@@ -69,12 +73,16 @@ with install_import_hook("coordinax.internal"):
         inv,
         inv_p,
         jax_scalar_handler,
+        matmul,
+        matvec,
         pack_nonuniform_unit,
         pack_to_qmatrix,
         pack_uniform_unit,
         pack_with_usys,
         pos_named_objs,
         tree_cast_int_bool_to_float,
+        vecdot,
+        vecmat,
     )
 
 del install_import_hook
