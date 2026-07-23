@@ -11,6 +11,10 @@ by recursively calling the standalone ``metric_matrix`` dispatch API.
 
 __all__: tuple[str, ...] = ()
 
+from itertools import combinations, product
+
+from typing import Any
+
 import jax.numpy as jnp
 import plum
 
@@ -114,8 +118,11 @@ def metric_matrix(
     n = sum(block.shape[0] for block in factor_blocks)
     dtype = jnp.result_type(*(block.value.dtype for block in factor_blocks))
     value = jnp.zeros((n, n), dtype=dtype)
-    units = [[u.unit("") for _ in range(n)] for _ in range(n)]
 
+    # Place each factor's numeric block and its (intra-block) units; record the
+    # index range of each block for the cross-factor pass below.
+    units: list[list[Any]] = [[u.unit("") for _ in range(n)] for _ in range(n)]
+    block_ranges: list[range] = []
     offset = 0
     for block in factor_blocks:
         block_n = block.shape[0]
@@ -125,7 +132,23 @@ def metric_matrix(
         for i in range(block_n):
             for j in range(block_n):
                 units[offset + i][offset + j] = block.unit[i, j]
+        block_ranges.append(range(offset, offset + block_n))
         offset += block_n
+
+    # Cross-factor (i, j) entries are numerically zero, but their units must be
+    # the geometric mean sqrt([g_ii]*[g_jj]) so that every term of the vᵀGv
+    # contraction converts to the row reference unit g[i,0]*v[0]. This mirrors
+    # DiagonalMetric.to_dense and keeps products of factors with non-
+    # dimensionless metrics (e.g. an embedded sphere with a radius) consistent.
+    # Only cross-block entries are filled (intra-block units are kept), so it
+    # is a no-op when every factor metric is dimensionless.
+    #
+    # The mean factorises as sqrt([g_ii]*[g_jj]) = sqrt([g_ii]) * sqrt([g_jj]),
+    # so the per-index sqrt is taken once (n roots, not one per pair).
+    sqrt_diag = [units[i][i] ** 0.5 for i in range(n)]
+    for ra, rb in combinations(block_ranges, 2):
+        for i, j in product(ra, rb):
+            units[i][j] = units[j][i] = sqrt_diag[i] * sqrt_diag[j]
 
     unit_tup = tuple(tuple(row) for row in units)
     G = QMatrix(value=value, unit=UnitsMatrix(unit_tup))
