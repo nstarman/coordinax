@@ -145,3 +145,31 @@ class TestPointSeparation:
         q = cx.Point.from_([0.0, 1.0, 0.0], "m", cxf.noframe)
         with pytest.raises(ValueError, match="frame"):
             cx.separation_3d(p, q)
+
+    def test_separation_angular_is_unit_invariant(self):
+        """Angular separation does not depend on the component units."""
+        p = cx.Point.from_([3.0, 0.0, 0.0], "m")
+        q = cx.Point.from_([0.0, 0.004, 0.0], "km")
+        assert bool(qnp.isclose(cx.separation(p, q).ustrip("deg"), 90.0))
+
+    def test_separation_angular_elementwise_over_batch(self):
+        """Angular separation is evaluated element-wise over the batch."""
+        p = cx.Point.from_([[3.0, 0, 0], [0, 2, 0]], "m")
+        q = cx.Point.from_([[0.0, 4, 0], [0, 0, 5]], "m")
+        sep = cx.separation(p, q).ustrip("deg")
+        assert bool(qnp.isclose(sep[0], 90.0))
+        assert bool(qnp.isclose(sep[1], 90.0))
+
+    def test_separation_angular_different_frames_raises(self):
+        """Angular separation across frames is undefined without alignment."""
+        p = cx.Point.from_([1.0, 0.0, 0.0], "m", cxf.alice)
+        q = cx.Point.from_([0.0, 1.0, 0.0], "m", cxf.noframe)
+        with pytest.raises(ValueError, match="frame"):
+            cx.separation(p, q)
+
+    def test_separation_unitless_components(self):
+        """Separation works for vectors with plain (unitless) array leaves."""
+        p = cx.Point.from_({"x": 3.0, "y": 0.0, "z": 0.0}, cxc.cart3d)
+        q = cx.Point.from_({"x": 0.0, "y": 4.0, "z": 0.0}, cxc.cart3d)
+        assert bool(qnp.isclose(cx.separation_3d(p, q), 5.0))
+        assert bool(qnp.isclose(cx.separation(p, q).ustrip("deg"), 90.0))
