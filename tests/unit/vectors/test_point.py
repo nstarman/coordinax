@@ -100,68 +100,44 @@ class TestPointEquality:
 
 
 class TestPointSeparation:
-    """`separation_3d` and `separation` measure between two points."""
+    """`separation` measures the manifold-norm distance between two points."""
 
-    def test_separation_3d_euclidean(self):
-        """3D separation is the straight-line (Cartesian) distance."""
+    def test_separation_euclidean(self):
+        """Separation is the straight-line (Cartesian) distance."""
         p = cx.Point.from_([3.0, 0.0, 0.0], "m")
         q = cx.Point.from_([0.0, 4.0, 0.0], "m")
-        d = cx.separation_3d(p, q)
+        d = cx.separation(p, q)
         assert isinstance(d, cx.Distance)
         assert bool(qnp.isclose(d.ustrip("m"), 5.0))
-
-    def test_separation_angular(self):
-        """Angular separation is the angle subtended at the origin."""
-        p = cx.Point.from_([3.0, 0.0, 0.0], "m")
-        q = cx.Point.from_([0.0, 4.0, 0.0], "m")
-        sep = cx.separation(p, q)
-        assert isinstance(sep, cx.Angle)
-        assert bool(qnp.isclose(sep.ustrip("deg"), 90.0))
 
     def test_separation_is_chart_invariant(self):
         """Separation does not depend on the chart of either operand."""
         p = cx.Point.from_([3.0, 0.0, 0.0], "m")
         q = cx.Point.from_([0.0, 4.0, 0.0], "m").cconvert(cxc.sph3d)
-        assert bool(qnp.isclose(cx.separation_3d(p, q).ustrip("m"), 5.0))
-        assert bool(qnp.isclose(cx.separation(p, q).ustrip("deg"), 90.0))
+        assert bool(qnp.isclose(cx.separation(p, q).ustrip("m"), 5.0))
 
     def test_separation_is_unit_invariant(self):
         """Separation does not depend on the component units."""
         p = cx.Point.from_([3.0, 0.0, 0.0], "m")
         q = cx.Point.from_([0.0, 0.004, 0.0], "km")
-        assert bool(qnp.isclose(cx.separation_3d(p, q).ustrip("m"), 5.0))
+        assert bool(qnp.isclose(cx.separation(p, q).ustrip("m"), 5.0))
 
     def test_separation_elementwise_over_batch(self):
         """Separation is evaluated element-wise over the batch."""
         p = cx.Point.from_([[3.0, 0, 0], [1, 0, 0]], "m")
         q = cx.Point.from_([[0.0, 4, 0], [0, 1, 0]], "m")
-        d = cx.separation_3d(p, q)
+        d = cx.separation(p, q)
         assert bool(qnp.isclose(d.ustrip("m")[0], 5.0))
         assert bool(qnp.isclose(d.ustrip("m")[1], qnp.sqrt(2.0)))
 
+    def test_separation_dimensionality_follows_manifold(self):
+        """2-D points give a 2-D distance -- no separate ``separation_3d``."""
+        p = cx.Point.from_([3.0, 0.0], "m")
+        q = cx.Point.from_([0.0, 4.0], "m")
+        assert bool(qnp.isclose(cx.separation(p, q).ustrip("m"), 5.0))
+
     def test_separation_different_frames_raises(self):
         """Separation across frames is undefined without alignment."""
-        p = cx.Point.from_([1.0, 0.0, 0.0], "m", cxf.alice)
-        q = cx.Point.from_([0.0, 1.0, 0.0], "m", cxf.noframe)
-        with pytest.raises(ValueError, match="frame"):
-            cx.separation_3d(p, q)
-
-    def test_separation_angular_is_unit_invariant(self):
-        """Angular separation does not depend on the component units."""
-        p = cx.Point.from_([3.0, 0.0, 0.0], "m")
-        q = cx.Point.from_([0.0, 0.004, 0.0], "km")
-        assert bool(qnp.isclose(cx.separation(p, q).ustrip("deg"), 90.0))
-
-    def test_separation_angular_elementwise_over_batch(self):
-        """Angular separation is evaluated element-wise over the batch."""
-        p = cx.Point.from_([[3.0, 0, 0], [0, 2, 0]], "m")
-        q = cx.Point.from_([[0.0, 4, 0], [0, 0, 5]], "m")
-        sep = cx.separation(p, q).ustrip("deg")
-        assert bool(qnp.isclose(sep[0], 90.0))
-        assert bool(qnp.isclose(sep[1], 90.0))
-
-    def test_separation_angular_different_frames_raises(self):
-        """Angular separation across frames is undefined without alignment."""
         p = cx.Point.from_([1.0, 0.0, 0.0], "m", cxf.alice)
         q = cx.Point.from_([0.0, 1.0, 0.0], "m", cxf.noframe)
         with pytest.raises(ValueError, match="frame"):
@@ -171,13 +147,4 @@ class TestPointSeparation:
         """Separation works for vectors with plain (unitless) array leaves."""
         p = cx.Point.from_({"x": 3.0, "y": 0.0, "z": 0.0}, cxc.cart3d)
         q = cx.Point.from_({"x": 0.0, "y": 4.0, "z": 0.0}, cxc.cart3d)
-        assert bool(qnp.isclose(cx.separation_3d(p, q), 5.0))
-        assert bool(qnp.isclose(cx.separation(p, q).ustrip("deg"), 90.0))
-
-    def test_separation_at_origin_is_nan(self):
-        """A point at the origin has no direction: angular separation is nan."""
-        origin = cx.Point.from_([0.0, 0.0, 0.0], "m")
-        q = cx.Point.from_([0.0, 4.0, 0.0], "m")
-        assert bool(qnp.isnan(cx.separation(origin, q).ustrip("rad")))
-        # The straight-line distance remains well-defined.
-        assert bool(qnp.isclose(cx.separation_3d(origin, q).ustrip("m"), 4.0))
+        assert bool(qnp.isclose(cx.separation(p, q), 5.0))
