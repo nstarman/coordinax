@@ -197,9 +197,9 @@ nitpick_ignore_regex = [
     (r"py:.*", r"unxt_hypothesis\..*"),
     (r"py:.*", r"optype\..*"),
     # ``unxts.linalg`` (unxt v2 heterogeneous-unit linalg) is pinned from git and
-    # publishes no objects.inv; its ``QuantityMatrix`` reference leaks from the
-    # re-exported ``det``/``inv`` docstrings.
-    (r"py:.*", r"unxts\.linalg\..*"),
+    # publishes no objects.inv, so neither the module (``:mod:`unxts.linalg```)
+    # nor its members (``unxts.linalg.QuantityMatrix``) resolve.
+    (r"py:.*", r"unxts\.linalg(\..*)?$"),
     # quax-blocks mixins are private (``_src``) implementation details with no
     # published inventory; they leak into base-class signatures.
     (r"py:.*", r"quax_blocks\._src\..*"),
