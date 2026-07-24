@@ -21,6 +21,13 @@ constraints = [
     { name = "starlette", specifier = ">=1.0.1" },
     { name = "tornado", specifier = ">=6.5.6" },
 ]
+overrides = [
+    { name = "unxt", git = "https://github.com/GalacticDynamics/unxt.git?branch=main" },
+    { name = "unxt-hypothesis", git = "https://github.com/GalacticDynamics/unxt.git?subdirectory=packages%2Funxt-hypothesis&branch=main" },
+    { name = "unxts-hypothesis", git = "https://github.com/GalacticDynamics/unxt.git?subdirectory=packages%2Funxts.hypothesis&branch=main" },
+    { name = "unxts-linalg", git = "https://github.com/GalacticDynamics/unxt.git?subdirectory=packages%2Funxts.linalg&branch=main" },
+    { name = "unxts-parametric", git = "https://github.com/GalacticDynamics/unxt.git?subdirectory=packages%2Funxts.parametric&branch=main" },
+]
 
 [[package]]
 name = "accessible-pygments"
@@ -468,6 +475,7 @@ dependencies = [
     { name = "quaxed" },
     { name = "typing-extensions" },
     { name = "unxt" },
+    { name = "unxts-linalg" },
     { name = "wadler-lindig" },
     { name = "xmmutablemap" },
 ]
@@ -534,6 +542,7 @@ dev = [
     { name = "sphinxext-rediraffe" },
     { name = "sybil", extra = ["pytest"] },
     { name = "ty" },
+    { name = "unxts-parametric" },
 ]
 docs = [
     { name = "jaxmore" },
@@ -579,6 +588,7 @@ test = [
     { name = "pytest-env" },
     { name = "pytest-github-actions-annotate-failures" },
     { name = "sybil", extra = ["pytest"] },
+    { name = "unxts-parametric" },
 ]
 test-all = [
     { name = "coordinaxs-curveframes" },
@@ -591,6 +601,7 @@ test-all = [
     { name = "pytest-env" },
     { name = "pytest-github-actions-annotate-failures" },
     { name = "sybil", extra = ["pytest"] },
+    { name = "unxts-parametric" },
 ]
 
 [package.metadata]
@@ -621,7 +632,8 @@ requires-dist = [
     { name = "quax-blocks", specifier = ">=0.4.1" },
     { name = "quaxed", specifier = ">=0.10.5" },
     { name = "typing-extensions", specifier = ">=4.13.2" },
-    { name = "unxt", specifier = ">=1.11.2" },
+    { name = "unxt", git = "https://github.com/GalacticDynamics/unxt.git?branch=main" },
+    { name = "unxts-linalg", git = "https://github.com/GalacticDynamics/unxt.git?subdirectory=packages%2Funxts.linalg&branch=main" },
     { name = "wadler-lindig", specifier = ">=0.1.6" },
     { name = "xmmutablemap", specifier = ">=0.1" },
 ]
@@ -666,6 +678,7 @@ dev = [
     { name = "sphinxext-rediraffe", specifier = ">=0.2.7" },
     { name = "sybil", extras = ["pytest"], specifier = ">=8.0.0" },
     { name = "ty", specifier = ">=0.0.19" },
+    { name = "unxts-parametric", git = "https://github.com/GalacticDynamics/unxt.git?subdirectory=packages%2Funxts.parametric&branch=main" },
 ]
 docs = [
     { name = "jaxmore", specifier = ">=0.3.0" },
@@ -711,6 +724,7 @@ test = [
     { name = "pytest-env", specifier = ">=1.1.5" },
     { name = "pytest-github-actions-annotate-failures", specifier = ">=0.3.0" },
     { name = "sybil", extras = ["pytest"], specifier = ">=8.0.0" },
+    { name = "unxts-parametric", git = "https://github.com/GalacticDynamics/unxt.git?subdirectory=packages%2Funxts.parametric&branch=main" },
 ]
 test-all = [
     { name = "coordinaxs-curveframes", editable = "packages/coordinaxs.curveframes" },
@@ -723,6 +737,7 @@ test-all = [
     { name = "pytest-env", specifier = ">=1.1.5" },
     { name = "pytest-github-actions-annotate-failures", specifier = ">=0.3.0" },
     { name = "sybil", extras = ["pytest"], specifier = ">=8.0.0" },
+    { name = "unxts-parametric", git = "https://github.com/GalacticDynamics/unxt.git?subdirectory=packages%2Funxts.parametric&branch=main" },
 ]
 
 [[package]]
@@ -763,7 +778,7 @@ requires-dist = [
     { name = "coordinaxs-hypothesis", marker = "extra == 'hypothesis'", editable = "packages/coordinaxs.hypothesis" },
     { name = "hypothesis", marker = "extra == 'hypothesis'", specifier = ">=6.148.7" },
     { name = "optional-dependencies", specifier = ">=0.4.0" },
-    { name = "unxt-hypothesis", marker = "extra == 'hypothesis'", specifier = ">=1.10.1" },
+    { name = "unxt-hypothesis", marker = "extra == 'hypothesis'", git = "https://github.com/GalacticDynamics/unxt.git?subdirectory=packages%2Funxt-hypothesis&branch=main" },
 ]
 provides-extras = ["astropy", "hypothesis"]
 
@@ -790,7 +805,7 @@ dependencies = [
 requires-dist = [
     { name = "coordinax", editable = "." },
     { name = "hypothesis", specifier = ">=6.0" },
-    { name = "unxt-hypothesis", specifier = ">=1.10.1" },
+    { name = "unxt-hypothesis", git = "https://github.com/GalacticDynamics/unxt.git?subdirectory=packages%2Funxt-hypothesis&branch=main" },
 ]
 
 [[package]]
@@ -822,14 +837,14 @@ requires-dist = [
     { name = "jaxtyping", specifier = ">=0.3.3" },
     { name = "plum", marker = "python_full_version < '3.14'", specifier = ">=2.8.0" },
     { name = "plum", marker = "python_full_version >= '3.14'", specifier = ">=2.9.0" },
-    { name = "unxt", specifier = ">=1.11.2" },
+    { name = "unxt", git = "https://github.com/GalacticDynamics/unxt.git?branch=main" },
 ]
 
 [package.metadata.requires-dev]
 test = [
     { name = "hypothesis", specifier = ">=6.148.7" },
     { name = "pytest", specifier = ">=9.0.2" },
-    { name = "unxt-hypothesis", specifier = ">=1.10.1" },
+    { name = "unxt-hypothesis", git = "https://github.com/GalacticDynamics/unxt.git?subdirectory=packages%2Funxt-hypothesis&branch=main" },
 ]
 
 [[package]]
@@ -2585,7 +2600,7 @@ wheels = [
 
 [[package]]
 name = "quax"
-version = "0.3.6"
+version = "0.4.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "equinox" },
@@ -2594,9 +2609,9 @@ dependencies = [
     { name = "packaging" },
     { name = "plum-dispatch" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/bb/09/7d59f59e558f2fb573abef5a15d107f845d59f2b42cf9c40d7d92f7b13cf/quax-0.3.6.tar.gz", hash = "sha256:f879f9c9945393281cf219b76d4e531ef3b50e88b864041ab159c95305eef451", size = 175831, upload-time = "2026-06-29T20:22:28.982Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/d4/bf/b82c3951dc90de2ecead6c5bce06e7f4f492133d7a33cd3a0a2f50b7acf7/quax-0.4.1.tar.gz", hash = "sha256:d765430bf0f87a82311da7278e3e24148e854802fe765e6bc608383f059b2cb9", size = 202924, upload-time = "2026-07-22T19:51:31.037Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/1d/8d/c3fd4c78ba0a128b79053a279bc5de4db6b81bcf8476726d45c64ff46b8b/quax-0.3.6-py3-none-any.whl", hash = "sha256:dbe08ddca8d6df4383feffa5943f7bceaa4d273fd588901d2a5819e36ffce815", size = 40887, upload-time = "2026-06-29T20:22:27.473Z" },
+    { url = "https://files.pythonhosted.org/packages/8e/f4/71ff3476add83f10d17f5e2aaa7d6d48c0aabed39150b2630e1c523564a0/quax-0.4.1-py3-none-any.whl", hash = "sha256:1973f80b5f0e9687253e67ed766299226e4acbd986ada2e566db0f85bfb44b4e", size = 58940, upload-time = "2026-07-22T19:51:29.713Z" },
 ]
 
 [[package]]
@@ -3280,8 +3295,8 @@ wheels = [
 
 [[package]]
 name = "unxt"
-version = "1.11.2"
-source = { registry = "https://pypi.org/simple" }
+version = "1.11.1.dev141"
+source = { git = "https://github.com/GalacticDynamics/unxt.git?branch=main#f006bdcab5c5da464c74393d8b7f893ec702c37d" }
 dependencies = [
     { name = "astropy" },
     { name = "dataclassish" },
@@ -3291,6 +3306,7 @@ dependencies = [
     { name = "jaxlib" },
     { name = "jaxtyping" },
     { name = "optional-dependencies" },
+    { name = "packaging" },
     { name = "plum-dispatch" },
     { name = "quax" },
     { name = "quax-blocks" },
@@ -3301,35 +3317,62 @@ dependencies = [
     { name = "xmmutablemap" },
     { name = "zeroth" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/b9/c1/196675cf1d0d659e03e6beab5d68c6bfc703c7b02e771957cdb787f98f42/unxt-1.11.2.tar.gz", hash = "sha256:07a6ddeffb18733ca2d52fc9a5fa43be9f92fc271b84142d371aea58c4741e19", size = 1062862, upload-time = "2026-05-08T21:06:08.991Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/d8/99/fe4542790e9b6d156414e461ccbb13c824d408a2c6df8b0aa87fbe5440a9/unxt-1.11.2-py3-none-any.whl", hash = "sha256:4352b889595a4657393607043b39548235962a95e34660559207223c6eed2279", size = 91438, upload-time = "2026-05-08T21:06:06.919Z" },
-]
 
 [[package]]
 name = "unxt-api"
-version = "1.11.0"
-source = { registry = "https://pypi.org/simple" }
+version = "1.11.1.dev141"
+source = { git = "https://github.com/GalacticDynamics/unxt.git?subdirectory=packages%2Funxt-api&branch=main#f006bdcab5c5da464c74393d8b7f893ec702c37d" }
 dependencies = [
-    { name = "plum-dispatch" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/60/d4/057ee928ebd3a9f55b1d6a8c708ac6b59e6593c0e0f0c90c23e1f908a530/unxt_api-1.11.0.tar.gz", hash = "sha256:5882f11d54dd5d6557abeba915b522ad1dae852fbe6df9f1bca6e8070e877688", size = 21226, upload-time = "2026-03-10T14:22:15.39Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/68/5f/d568994f170c4bf0892ecdff255f4c0e0a4ce7eec40f888f3ac0eb021363/unxt_api-1.11.0-py3-none-any.whl", hash = "sha256:69d327184d08588457fda37accc74ae3db244eb786f9851ad683f69174f06ec9", size = 6251, upload-time = "2026-03-10T14:22:14.136Z" },
+    { name = "unxts-api" },
 ]
 
 [[package]]
 name = "unxt-hypothesis"
-version = "1.11.0"
-source = { registry = "https://pypi.org/simple" }
+version = "1.11.1.dev141"
+source = { git = "https://github.com/GalacticDynamics/unxt.git?subdirectory=packages%2Funxt-hypothesis&branch=main#f006bdcab5c5da464c74393d8b7f893ec702c37d" }
+dependencies = [
+    { name = "unxts-hypothesis" },
+]
+
+[[package]]
+name = "unxts-api"
+version = "0.1.dev617"
+source = { git = "https://github.com/GalacticDynamics/unxt.git?subdirectory=packages%2Funxts.api&branch=main#f006bdcab5c5da464c74393d8b7f893ec702c37d" }
+dependencies = [
+    { name = "plum-dispatch" },
+]
+
+[[package]]
+name = "unxts-hypothesis"
+version = "0.1.dev617"
+source = { git = "https://github.com/GalacticDynamics/unxt.git?subdirectory=packages%2Funxts.hypothesis&branch=main#f006bdcab5c5da464c74393d8b7f893ec702c37d" }
 dependencies = [
     { name = "hypothesis", extra = ["numpy"] },
     { name = "jax" },
     { name = "unxt" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/ff/0a/449b7ecba77bf65d740966a24c4f897e9d1c7272d4de7bd13863d66b7b7c/unxt_hypothesis-1.11.0.tar.gz", hash = "sha256:159864c52eb038af8f71702d4b4f47a09eb63fdbb1d11d0e65dc8eded67d7621", size = 28314, upload-time = "2026-03-10T14:22:51.263Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/2f/d6/ff5bcf7b2d5e5b5a9e25a4e5600ec9de2592f76004e4af5f9123c1fb587f/unxt_hypothesis-1.11.0-py3-none-any.whl", hash = "sha256:ac65f2a33eacb277282a6c10ac2dced5ccf33156be3c19226cc0439c72bd9467", size = 15161, upload-time = "2026-03-10T14:22:49.798Z" },
+
+[[package]]
+name = "unxts-linalg"
+version = "0.1.dev617"
+source = { git = "https://github.com/GalacticDynamics/unxt.git?subdirectory=packages%2Funxts.linalg&branch=main#f006bdcab5c5da464c74393d8b7f893ec702c37d" }
+dependencies = [
+    { name = "equinox" },
+    { name = "jaxtyping" },
+    { name = "plum-dispatch" },
+    { name = "quax" },
+    { name = "unxt" },
+]
+
+[[package]]
+name = "unxts-parametric"
+version = "0.1.dev617"
+source = { git = "https://github.com/GalacticDynamics/unxt.git?subdirectory=packages%2Funxts.parametric&branch=main#f006bdcab5c5da464c74393d8b7f893ec702c37d" }
+dependencies = [
+    { name = "astropy" },
+    { name = "plum-dispatch" },
+    { name = "unxt" },
+    { name = "unxts-api" },
 ]
 
 [[package]]
