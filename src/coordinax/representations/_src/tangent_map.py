@@ -7,6 +7,7 @@ from typing import Any
 
 import jax.numpy as jnp
 import plum
+from unxts.linalg import QuantityMatrix
 
 import quaxed.numpy as qnp
 import unxt as u
@@ -17,7 +18,7 @@ from .basis import CoordinateBasis, PhysicalBasis, coord_basis
 from .custom_types import CDict, OptUSys
 from .geom import TangentGeometry
 from .rep import Representation
-from coordinax.internal import QuantityMatrix, pack_nonuniform_unit
+from coordinax.internal import pack_nonuniform_unit
 
 # ---------------------------------------------------------------------------
 # Validation helpers
@@ -55,7 +56,7 @@ def _apply_jac(
     If the components of ``v`` are plain arrays, the output is a plain-array
     CDict (using ``J.value @ v_arr``).  If any component of ``v`` is a
     {class}`~unxt.AbstractQuantity`, ``v`` is packed into a 1-D
-    {class}`~coordinax.internal.QuantityMatrix` and the result is computed
+    {class}`~unxts.linalg.QuantityMatrix` and the result is computed
     via ``qnp.matmul(J, v_qm)``, which handles per-element unit conversion.
 
     Parameters

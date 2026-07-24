@@ -7,6 +7,7 @@ from jaxtyping import Array, ArrayLike
 from typing import cast
 
 import plum
+from unxts.linalg import QuantityMatrix, UnitsMatrix
 
 import quaxed.numpy as jnp
 import unxt as u
@@ -14,7 +15,6 @@ import unxt as u
 import coordinaxs.api.charts as cxcapi
 from coordinax._src.base import AbstractChart
 from coordinax._src.custom_types import CDict
-from coordinax.internal import QuantityMatrix, UnitsMatrix
 
 # ===================================================================
 # CDict
@@ -126,7 +126,7 @@ def cdict(obj: QuantityMatrix, keys: tuple[str, ...], /) -> CDict:
     --------
     >>> import jax.numpy as jnp
     >>> import unxt as u
-    >>> from coordinax.internal import QuantityMatrix
+    >>> from unxts.linalg import QuantityMatrix
 
     >>> q = QuantityMatrix(jnp.array([1.0, 2.0, 3.0]),
     ...                    unit=("m", "km/s", "rad"))
@@ -183,7 +183,7 @@ def cdict(obj: QuantityMatrix, chart: AbstractChart, /) -> CDict:
     >>> import jax.numpy as jnp
     >>> import coordinax.charts as cxc
     >>> import unxt as u
-    >>> from coordinax.internal import QuantityMatrix
+    >>> from unxts.linalg import QuantityMatrix
 
     >>> q = QuantityMatrix(
     ...     jnp.array([1.0, 2.0, 3.0]),

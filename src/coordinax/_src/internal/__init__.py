@@ -9,16 +9,12 @@
     in minor or patch releases.  Pin to an exact version if you depend on
     anything here.
 
+The heterogeneous-unit matrix machinery (``QuantityMatrix``, ``UnitsMatrix``,
+``det``/``inv``, ``matmul``/``matvec``/``vecdot``/``vecmat``, ``cdict_units``)
+lives in :mod:`unxts.linalg` as of unxt v2.0 and is imported directly from
+there; it is intentionally **not** re-exported here.
+
 Contents:
-
-- ``QuantityMatrix``
-    An N-D quantity matrix/vector where every element carries its own unit.
-    Supports both 1-D (vector) and 2-D (matrix) cases.
-    Useful for Jacobians and metric tensors whose entries have
-    heterogeneous physical dimensions.
-
-- ``UnitsMatrix``
-    Nested tuple of units with indexing support for 1-D, 2-D (and N-D).
 
 - ``pack_uniform_unit``
     Pack dict-of-quantities into an array, converting all entries to
@@ -37,21 +33,10 @@ Contents:
 """
 
 # The heterogeneous-unit matrix machinery lives in ``unxts.linalg`` as of
-# unxt v2.0.
-from unxts.linalg import (
-    QM,  # noqa: F401
-    QuantityMatrix,
-    UnitsMatrix,  # noqa: F401
-    cdict_units,  # noqa: F401
-    det,  # noqa: F401
-    det_p,  # noqa: F401
-    inv,  # noqa: F401
-    inv_p,  # noqa: F401
-    matmul,  # noqa: F401
-    matvec,  # noqa: F401
-    vecdot,  # noqa: F401
-    vecmat,  # noqa: F401
-)
+# unxt v2.0; import it directly from there. ``QuantityMatrix`` is imported here
+# only for the ``short_name`` display side-effect below — it is deliberately not
+# re-exported from ``coordinax.internal``.
+from unxts.linalg import QuantityMatrix
 
 from . import custom_types  # noqa: F401
 from .dtype_utils import *

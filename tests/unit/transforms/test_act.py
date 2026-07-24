@@ -22,6 +22,7 @@ import jax.numpy as jnp
 import numpy as np
 import pytest
 from plum import NotFoundLookupError
+from unxts.linalg import QuantityMatrix
 
 import unxt as u
 
@@ -37,7 +38,6 @@ from .conftest import (
     EXPECTED_ROTATE,
     EXPECTED_TRANSLATE,
 )
-from coordinax.internal import QuantityMatrix
 
 ATOL = 1e-5
 

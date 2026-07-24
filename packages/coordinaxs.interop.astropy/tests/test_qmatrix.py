@@ -5,10 +5,9 @@ import jax.numpy as jnp
 import numpy as np
 import plum
 import pytest
+from unxts.linalg import QuantityMatrix, UnitsMatrix
 
 import unxt as u
-
-from coordinax.internal import QuantityMatrix, UnitsMatrix
 
 
 class TestUnitsMatrixToStructuredUnit:

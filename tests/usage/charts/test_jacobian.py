@@ -26,12 +26,12 @@ from strategies import (
     polar_rad as _angle_rad,
     pos_m as _pos_m,
 )
+from unxts.linalg import QuantityMatrix
 
 import quaxed.numpy as qnp
 import unxt as u
 
 import coordinax.charts as cxc
-from coordinax.internal import QuantityMatrix
 
 # ---------------------------------------------------------------------------
 # Helpers

@@ -5,6 +5,7 @@ __all__: tuple[str, ...] = ()
 from jaxtyping import Array
 
 import plum
+from unxts.linalg import QuantityMatrix, UnitsMatrix
 
 import quaxed.numpy as jnp
 import unxt as u
@@ -14,7 +15,6 @@ import coordinaxs.api.charts as cxcapi
 from .metric import FlatMetric
 from coordinax._src.base import AbstractChart
 from coordinax._src.custom_types import CDict, OptUSys
-from coordinax.internal import QuantityMatrix, UnitsMatrix
 
 DMLS = u.unit("")
 

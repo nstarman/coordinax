@@ -7,6 +7,7 @@ from jaxtyping import Array
 import jax
 import numpy as np
 import plum
+from unxts.linalg import QuantityMatrix, UnitsMatrix
 
 import quaxed.numpy as qnp
 import unxt as u
@@ -16,7 +17,7 @@ import coordinaxs.api.manifolds as cxmapi
 from coordinax._src.base import AbstractChart, AbstractMetricField
 from coordinax._src.custom_types import CDict, OptUSys
 from coordinax._src.metric.matrix import DenseMetric
-from coordinax.internal import QuantityMatrix, UnitsMatrix, pack_to_qmatrix
+from coordinax.internal import pack_to_qmatrix
 
 
 @plum.dispatch

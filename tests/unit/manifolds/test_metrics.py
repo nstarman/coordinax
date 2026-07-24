@@ -6,13 +6,13 @@ All tests in this file are RED until the metrics module is implemented.
 import jax
 import jax.numpy as jnp
 import pytest
+from unxts.linalg import QuantityMatrix
 
 import unxt as u
 
 import coordinax.charts as cxc
 import coordinax.manifolds as cxm
 from coordinax._src.metric.matrix import DenseMetric, DiagonalMetric
-from coordinax.internal import QuantityMatrix
 from coordinaxs.api.manifolds import metric_matrix as mm_dispatch
 
 

@@ -21,6 +21,7 @@ __all__: tuple[str, ...] = ()
 import jax.numpy as jnp
 import numpy as np
 import pytest
+from unxts.linalg import QuantityMatrix
 
 import unxt as u
 
@@ -29,7 +30,6 @@ import coordinax.charts as cxc
 import coordinax.frames as cxf
 import coordinax.representations as cxr
 import coordinax.transforms as cxfm
-from coordinax.internal import QuantityMatrix
 
 # ===================================================================
 # Helpers

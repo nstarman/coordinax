@@ -4,6 +4,7 @@ __all__: tuple[str, ...] = ()
 
 
 import plum
+from unxts.linalg import QuantityMatrix, UnitsMatrix
 
 import quaxed.numpy as jnp
 import unxt as u
@@ -16,7 +17,6 @@ from .dn import CartND
 from coordinax._src.base import AbstractDimensionalFlag
 from coordinax._src.custom_types import CDict, OptUSys
 from coordinax._src.euclidean import FlatMetric
-from coordinax.internal import QuantityMatrix, UnitsMatrix
 
 DMLS = u.unit("")
 

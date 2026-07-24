@@ -7,6 +7,7 @@ import dataclasses
 from typing import final
 
 import jax
+from unxts.linalg import QuantityMatrix, UnitsMatrix, cdict_units
 
 import quaxed.numpy as qnp
 import unxt as u
@@ -14,12 +15,7 @@ import unxt as u
 from .embedmap import AbstractEmbeddingMap
 from coordinax._src.base import AbstractMetricField
 from coordinax._src.custom_types import CDict, OptUSys
-from coordinax.internal import (
-    QuantityMatrix,
-    UnitsMatrix,
-    cdict_units,
-    pack_nonuniform_unit,
-)
+from coordinax.internal import pack_nonuniform_unit
 
 DMLS = u.unit("")
 

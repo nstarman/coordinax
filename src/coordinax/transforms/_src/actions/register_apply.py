@@ -6,6 +6,7 @@ from jaxtyping import Array, ArrayLike
 from typing import Any, TypeAlias, cast
 
 import plum
+from unxts.linalg import QuantityMatrix
 
 import unxt as u
 from unxt import AbstractQuantity as AbcQ
@@ -15,7 +16,7 @@ import coordinax.representations as cxr
 import coordinaxs.api.transforms as cxfmapi
 from .base import AbstractTransform
 from .custom_types import CDict
-from coordinax.internal import QuantityMatrix, pack_nonuniform_unit, pack_uniform_unit
+from coordinax.internal import pack_nonuniform_unit, pack_uniform_unit
 
 # A "point-like" input the entry funnel accepts. Faithful (each member and the
 # union), so the normalizer methods below stay in plum's method cache.
@@ -247,7 +248,7 @@ def act(
     >>> import coordinax.charts as cxc
     >>> import coordinax.transforms as cxfm
     >>> import coordinax.representations as cxr
-    >>> from coordinax.internal import QuantityMatrix
+    >>> from unxts.linalg import QuantityMatrix
 
     >>> op = cxfm.Rotate.from_euler("z", u.Q(90, "deg"))
     >>> qm = QuantityMatrix(

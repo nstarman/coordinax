@@ -22,10 +22,12 @@ These utilities are primarily useful when implementing downstream transforms, Ja
 
 ## Quick Start
 
+The heterogeneous-unit matrix machinery (`QuantityMatrix`, `UnitsMatrix`, `det`/`inv`, `matmul`/`matvec`/`vecdot`/`vecmat`, `cdict_units`) lives in `unxts.linalg` as of unxt v2.0 — import it directly from there:
+
 ```python
 import jax.numpy as jnp
 import unxt as u
-from coordinax.internal import QuantityMatrix
+from unxts.linalg import QuantityMatrix
 
 J = QuantityMatrix(
     value=jnp.eye(3),
@@ -58,13 +60,14 @@ Use `pack_uniform_unit` when all components should be expressed in a shared unit
 
 ## Functional API
 
-- `cdict_units`: extract per-key units from a component dictionary
 - `pack_uniform_unit`: stack a component dictionary into an array using a shared reference unit
 - `pack_nonuniform_unit`: stack a component dictionary into an array while preserving a per-component unit tuple
 
 ## Available Objects
 
 ### Heterogeneous Unit Containers
+
+These live in `unxts.linalg` (import them from there, not from `coordinax.internal`):
 
 - `QuantityMatrix`: N-D quantity container with per-element units; currently supports 1-D vectors and 2-D matrices
 - `UnitsMatrix`: immutable nested tuple of units with tuple-style indexing and shape metadata

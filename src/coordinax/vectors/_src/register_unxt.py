@@ -9,11 +9,12 @@ from collections.abc import Mapping
 from typing import Any, Literal, cast, final
 
 import plum
+from unxts.linalg import QuantityMatrix
 
 import unxt as u
 
 from .point import Point
-from coordinax.internal import QuantityMatrix, pack_nonuniform_unit
+from coordinax.internal import pack_nonuniform_unit
 
 
 @final

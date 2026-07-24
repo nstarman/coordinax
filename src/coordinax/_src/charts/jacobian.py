@@ -12,7 +12,7 @@ Jacobian at a base point $p$ (expressed in $C_1$ coordinates) is
 $$ J^j{}_i(p) = \frac{\\partial \tau^j}{\partial q^i}\bigg|_p $$
 
 where $q^i$ are the $C_1$ coordinates and $\tau^j$ are the $C_2$ coordinates.
-The result is a 2-D {class}`~coordinax.internal.QuantityMatrix` of shape
+The result is a 2-D {class}`~unxts.linalg.QuantityMatrix` of shape
 $(n_\\mathrm{out},\\, n_\\mathrm{in})$ whose $(j, i)$ element carries units
 
 $$ \mathrm{unit}(J^j{}_i) = \frac{\mathrm{unit}(\tau^j)}{\mathrm{unit}(q^i)} $$
@@ -47,6 +47,7 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 import plum
+from unxts.linalg import QuantityMatrix, UnitsMatrix
 
 import quaxed.numpy as qnp
 import unxt as u
@@ -55,12 +56,7 @@ import coordinaxs.api.charts as cxcapi
 from .d2 import Cart2D, Polar2D
 from coordinax._src.base import AbstractChart
 from coordinax._src.custom_types import CDict, OptUSys
-from coordinax.internal import (
-    QuantityMatrix,
-    UnitsMatrix,
-    pack_to_qmatrix,
-    tree_cast_int_bool_to_float,
-)
+from coordinax.internal import pack_to_qmatrix, tree_cast_int_bool_to_float
 
 DMLS: Final[u.AbstractUnit] = cast("u.AbstractUnit", u.unit(""))
 

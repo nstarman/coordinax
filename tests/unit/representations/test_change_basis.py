@@ -6,6 +6,7 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 import pytest
+from unxts.linalg import QuantityMatrix, UnitsMatrix
 
 import unxt as u
 
@@ -13,7 +14,6 @@ import coordinax as cx
 import coordinax.charts as cxc
 import coordinax.manifolds as cxm
 import coordinax.representations as cxr
-from coordinax.internal import QuantityMatrix, UnitsMatrix
 from coordinax.representations._src.basis_change import _qm_triangular_solve
 
 

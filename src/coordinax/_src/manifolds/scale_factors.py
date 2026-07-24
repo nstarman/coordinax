@@ -8,6 +8,7 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 import plum
+from unxts.linalg import QuantityMatrix, UnitsMatrix, cdict_units
 
 import quaxed.numpy as qnp
 import unxt as u
@@ -19,12 +20,7 @@ from coordinax._src.custom_types import CDict, OptUSys
 from coordinax._src.embedded.metric import PullbackMetric
 from coordinax._src.euclidean.scale_factors import _column_squared_norms as _csn
 from coordinax._src.metric.matrix import DiagonalMetric
-from coordinax.internal import (
-    QuantityMatrix,
-    UnitsMatrix,
-    cdict_units,
-    pack_nonuniform_unit,
-)
+from coordinax.internal import pack_nonuniform_unit
 
 DMLS = u.unit("")
 

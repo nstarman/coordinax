@@ -171,7 +171,7 @@ def norm(
       The result is an ``AbstractQuantity`` whose unit reflects the physical
       dimensions of the norm (e.g. ``m / s`` when components mix ``m/s``
       and ``1/s``).  Mixed-unit components are handled correctly via
-      {class}`~coordinax.internal.QuantityMatrix` arithmetic.
+      {class}`~unxts.linalg.QuantityMatrix` arithmetic.
     * **Bare jax.Array values**: ``usys`` is **required** (raises
       ``TypeError`` if omitted); a plain ``jax.Array`` is returned.
 

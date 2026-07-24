@@ -9,6 +9,7 @@ from typing import Any, Final, cast, final
 
 import jax
 import plum
+from unxts.linalg import QuantityMatrix, UnitsMatrix, cdict_units
 
 import quaxed.numpy as jnp
 import unxt as u
@@ -35,7 +36,6 @@ from coordinax._src.base.manifold import AbstractManifold
 from coordinax._src.custom_types import CDict, OptUSys
 from coordinax._src.euclidean import RN, EuclideanManifold, Rn
 from coordinax._src.utils import uconvert_to_rad
-from coordinax.internal import QuantityMatrix, UnitsMatrix, cdict_units
 
 
 @final

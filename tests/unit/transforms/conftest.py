@@ -4,13 +4,13 @@ __all__: tuple[str, ...] = ()
 
 import jax.numpy as jnp
 import pytest
+from unxts.linalg import QuantityMatrix
 
 import unxt as u
 
 import coordinax as cx
 import coordinax.frames as cxf
 import coordinax.transforms as cxfm
-from coordinax.internal import QuantityMatrix
 
 # ===================================================================
 # Transform fixtures

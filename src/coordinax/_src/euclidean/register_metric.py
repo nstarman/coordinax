@@ -19,6 +19,7 @@ from typing import Any, cast
 
 import jax.numpy as jnp
 import plum
+from unxts.linalg import QuantityMatrix, UnitsMatrix
 
 import unxt as u
 
@@ -37,7 +38,6 @@ from coordinax._src.charts.d3 import (
 from coordinax._src.charts.dn import CartND
 from coordinax._src.exceptions import NoGlobalCartesianChartError
 from coordinax._src.metric.matrix import DenseMetric, DiagonalMetric
-from coordinax.internal import QuantityMatrix, UnitsMatrix
 
 # =====================================================================
 # Private helpers for unit-aware analytic metric formulas

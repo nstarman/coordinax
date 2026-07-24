@@ -125,7 +125,7 @@ def pack_to_qmatrix(
 
     Components are ordered according to ``keys``. If the values
     are {class}`~unxt.AbstractQuantity`, a 1-D
-    {class}`~coordinax.internal.QuantityMatrix` is returned with per-component
+    {class}`~unxts.linalg.QuantityMatrix` is returned with per-component
     units. If the values are plain arrays, a stacked JAX array is returned.
 
     Parameters

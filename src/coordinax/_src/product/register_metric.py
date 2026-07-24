@@ -17,13 +17,13 @@ from typing import Any
 
 import jax.numpy as jnp
 import plum
+from unxts.linalg import QuantityMatrix, UnitsMatrix
 
 import unxt as u
 
 from .chart import AbstractCartesianProductChart
 from .manifold import CartesianProductManifold
 from coordinax._src.metric.matrix import DenseMetric, DiagonalMetric
-from coordinax.internal import QuantityMatrix, UnitsMatrix
 from coordinaxs.api.manifolds import metric_matrix, metric_representation
 
 # =====================================================================

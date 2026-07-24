@@ -3,6 +3,7 @@
 __all__: tuple[str, ...] = ()
 
 import plum
+from unxts.linalg import QuantityMatrix, UnitsMatrix
 
 import quaxed.numpy as jnp
 import unxt as u
@@ -11,7 +12,6 @@ from unxt.quantity import AllowValue
 from .metric import RoundMetric
 from coordinax._src.base import AbstractChart
 from coordinax._src.custom_types import CDict, OptUSys
-from coordinax.internal import QuantityMatrix, UnitsMatrix
 
 
 @plum.dispatch

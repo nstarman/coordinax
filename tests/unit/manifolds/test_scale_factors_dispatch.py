@@ -2,13 +2,13 @@
 
 import jax
 import jax.numpy as jnp
+from unxts.linalg import QuantityMatrix
 
 import unxt as u
 
 import coordinax.charts as cxc
 import coordinax.manifolds as cxm
 from coordinax._src.metric.matrix import DiagonalMetric
-from coordinax.internal import QuantityMatrix
 from coordinaxs.api.manifolds import metric_matrix as mm_dispatch
 
 

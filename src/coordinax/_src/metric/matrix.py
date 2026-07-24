@@ -18,16 +18,15 @@ from typing import Any, final
 import equinox as eqx
 import jax.numpy as jnp
 import quax
-
-import quaxed.numpy as qnp
-import unxt as u
-
-from coordinax.internal import (
+from unxts.linalg import (
     QuantityMatrix,
     UnitsMatrix,
     det as _det_primitive,
     inv as _inv_primitive,
 )
+
+import quaxed.numpy as qnp
+import unxt as u
 
 _det = quax.quaxify(_det_primitive)
 _inv = quax.quaxify(_inv_primitive)
@@ -164,12 +163,12 @@ class DiagonalMetric(AbstractMetricMatrix):
     def to_dense(self) -> "DenseMetric":
         r"""Convert to a full $n \times n$ matrix with zeros off the diagonal.
 
-        When the diagonal is a :class:`~coordinax.internal.QuantityMatrix`,
+        When the diagonal is a :class:`~unxts.linalg.QuantityMatrix`,
         the off-diagonal entry ``(i, j)`` is assigned the geometric-mean unit
         ``sqrt(diag_unit[i] * diag_unit[j])``.  This choice ensures that
         ``g[i, j] * v[j]`` is unit-compatible with ``g[i, i] * v[i]`` during
         matrix-vector contraction, which is required for the
-        :func:`~coordinax.internal.QuantityMatrix` dot-product to succeed even
+        :func:`~unxts.linalg.QuantityMatrix` dot-product to succeed even
         when the coordinate components have different physical dimensions (e.g.
         metres and radians in spherical coordinates).
 
@@ -188,7 +187,7 @@ class DiagonalMetric(AbstractMetricMatrix):
         QuantityMatrix diagonal — diagonal units are preserved and off-diagonal
         entries get the geometric-mean unit:
 
-        >>> from coordinax.internal import QuantityMatrix
+        >>> from unxts.linalg import QuantityMatrix
         >>> d = DiagonalMetric(QuantityMatrix(jnp.array([1.0, 4.0]), unit=("m2", "s2")))
         >>> d.to_dense().matrix.unit[0, 0]
         Unit("m2")
@@ -227,7 +226,7 @@ class DiagonalMetric(AbstractMetricMatrix):
 
         When either the diagonal or ``other`` carries units, the operation is
         routed through :meth:`to_dense` so that unit propagation is handled
-        correctly by the :class:`~coordinax.internal.QuantityMatrix` Quax
+        correctly by the :class:`~unxts.linalg.QuantityMatrix` Quax
         dispatches.  Plain-array inputs use a fast O(n) element-wise multiply.
 
         Examples
@@ -243,7 +242,7 @@ class DiagonalMetric(AbstractMetricMatrix):
 
         QuantityMatrix diagonal, plain array vector — result carries diagonal units:
 
-        >>> from coordinax.internal import QuantityMatrix
+        >>> from unxts.linalg import QuantityMatrix
         >>> d = DiagonalMetric(
         ...     QuantityMatrix(jnp.array([2.0, 3.0]), unit=("m2 / rad2", "m2 / rad2"))
         ... )
@@ -306,7 +305,7 @@ class DiagonalMetric(AbstractMetricMatrix):
         """Product of the diagonal entries.
 
         Returns a :class:`~unxt.AbstractQuantity` when the diagonal is a
-        :class:`~coordinax.internal.QuantityMatrix`.
+        :class:`~unxts.linalg.QuantityMatrix`.
 
         Examples
         --------
@@ -321,7 +320,7 @@ class DiagonalMetric(AbstractMetricMatrix):
         QuantityMatrix diagonal — returns a :class:`~unxt.Quantity`:
 
         >>> import unxt as u
-        >>> from coordinax.internal import QuantityMatrix
+        >>> from unxts.linalg import QuantityMatrix
         >>> d = DiagonalMetric(QuantityMatrix(jnp.array([2.0, 3.0]), unit=("m2", "s2")))
         >>> d.determinant
         Q(6., 'm2 s2')
@@ -391,7 +390,7 @@ class DenseMetric(AbstractMetricMatrix):
     ) -> "Array | QuantityMatrix":
         """Apply this metric matrix to a vector via matrix-vector product.
 
-        When the metric matrix is a :class:`~coordinax.internal.QuantityMatrix`,
+        When the metric matrix is a :class:`~unxts.linalg.QuantityMatrix`,
         a plain-array ``other`` is treated as dimensionless so that units flow
         through the contraction correctly.
 
@@ -408,7 +407,7 @@ class DenseMetric(AbstractMetricMatrix):
 
         QuantityMatrix metric, plain array vector — result carries metric units:
 
-        >>> from coordinax.internal import QuantityMatrix, UnitsMatrix
+        >>> from unxts.linalg import QuantityMatrix, UnitsMatrix
         >>> g = DenseMetric(
         ...     QuantityMatrix(
         ...         jnp.array([[2.0, 0.0], [0.0, 3.0]]),
@@ -438,7 +437,7 @@ class DenseMetric(AbstractMetricMatrix):
     def inverse(self) -> "DenseMetric":
         """Inverse via :func:`jax.numpy.linalg.inv` (positive-definite assumption).
 
-        Returns a :class:`~coordinax.internal.QuantityMatrix`-backed
+        Returns a :class:`~unxts.linalg.QuantityMatrix`-backed
         :class:`DenseMetric` with units ``1 / ref_unit`` when the matrix
         carries units.  Assumes all entries share the same unit (physically
         well-formed metrics from the Cartesian-Jacobian pullback always satisfy
@@ -459,7 +458,7 @@ class DenseMetric(AbstractMetricMatrix):
         QuantityMatrix — inverse carries reciprocal units:
 
         >>> import unxt as u
-        >>> from coordinax.internal import QuantityMatrix, UnitsMatrix
+        >>> from unxts.linalg import QuantityMatrix, UnitsMatrix
         >>> g = DenseMetric(
         ...     QuantityMatrix(
         ...         jnp.array([[4.0, 0.0], [0.0, 1.0]]),
@@ -482,7 +481,7 @@ class DenseMetric(AbstractMetricMatrix):
     def determinant(self) -> "Array | u.AbstractQuantity":
         """Determinant via the custom ``det_p`` JAX primitive.
 
-        Routes through Quax, so a :class:`~coordinax.internal.QuantityMatrix`
+        Routes through Quax, so a :class:`~unxts.linalg.QuantityMatrix`
         matrix returns a :class:`~unxt.AbstractQuantity` while a plain array
         returns a bare :class:`~jaxtyping.Array`.  The unit is the product of
         the main-diagonal units — valid for diagonal and uniform-unit matrices.
@@ -500,7 +499,7 @@ class DenseMetric(AbstractMetricMatrix):
         QuantityMatrix — returns a :class:`~unxt.Quantity`:
 
         >>> import unxt as u
-        >>> from coordinax.internal import QuantityMatrix
+        >>> from unxts.linalg import QuantityMatrix
         >>> g = DenseMetric(QuantityMatrix(jnp.eye(2), unit=(("m2", ""), ("", "s2"))))
         >>> g.determinant
         Q(1., 'm2 s2')

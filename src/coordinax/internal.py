@@ -9,16 +9,12 @@
     in minor or patch releases.  Pin to an exact version if you depend on
     anything here.
 
+The heterogeneous-unit matrix machinery (``QuantityMatrix``, ``UnitsMatrix``,
+``det``/``inv``, ``matmul``/``matvec``/``vecdot``/``vecmat``, ``cdict_units``)
+lives in :mod:`unxts.linalg` as of unxt v2.0 — import it directly from there,
+**not** from ``coordinax.internal``.
+
 Contents:
-
-- ``QuantityMatrix``
-    An N-D quantity matrix/vector where every element carries its own unit.
-    Supports both 1-D (vector) and 2-D (matrix) cases.
-    Useful for Jacobians and metric tensors whose entries have
-    heterogeneous physical dimensions.
-
-- ``UnitsMatrix``
-    Nested tuple of units with indexing support for 1-D, 2-D (and N-D).
 
 - ``pack_uniform_unit``
     Pack dict-of-quantities into an array, converting all entries to
@@ -37,24 +33,13 @@ Contents:
 """
 
 __all__ = (
-    "QuantityMatrix",
-    "UnitsMatrix",
     "tree_cast_int_bool_to_float",
     "pack_uniform_unit",
-    "cdict_units",
     "pack_nonuniform_unit",
     "pack_with_usys",
     "pack_to_qmatrix",
     "pos_named_objs",
     "jax_scalar_handler",
-    "det",
-    "det_p",
-    "inv",
-    "inv_p",
-    "matmul",
-    "matvec",
-    "vecdot",
-    "vecmat",
     # Types
     "CDict",
     "OptUSys",
@@ -65,24 +50,13 @@ from ._src.setup_package import install_import_hook
 with install_import_hook("coordinax.internal"):
     from coordinax._src.custom_types import CDict, OptUSys
     from coordinax._src.internal import (
-        QuantityMatrix,
-        UnitsMatrix,
-        cdict_units,
-        det,
-        det_p,
-        inv,
-        inv_p,
         jax_scalar_handler,
-        matmul,
-        matvec,
         pack_nonuniform_unit,
         pack_to_qmatrix,
         pack_uniform_unit,
         pack_with_usys,
         pos_named_objs,
         tree_cast_int_bool_to_float,
-        vecdot,
-        vecmat,
     )
 
 del install_import_hook

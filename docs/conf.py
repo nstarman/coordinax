@@ -203,6 +203,10 @@ nitpick_ignore_regex = [
     # quax-blocks mixins are private (``_src``) implementation details with no
     # published inventory; they leak into base-class signatures.
     (r"py:.*", r"quax_blocks\._src\..*"),
+    # quax's private paths (e.g. ``quax._values.ArrayValue``) leak from
+    # ``AbstractQuantity``'s base classes into signatures; quax publishes no
+    # inventory entry for them.
+    (r"py:.*", r"quax\._.*"),
     # Parametrized unxt Quantity aliases (``Quantity[PhysicalType('length')]``,
     # ``['angle']``, …) are emitted verbatim into signatures but are not
     # resolvable inventory targets.

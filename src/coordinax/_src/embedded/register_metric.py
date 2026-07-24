@@ -19,6 +19,7 @@ __all__: tuple[str, ...] = ()
 import jax
 import jax.numpy as jnp
 import plum
+from unxts.linalg import QuantityMatrix, UnitsMatrix, cdict_units
 
 import quaxed.numpy as qnp
 import unxt as u
@@ -27,12 +28,7 @@ import coordinaxs.api.charts as cxcapi
 from .manifold import EmbeddedManifold
 from coordinax._src.base import AbstractChart  # type: ignore[type-arg]
 from coordinax._src.metric.matrix import DenseMetric
-from coordinax.internal import (
-    QuantityMatrix,
-    UnitsMatrix,
-    cdict_units,
-    pack_nonuniform_unit,
-)
+from coordinax.internal import pack_nonuniform_unit
 from coordinaxs.api.manifolds import metric_matrix
 
 DMLS = u.unit("")
@@ -97,7 +93,7 @@ def metric_matrix(
     -------
     DenseMetric
         Induced metric matrix at ``point``, backed by a
-        :class:`~coordinax.internal.QuantityMatrix` with units
+        :class:`~unxts.linalg.QuantityMatrix` with units
         ``cart_unit^2 / (intrinsic_unit_i * intrinsic_unit_j)``.
 
     Examples

@@ -4,13 +4,13 @@ __all__: tuple[str, ...] = ()
 
 import jax.numpy as jnp
 import plum
+from unxts.linalg import QuantityMatrix, UnitsMatrix
 
 import unxt as u
 
 from .charts import MinkowskiCT
 from .metric import MinkowskiMetric
 from coordinax._src.custom_types import CDict, OptUSys
-from coordinax.internal import QuantityMatrix, UnitsMatrix
 
 
 @plum.dispatch

@@ -16,6 +16,7 @@ __all__: tuple[str, ...] = ()
 
 import jax.numpy as jnp
 import plum
+from unxts.linalg import QuantityMatrix, UnitsMatrix
 
 import unxt as u
 
@@ -24,7 +25,6 @@ from .charts import MinkowskiCT
 from .manifold import MinkowskiManifold
 from coordinax._src.base import AbstractChart  # type: ignore[type-arg]
 from coordinax._src.metric.matrix import DenseMetric, DiagonalMetric
-from coordinax.internal import QuantityMatrix, UnitsMatrix
 from coordinaxs.api.manifolds import metric_matrix, metric_representation
 
 # =====================================================================
