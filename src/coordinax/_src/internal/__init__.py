@@ -36,7 +36,7 @@ Contents:
 # unxt v2.0; import it directly from there. ``QuantityMatrix`` is imported here
 # only for the ``short_name`` display side-effect below — it is deliberately not
 # re-exported from ``coordinax.internal``.
-from unxts.linalg import QuantityMatrix
+import unxts.linalg as ul
 
 from . import custom_types  # noqa: F401
 from .dtype_utils import *
@@ -47,4 +47,4 @@ from .wl_utils import *
 # prints as ``QM(...)`` (matching the ``QM`` alias) under coordinax's
 # ``use_short_name`` repr/str config (see ``[tool.unxts.unxt]`` in
 # ``pyproject.toml``).
-QuantityMatrix.short_name = "QM"  # ty: ignore[unresolved-attribute]
+ul.QuantityMatrix.short_name = "QM"  # ty: ignore[unresolved-attribute]

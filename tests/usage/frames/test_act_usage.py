@@ -21,7 +21,7 @@ __all__: tuple[str, ...] = ()
 import jax.numpy as jnp
 import numpy as np
 import pytest
-from unxts.linalg import QuantityMatrix
+import unxts.linalg as ul
 
 import unxt as u
 
@@ -113,20 +113,20 @@ class TestRotateUsage:
 
     def test_on_quantity_matrix(self, rot90z):
         """QuantityMatrix (1,0,0) km → (0,1,0) km."""
-        qm = QuantityMatrix(
+        qm = ul.QuantityMatrix(
             jnp.array([1, 0, 0]), unit=(u.unit("km"), u.unit("km"), u.unit("km"))
         )
         result = cxfm.act(rot90z, None, qm)
-        assert isinstance(result, QuantityMatrix)
+        assert isinstance(result, ul.QuantityMatrix)
         _assert_close(result.value, [0, 1, 0])
 
     def test_on_quantity_matrix_mixed_units(self, rot90z):
         """QuantityMatrix with km,m,m: converted to common unit internally."""
-        qm = QuantityMatrix(
+        qm = ul.QuantityMatrix(
             jnp.array([1, 0, 0]), unit=(u.unit("km"), u.unit("m"), u.unit("m"))
         )
         result = cxfm.act(rot90z, None, qm)
-        assert isinstance(result, QuantityMatrix)
+        assert isinstance(result, ul.QuantityMatrix)
         # Internal conversion normalizes to common unit (km); x→0, y→1km, z→0
         _assert_close(result.value, [0, 1, 0], atol=1e-12)
 
@@ -176,11 +176,11 @@ class TestTranslateUsage:
 
     def test_on_quantity_matrix(self, shift_1_2_3):
         """QuantityMatrix [0,0,0] km + shift → [1,2,3] km."""
-        qm = QuantityMatrix(
+        qm = ul.QuantityMatrix(
             jnp.array([0, 0, 0]), unit=(u.unit("km"), u.unit("km"), u.unit("km"))
         )
         result = cxfm.act(shift_1_2_3, None, qm)
-        assert isinstance(result, QuantityMatrix)
+        assert isinstance(result, ul.QuantityMatrix)
         _assert_close(result.value, [1, 2, 3])
 
     def test_on_cdict(self, shift_1_2_3):
@@ -231,11 +231,11 @@ class TestComposedUsage:
 
     def test_on_quantity_matrix(self, pipe):
         """QuantityMatrix through composed pipeline."""
-        qm = QuantityMatrix(
+        qm = ul.QuantityMatrix(
             jnp.array([0, 0, 0]), unit=(u.unit("km"), u.unit("km"), u.unit("km"))
         )
         result = cxfm.act(pipe, None, qm)
-        assert isinstance(result, QuantityMatrix)
+        assert isinstance(result, ul.QuantityMatrix)
         _assert_close(result.value, [-2, 1, 3])
 
     def test_on_cdict(self, pipe):
@@ -306,7 +306,7 @@ class TestRoundtripUsage:
 
     def test_roundtrip_on_quantity_matrix(self, rot90z):
         """Rotate then inverse-rotate a QuantityMatrix recovers original."""
-        qm = QuantityMatrix(
+        qm = ul.QuantityMatrix(
             jnp.array([3, -1, 2]), unit=(u.unit("km"), u.unit("km"), u.unit("km"))
         )
         fwd = cxfm.act(rot90z, None, qm)

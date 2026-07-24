@@ -6,7 +6,7 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 import pytest
-from unxts.linalg import QuantityMatrix, UnitsMatrix
+import unxts.linalg as ul
 
 import unxt as u
 
@@ -379,12 +379,14 @@ class TestTriangularSolveBatching:
 
     def test_qm_triangular_solve_batched_rows_scaled_correctly(self):
         e_val = jnp.array([[[2, 1], [0, 4]], [[3, 2], [0, 5]]])
-        e_unit = UnitsMatrix(((u.unit("m"), u.unit("m")), (u.unit("m"), u.unit("m"))))
-        e = QuantityMatrix(e_val, unit=e_unit)
+        e_unit = ul.UnitsMatrix(
+            ((u.unit("m"), u.unit("m")), (u.unit("m"), u.unit("m")))
+        )
+        e = ul.QuantityMatrix(e_val, unit=e_unit)
 
         b_val = jnp.array([[5, 8], [7, 10]])
-        b_unit = UnitsMatrix((u.unit("m/s"), u.unit("m/s")))
-        b = QuantityMatrix(b_val, unit=b_unit)
+        b_unit = ul.UnitsMatrix((u.unit("m/s"), u.unit("m/s")))
+        b = ul.QuantityMatrix(b_val, unit=b_unit)
 
         out = _qm_triangular_solve(e, b)
 
@@ -395,4 +397,4 @@ class TestTriangularSolveBatching:
             ]
         )
         np.testing.assert_allclose(out.value, expected)
-        assert out.unit == UnitsMatrix((u.unit("1 / s"), u.unit("1 / s")))
+        assert out.unit == ul.UnitsMatrix((u.unit("1 / s"), u.unit("1 / s")))

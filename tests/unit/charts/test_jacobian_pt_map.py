@@ -9,6 +9,7 @@ import jaxtyping
 import jax
 import jax.numpy as jnp
 import pytest
+import unxts.linalg as ul
 from hypothesis import given, settings
 from numpy.testing import assert_allclose
 from strategies import (
@@ -17,7 +18,6 @@ from strategies import (
     polar_rad as _angle_rad,
     pos_m as _pos_m,
 )
-from unxts.linalg import QuantityMatrix
 
 import quaxed.numpy as qnp
 import unxt as u
@@ -103,7 +103,7 @@ class TestJacobianPtMapReturnType:
     )
     def test_returns_QuantityMatrix(self, from_chart, to_chart, at, exp_shape) -> None:
         J = cxc.jac_pt_map(at, from_chart, to_chart)
-        assert isinstance(J, QuantityMatrix)
+        assert isinstance(J, ul.QuantityMatrix)
         assert J.ndim == 2
         assert J.value.shape == exp_shape
 
@@ -675,7 +675,7 @@ class TestJacobianPtMapJAXCompatibility:
             return cxc.jac_pt_map(at, cxc.cart3d, cxc.sph3d)
 
         J = jitted(at)
-        assert isinstance(J, QuantityMatrix)
+        assert isinstance(J, ul.QuantityMatrix)
         assert_allclose(J.value[0, 0], 1, atol=1e-6)  # ∂r/∂x at (1,0,0)
 
     def test_jit_cart2d_to_polar2d(self) -> None:
@@ -743,7 +743,7 @@ class TestJacobianPtMapCurriedForms:
         at = {"x": u.Q(1, "m"), "y": u.Q(0, "m")}
         fn = cxc.jac_pt_map(cxc.cart2d, cxc.polar2d, usys=usys_si)
         J = fn(at)
-        assert isinstance(J, QuantityMatrix)
+        assert isinstance(J, ul.QuantityMatrix)
         assert J.value.shape == (2, 2)
 
 

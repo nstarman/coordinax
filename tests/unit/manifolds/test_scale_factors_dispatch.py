@@ -2,7 +2,7 @@
 
 import jax
 import jax.numpy as jnp
-from unxts.linalg import QuantityMatrix
+import unxts.linalg as ul
 
 import unxt as u
 
@@ -25,7 +25,7 @@ class TestScaleFactorsEuclidean:
 
         result = cxm.scale_factors(metric, cxc.cart3d, at=at)
 
-        assert isinstance(result, QuantityMatrix)
+        assert isinstance(result, ul.QuantityMatrix)
         assert result.shape == (3,)
         assert result.ndim == 1
         assert jnp.allclose(result.value, jnp.array([1, 1, 1]))
@@ -41,7 +41,7 @@ class TestScaleFactorsEuclidean:
 
         result = cxm.scale_factors(metric, cxc.sph3d, at=at)
 
-        assert isinstance(result, QuantityMatrix)
+        assert isinstance(result, ul.QuantityMatrix)
         assert result.shape == (3,)
         assert jnp.allclose(result.value, jnp.array([1, 4, 1]), atol=1e-6)
         assert result.unit[0] == u.unit("")
@@ -58,7 +58,7 @@ class TestScaleFactorsGeneric:
 
         result = cxm.scale_factors(metric, cxc.sph2, at=at)
 
-        assert isinstance(result, QuantityMatrix)
+        assert isinstance(result, ul.QuantityMatrix)
         assert result.shape == (2,)
         assert jnp.allclose(result.value, jnp.array([1, 1]), atol=1e-6)
         assert all(result.unit[i] == u.unit("") for i in range(2))
@@ -75,11 +75,11 @@ class TestScaleFactorsGeneric:
         assert isinstance(expected_mm, DiagonalMetric)
         # Extract numeric diagonal values
         diag = expected_mm.diagonal
-        expected_values = diag.value if isinstance(diag, QuantityMatrix) else diag
+        expected_values = diag.value if isinstance(diag, ul.QuantityMatrix) else diag
 
         result = cxm.scale_factors(metric, cxc.sph2, at=at)
 
-        assert isinstance(result, QuantityMatrix)
+        assert isinstance(result, ul.QuantityMatrix)
         assert jnp.allclose(result.value, expected_values, atol=1e-6)
 
     def test_jit(self):
@@ -92,7 +92,7 @@ class TestScaleFactorsGeneric:
         at = {"theta": u.Angle(jnp.pi / 2, "rad"), "phi": u.Angle(jnp.array(0), "rad")}
         result = compute(at)
 
-        assert isinstance(result, QuantityMatrix)
+        assert isinstance(result, ul.QuantityMatrix)
         assert jnp.allclose(result.value, jnp.array([1, 1]), atol=1e-6)
 
     def test_vmap_values(self):
@@ -130,7 +130,7 @@ class TestScaleFactorsGeneric:
         # not just a coincidental [4, 4] value at the equator.
         expected = jnp.array([4, 1])
 
-        assert isinstance(result, QuantityMatrix)
+        assert isinstance(result, ul.QuantityMatrix)
         assert result.shape == (2,)
         assert jnp.allclose(result.value, expected, atol=1e-6)
         assert result.unit[0] == u.unit("m2 / rad2")

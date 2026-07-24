@@ -9,7 +9,7 @@ from typing import Any, Final, cast, final
 
 import jax
 import plum
-from unxts.linalg import QuantityMatrix, UnitsMatrix, cdict_units
+import unxts.linalg as ul
 
 import quaxed.numpy as jnp
 import unxt as u
@@ -1577,7 +1577,7 @@ def pt_map(
     /,
     *,
     usys: OptUSys = None,
-) -> QuantityMatrix:
+) -> ul.QuantityMatrix:
     """Transform a QuantityMatrix between charts.
 
     Converts the components of a QuantityMatrix from one chart to another,
@@ -1618,9 +1618,9 @@ def pt_map(
     p_to = cast("dict[str, u.AbstractQuantity]", p_to)
 
     # Stack the transformed components into an QuantityMatrix
-    p_out = QuantityMatrix(
+    p_out = ul.QuantityMatrix(
         jnp.stack([u.ustrip(p_to[k]) for k in to_chart.components], axis=-1),
-        unit=UnitsMatrix(cdict_units(p_to, to_chart.components)),
+        unit=ul.UnitsMatrix(ul.cdict_units(p_to, to_chart.components)),
     )
 
     return p_out  # noqa: RET504

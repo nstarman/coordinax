@@ -9,7 +9,7 @@ from collections.abc import Mapping
 from typing import Any, Literal, cast, final
 
 import plum
-from unxts.linalg import QuantityMatrix
+import unxts.linalg as ul
 
 import unxt as u
 
@@ -225,4 +225,4 @@ def point_to_q(obj: Point, /) -> u.AbstractQuantity:
         unit = u.unit("") if units[0] is None else units[0]
         return u.Q(vals, unit)
 
-    return QuantityMatrix(vals, units)
+    return ul.QuantityMatrix(vals, units)

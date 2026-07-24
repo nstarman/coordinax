@@ -7,7 +7,7 @@ from jaxtyping import Array
 import jax
 import numpy as np
 import plum
-from unxts.linalg import QuantityMatrix, UnitsMatrix
+import unxts.linalg as ul
 
 import quaxed.numpy as qnp
 import unxt as u
@@ -112,14 +112,14 @@ def angle_between(
     return cxa.Angle(qnp.arccos(cosine_value), "rad")
 
 
-def _as_quantity_matrix(x: QuantityMatrix | Array) -> QuantityMatrix:
+def _as_quantity_matrix(x: ul.QuantityMatrix | Array) -> ul.QuantityMatrix:
     """Convert a numeric matrix into a dimensionless QuantityMatrix."""
-    if isinstance(x, QuantityMatrix):
+    if isinstance(x, ul.QuantityMatrix):
         return x
 
     n_rows, n_cols = x.shape[-2:]
-    units = UnitsMatrix(np.full((n_rows, n_cols), u.unit("")))
-    return QuantityMatrix(value=x, unit=units)
+    units = ul.UnitsMatrix(np.full((n_rows, n_cols), u.unit("")))
+    return ul.QuantityMatrix(value=x, unit=units)
 
 
 def _check_nonzero_norm(*norms: u.AbstractQuantity) -> None:

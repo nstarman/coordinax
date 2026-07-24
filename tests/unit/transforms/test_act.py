@@ -21,8 +21,8 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 import pytest
+import unxts.linalg as ul
 from plum import NotFoundLookupError
-from unxts.linalg import QuantityMatrix
 
 import unxt as u
 
@@ -62,7 +62,7 @@ def _extract_xyz(result):
         z = float(u.ustrip("km", d["z"]))
         return (x, y, z)
 
-    if isinstance(result, QuantityMatrix):
+    if isinstance(result, ul.QuantityMatrix):
         x = float(u.ustrip("km", u.Q(result.value[0], result.unit[0])))
         y = float(u.ustrip("km", u.Q(result.value[1], result.unit[1])))
         z = float(u.ustrip("km", u.Q(result.value[2], result.unit[2])))
@@ -96,7 +96,7 @@ USYS = u.unitsystem("km", "s", "kg", "rad")
 INPUT_LEVELS = [
     ("array_3d", jax.Array),
     ("quantity_3d", u.AbstractQuantity),
-    ("qmatrix_3d", QuantityMatrix),
+    ("qmatrix_3d", ul.QuantityMatrix),
     ("cdict_3d", dict),
     ("vector_3d", cx.Point),
     ("coord_3d", cx.Point),
@@ -187,9 +187,9 @@ def test_act_under_jit(request, rotate_op, level_fixture):
 def test_qmatrix_heterogeneous_units_identity(identity_op):
     """A QuantityMatrix with heterogeneous per-component units survives Identity."""
     units = (u.unit("km"), u.unit("m"), u.unit("cm"))
-    qm = QuantityMatrix(jnp.array([1.0, 2.0, 3.0]), unit=units)
+    qm = ul.QuantityMatrix(jnp.array([1.0, 2.0, 3.0]), unit=units)
     result = cxfm.act(identity_op, None, qm)
-    assert isinstance(result, QuantityMatrix)
+    assert isinstance(result, ul.QuantityMatrix)
     np.testing.assert_allclose(np.asarray(result.value), [1.0, 2.0, 3.0])
     assert result.unit == units
 

@@ -8,7 +8,7 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 import plum
-from unxts.linalg import QuantityMatrix, UnitsMatrix, cdict_units
+import unxts.linalg as ul
 
 import quaxed.numpy as qnp
 import unxt as u
@@ -28,7 +28,7 @@ DMLS = u.unit("")
 @plum.dispatch
 def scale_factors(
     chart: AbstractChart, /, *, at: CDict, usys: OptUSys = None
-) -> QuantityMatrix:
+) -> ul.QuantityMatrix:
     """Manifold-level dispatch: delegate to the attached metric.
 
     >>> import jax.numpy as jnp
@@ -56,7 +56,7 @@ def scale_factors(
     *,
     at: CDict,
     usys: OptUSys = None,
-) -> QuantityMatrix:
+) -> ul.QuantityMatrix:
     """Return the diagonal entries of the metric at ``at`` in ``chart``.
 
     Uses the ``metric_matrix`` dispatch API to compute the metric, then
@@ -75,21 +75,21 @@ def scale_factors(
     mm = cxmapi.metric_matrix(chart.M, at, chart)
     if isinstance(mm, DiagonalMetric):
         diag = mm.diagonal
-        if isinstance(diag, QuantityMatrix):
+        if isinstance(diag, ul.QuantityMatrix):
             return diag
-        units = UnitsMatrix(tuple(DMLS for _ in range(diag.shape[-1])))
-        return QuantityMatrix(diag, unit=units)
+        units = ul.UnitsMatrix(tuple(DMLS for _ in range(diag.shape[-1])))
+        return ul.QuantityMatrix(diag, unit=units)
     return _as_quantity_matrix(mm.matrix).diag()  # ty: ignore[unresolved-attribute]
 
 
-def _as_quantity_matrix(x: QuantityMatrix | Array) -> QuantityMatrix:
+def _as_quantity_matrix(x: ul.QuantityMatrix | Array) -> ul.QuantityMatrix:
     """Convert a numeric matrix into a dimensionless QuantityMatrix."""
-    if isinstance(x, QuantityMatrix):
+    if isinstance(x, ul.QuantityMatrix):
         return x
 
     n_rows, n_cols = x.shape[-2:]
-    units = UnitsMatrix(np.full((n_rows, n_cols), DMLS))
-    return QuantityMatrix(value=x, unit=units)
+    units = ul.UnitsMatrix(np.full((n_rows, n_cols), DMLS))
+    return ul.QuantityMatrix(value=x, unit=units)
 
 
 @plum.dispatch
@@ -100,7 +100,7 @@ def scale_factors(
     *,
     at: CDict,
     usys: OptUSys = None,
-) -> QuantityMatrix:
+) -> ul.QuantityMatrix:
     """Return scale factors for a pullback (induced) metric via Jacobian pullback.
 
     Computes the Jacobian of the composed embedding ``intrinsic →
@@ -138,11 +138,11 @@ def scale_factors(
     # Evaluate once to determine Cartesian output units
     at_ambient = embed_map.embed(at, usys=usys)
     at_cart = cxcapi.pt_map(at_ambient, ambient_chart, cart_chart)
-    uto_ = cdict_units(at_cart, cart_keys)
+    uto_ = ul.cdict_units(at_cart, cart_keys)
     uto_ = tuple(ut if ut is not None else DMLS for ut in uto_)
 
     # Build the unit matrix: J_cart.unit[k][i] = cart_unit_k / intrinsic_unit_i
-    unit_matrix = UnitsMatrix(
+    unit_matrix = ul.UnitsMatrix(
         tuple(tuple(tj / fi for fi in ufrom_) for tj in uto_)  # ty: ignore[unsupported-operator]
     )
 
@@ -159,10 +159,10 @@ def scale_factors(
         return qnp.stack(vals)
 
     J_arr = jax.jacfwd(_embed_cart)(xat)  # (n_cart, n_intrinsic)
-    J_cart = QuantityMatrix(J_arr, unit=unit_matrix)
+    J_cart = ul.QuantityMatrix(J_arr, unit=unit_matrix)
     return _column_squared_norms(J_cart)
 
 
-def _column_squared_norms(J: QuantityMatrix | Array) -> QuantityMatrix:
+def _column_squared_norms(J: ul.QuantityMatrix | Array) -> ul.QuantityMatrix:
     """Return the squared column norms of a Jacobian matrix as a QuantityMatrix."""
     return _csn(J)

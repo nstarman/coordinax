@@ -20,7 +20,7 @@ __all__ = (
 from jaxtyping import Array, ArrayLike
 from typing import Any, Final, overload
 
-from unxts.linalg import QuantityMatrix
+import unxts.linalg as ul
 
 import quaxed.numpy as jnp
 import unxt as u
@@ -120,7 +120,7 @@ def pack_with_usys(
 
 def pack_to_qmatrix(
     p: CDict, /, keys: tuple[CKey, ...] | None = None
-) -> Array | QuantityMatrix:
+) -> Array | ul.QuantityMatrix:
     """Pack a component dictionary into a QuantityMatrix or plain Array.
 
     Components are ordered according to ``keys``. If the values
@@ -162,4 +162,4 @@ def pack_to_qmatrix(
         u.ustrip(AllowValue, unit, p[k]) for k, unit in zip(keys, units, strict=True)
     ]
     # Return as QuantityMatrix
-    return QuantityMatrix(jnp.stack(vals, axis=-1), unit=units)
+    return ul.QuantityMatrix(jnp.stack(vals, axis=-1), unit=units)

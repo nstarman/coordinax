@@ -5,7 +5,7 @@ __all__: tuple[str, ...] = ()
 from jaxtyping import Array
 
 import plum
-from unxts.linalg import QuantityMatrix, UnitsMatrix
+import unxts.linalg as ul
 
 import quaxed.numpy as jnp
 import unxt as u
@@ -27,7 +27,7 @@ def scale_factors(
     *,
     at: CDict,
     usys: OptUSys = None,
-) -> QuantityMatrix:
+) -> ul.QuantityMatrix:
     """Compute only the Euclidean metric diagonal instead of forming ``J.T @ J``.
 
     >>> import jax.numpy as jnp
@@ -50,30 +50,30 @@ def scale_factors(
 
     if chart == cart_chart:
         n = len(chart.components)
-        return QuantityMatrix(
-            jnp.ones((n,)), unit=UnitsMatrix(tuple(u.unit("") for _ in range(n)))
+        return ul.QuantityMatrix(
+            jnp.ones((n,)), unit=ul.UnitsMatrix(tuple(u.unit("") for _ in range(n)))
         )
 
     J = cxcapi.jac_pt_map(at, chart, cart_chart, usys=usys)
     return _column_squared_norms(J)
 
 
-def _column_squared_norms(J: QuantityMatrix | Array, /) -> QuantityMatrix:
+def _column_squared_norms(J: ul.QuantityMatrix | Array, /) -> ul.QuantityMatrix:
     """Return ``diag(J.T @ J)`` without forming the full Gram matrix."""
-    if isinstance(J, QuantityMatrix):
+    if isinstance(J, ul.QuantityMatrix):
         return _quantity_column_squared_norms(J)
     return _array_column_squared_norms(J)
 
 
-def _array_column_squared_norms(J: Array, /) -> QuantityMatrix:
+def _array_column_squared_norms(J: Array, /) -> ul.QuantityMatrix:
     """Return squared column norms for a dimensionless Jacobian array."""
     value = jnp.einsum("...ji,...ji->...i", J, J)
     n = value.shape[-1]
-    unit = UnitsMatrix(tuple(DMLS for _ in range(n)))
-    return QuantityMatrix(value, unit)
+    unit = ul.UnitsMatrix(tuple(DMLS for _ in range(n)))
+    return ul.QuantityMatrix(value, unit)
 
 
-def _quantity_column_squared_norms(J: QuantityMatrix) -> QuantityMatrix:
+def _quantity_column_squared_norms(J: ul.QuantityMatrix) -> ul.QuantityMatrix:
     """Return squared column norms for a heterogeneous-unit Jacobian."""
     xs = tuple(_colnorm2(J[:, i]) for i in range(J.shape[-1]))
     units = tuple(u.unit_of(x) if is_any_quantity(x) else DMLS for x in xs)
@@ -81,9 +81,9 @@ def _quantity_column_squared_norms(J: QuantityMatrix) -> QuantityMatrix:
         [u.ustrip(AllowValue, unit, x) for x, unit in zip(xs, units, strict=True)],
         axis=-1,
     )
-    return QuantityMatrix(value, unit=UnitsMatrix(units))
+    return ul.QuantityMatrix(value, unit=ul.UnitsMatrix(units))
 
 
-def _colnorm2(column: QuantityMatrix) -> u.AbstractQuantity | Array:
+def _colnorm2(column: ul.QuantityMatrix) -> u.AbstractQuantity | Array:
     """Return the squared norm of a single Jacobian column."""
     return jnp.dot(column, column)

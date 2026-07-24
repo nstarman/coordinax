@@ -7,7 +7,7 @@ import dataclasses
 from typing import final
 
 import jax
-from unxts.linalg import QuantityMatrix, UnitsMatrix, cdict_units
+import unxts.linalg as ul
 
 import quaxed.numpy as qnp
 import unxt as u
@@ -22,7 +22,7 @@ DMLS = u.unit("")
 
 def _jacobian_embed_map(
     embed_map: AbstractEmbeddingMap, at: CDict, usys: OptUSys
-) -> QuantityMatrix:
+) -> ul.QuantityMatrix:
     """Compute the Jacobian of ``embed_map`` at ``at`` as a ``QuantityMatrix``.
 
     Mirrors the general fallback of ``jac_pt_map`` but differentiates
@@ -53,14 +53,14 @@ def _jacobian_embed_map(
 
     # Run embedding once to determine output units
     at_ambient = embed_fn(at, usys=usys)
-    uto = cdict_units(at_ambient, ambient_keys)
+    uto = ul.cdict_units(at_ambient, ambient_keys)
 
     # Replace None with dimensionless
     ufrom_ = tuple(uf if uf is not None else DMLS for uf in ufrom)
     uto_ = tuple(ut if ut is not None else DMLS for ut in uto)
 
     # Build (n_ambient × n_intrinsic) unit matrix
-    unit_matrix = UnitsMatrix(tuple(tuple(tj / fi for fi in ufrom_) for tj in uto_))  # ty: ignore[unsupported-operator]
+    unit_matrix = ul.UnitsMatrix(tuple(tuple(tj / fi for fi in ufrom_) for tj in uto_))  # ty: ignore[unsupported-operator]
 
     # Plain-array embedding for jacfwd
     def embed_fn_arr(x_arr: qnp.ndarray) -> qnp.ndarray:
@@ -75,7 +75,7 @@ def _jacobian_embed_map(
         return qnp.stack(vals)
 
     J_arr = jax.jacfwd(embed_fn_arr)(xat)  # shape (n_ambient, n_intrinsic)
-    return QuantityMatrix(J_arr, unit=unit_matrix)
+    return ul.QuantityMatrix(J_arr, unit=unit_matrix)
 
 
 @jax.tree_util.register_static

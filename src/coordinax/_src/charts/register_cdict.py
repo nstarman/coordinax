@@ -7,7 +7,7 @@ from jaxtyping import Array, ArrayLike
 from typing import cast
 
 import plum
-from unxts.linalg import QuantityMatrix, UnitsMatrix
+import unxts.linalg as ul
 
 import quaxed.numpy as jnp
 import unxt as u
@@ -109,7 +109,7 @@ def cdict(obj: u.AbstractQuantity, keys: tuple[str, ...], /) -> CDict:
 
 
 @plum.dispatch
-def cdict(obj: QuantityMatrix, keys: tuple[str, ...], /) -> CDict:
+def cdict(obj: ul.QuantityMatrix, keys: tuple[str, ...], /) -> CDict:
     """Extract component dictionary from a 1D ``QuantityMatrix``.
 
     This overload supports heterogeneous per-component units by constructing
@@ -126,9 +126,9 @@ def cdict(obj: QuantityMatrix, keys: tuple[str, ...], /) -> CDict:
     --------
     >>> import jax.numpy as jnp
     >>> import unxt as u
-    >>> from unxts.linalg import QuantityMatrix
+    >>> import unxts.linalg as ul
 
-    >>> q = QuantityMatrix(jnp.array([1.0, 2.0, 3.0]),
+    >>> q = ul.QuantityMatrix(jnp.array([1.0, 2.0, 3.0]),
     ...                    unit=("m", "km/s", "rad"))
     >>> cxc.cdict(q, ('x', 'y', 'z'))
     {'x': Q(1., 'm'), 'y': Q(2., 'km / s'), 'z': Q(3., 'rad')}
@@ -173,7 +173,7 @@ def cdict(obj: u.AbstractQuantity, chart: AbstractChart, /) -> CDict:
 
 
 @plum.dispatch
-def cdict(obj: QuantityMatrix, chart: AbstractChart, /) -> CDict:
+def cdict(obj: ul.QuantityMatrix, chart: AbstractChart, /) -> CDict:
     """Extract component dictionary from a 1D ``QuantityMatrix``.
 
     This overload supports heterogeneous per-component units by constructing
@@ -183,9 +183,9 @@ def cdict(obj: QuantityMatrix, chart: AbstractChart, /) -> CDict:
     >>> import jax.numpy as jnp
     >>> import coordinax.charts as cxc
     >>> import unxt as u
-    >>> from unxts.linalg import QuantityMatrix
+    >>> import unxts.linalg as ul
 
-    >>> q = QuantityMatrix(
+    >>> q = ul.QuantityMatrix(
     ...     jnp.array([1.0, 2.0, 3.0]),
     ...     unit=(u.unit("m"), u.unit("km/s"), u.unit("rad")),
     ... )
@@ -248,7 +248,7 @@ def cdict(obj: ArrayLike, chart: AbstractChart, /) -> CDict:
 @plum.dispatch
 def cdict(
     obj: ArrayLike,
-    unit: u.AbstractUnit | str | UnitsMatrix | None,
+    unit: u.AbstractUnit | str | ul.UnitsMatrix | None,
     keys: tuple[str, ...],
     /,
 ) -> CDict:
@@ -269,7 +269,7 @@ def cdict(
 @plum.dispatch
 def cdict(
     obj: ArrayLike,
-    unit: u.AbstractUnit | str | UnitsMatrix | None,
+    unit: u.AbstractUnit | str | ul.UnitsMatrix | None,
     chart: AbstractChart,
     /,
 ) -> CDict:
@@ -286,7 +286,7 @@ def cdict(
 
 
 @plum.dispatch
-def cdict(obj: ArrayLike, unit: u.AbstractUnit | str | UnitsMatrix, /) -> CDict:
+def cdict(obj: ArrayLike, unit: u.AbstractUnit | str | ul.UnitsMatrix, /) -> CDict:
     """Extract component dictionary from an array.
 
     Treats the array as a Cartesian vector with components in the last

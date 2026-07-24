@@ -19,6 +19,7 @@ __all__: tuple[str, ...] = ()
 import jax
 import jax.numpy as jnp
 import numpy as np
+import unxts.linalg as ul
 from hypothesis import given, settings
 from strategies import (
     any_angle_rad as _any_angle_rad,
@@ -26,7 +27,6 @@ from strategies import (
     polar_rad as _angle_rad,
     pos_m as _pos_m,
 )
-from unxts.linalg import QuantityMatrix
 
 import quaxed.numpy as qnp
 import unxt as u
@@ -39,7 +39,7 @@ import coordinax.charts as cxc
 
 
 def _assert_jacobian_approx(
-    J1: QuantityMatrix, J2: QuantityMatrix, *, atol: float = 1e-5
+    J1: ul.QuantityMatrix, J2: ul.QuantityMatrix, *, atol: float = 1e-5
 ) -> None:
     """Assert two Jacobians agree entry-wise (values only)."""
     np.testing.assert_allclose(
@@ -70,7 +70,7 @@ class TestCurriedWorkflow:
         for x, y in [(1, 0), (0, 1), (1, 1)]:
             at = {"x": u.Q(x, "m"), "y": u.Q(y, "m")}
             J = jac_fn(at)
-            assert isinstance(J, QuantityMatrix)
+            assert isinstance(J, ul.QuantityMatrix)
             assert J.value.shape == (2, 2)
 
     def test_none_partial_matches_direct(self) -> None:
@@ -93,7 +93,7 @@ class TestJITCompatibility:
         at = {"x": u.Q(1, "m"), "y": u.Q(0, "m"), "z": u.Q(0, "m")}
         jac_fn = jax.jit(cxc.jac_pt_map(cxc.cart3d, cxc.sph3d, usys=u.unitsystems.si))
         J = jac_fn(at)
-        assert isinstance(J, QuantityMatrix)
+        assert isinstance(J, ul.QuantityMatrix)
         assert J.value.shape == (3, 3)
         # At (1,0,0): ∂r/∂x = 1
         np.testing.assert_allclose(J.value[0, 0], 1, atol=1e-6)
@@ -114,7 +114,7 @@ class TestJITCompatibility:
             return cxc.jac_pt_map(at, cxc.cart3d, cxc.sph3d)
 
         J = jitted(at)
-        assert isinstance(J, QuantityMatrix)
+        assert isinstance(J, ul.QuantityMatrix)
         np.testing.assert_allclose(J.value[0, 0], 1, atol=1e-6)
 
 

@@ -4,7 +4,7 @@ __all__: tuple[str, ...] = ()
 
 
 import plum
-from unxts.linalg import QuantityMatrix, UnitsMatrix
+import unxts.linalg as ul
 
 import quaxed.numpy as jnp
 import unxt as u
@@ -29,7 +29,7 @@ def scale_factors(
     *,
     at: CDict,
     usys: OptUSys = None,
-) -> QuantityMatrix:
+) -> ul.QuantityMatrix:
     """Fast path for Euclidean metrics in Cartesian charts.
 
     >>> import jax.numpy as jnp
@@ -53,6 +53,6 @@ def scale_factors(
         if isinstance(chart, AbstractDimensionalFlag)
         else len(chart.components)
     )
-    return QuantityMatrix(
-        jnp.ones((n,)), unit=UnitsMatrix(tuple(u.unit("") for _ in range(n)))
+    return ul.QuantityMatrix(
+        jnp.ones((n,)), unit=ul.UnitsMatrix(tuple(u.unit("") for _ in range(n)))
     )

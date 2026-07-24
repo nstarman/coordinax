@@ -3,7 +3,7 @@
 __all__: tuple[str, ...] = ()
 
 import plum
-from unxts.linalg import QuantityMatrix, UnitsMatrix
+import unxts.linalg as ul
 
 import quaxed.numpy as jnp
 import unxt as u
@@ -17,7 +17,7 @@ from coordinax._src.custom_types import CDict, OptUSys
 @plum.dispatch
 def scale_factors(
     metric: RoundMetric, chart: AbstractChart, /, *, at: CDict, usys: OptUSys = None
-) -> QuantityMatrix:
+) -> ul.QuantityMatrix:
     r"""Return round-metric diagonal directly without forming the nxn matrix.
 
     Computes the cumulative-sine diagonal $g_{kk} = \prod_{j<k} \sin^2\theta_j$
@@ -54,5 +54,5 @@ def scale_factors(
     sin2 = jnp.sin(angles) ** 2
     value = jnp.concatenate([jnp.ones(1, dtype=sin2.dtype), jnp.cumprod(sin2)])
     n = len(components)
-    units = UnitsMatrix(tuple(u.unit("") for _ in range(n)))
-    return QuantityMatrix(value, unit=units)
+    units = ul.UnitsMatrix(tuple(u.unit("") for _ in range(n)))
+    return ul.QuantityMatrix(value, unit=units)

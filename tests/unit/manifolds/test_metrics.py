@@ -6,7 +6,7 @@ All tests in this file are RED until the metrics module is implemented.
 import jax
 import jax.numpy as jnp
 import pytest
-from unxts.linalg import QuantityMatrix
+import unxts.linalg as ul
 
 import unxt as u
 
@@ -19,7 +19,7 @@ from coordinaxs.api.manifolds import metric_matrix as mm_dispatch
 def _mat_val(dense_metric, /):
     """Extract numeric array from DenseMetric, regardless of matrix type."""
     mat = dense_metric.matrix
-    return mat.value if isinstance(mat, QuantityMatrix) else mat
+    return mat.value if isinstance(mat, ul.QuantityMatrix) else mat
 
 
 # =============================================================================

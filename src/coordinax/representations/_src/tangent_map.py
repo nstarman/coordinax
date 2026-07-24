@@ -7,7 +7,7 @@ from typing import Any
 
 import jax.numpy as jnp
 import plum
-from unxts.linalg import QuantityMatrix
+import unxts.linalg as ul
 
 import quaxed.numpy as qnp
 import unxt as u
@@ -46,7 +46,7 @@ def _check_linear_basis(rep: Representation, label: str) -> None:
 
 
 def _apply_jac(
-    J: Array | QuantityMatrix,
+    J: Array | ul.QuantityMatrix,
     from_components: tuple[str, ...],
     to_components: tuple[str, ...],
     v: CDict,
@@ -79,7 +79,7 @@ def _apply_jac(
     """
     if isinstance(v[from_components[0]], u.AbstractQuantity):
         v_arr, v_units = pack_nonuniform_unit(v, keys=from_components)
-        v_qm = QuantityMatrix(v_arr, unit=v_units)
+        v_qm = ul.QuantityMatrix(v_arr, unit=v_units)
         w = qnp.matmul(J, v_qm)  # (n_out,) QuantityMatrix
         return {key: u.Q(w.value[i], w.unit[i]) for i, key in enumerate(to_components)}
 
@@ -87,7 +87,7 @@ def _apply_jac(
     # When J is a QuantityMatrix, use J.value to avoid the Quax fallback path
     # that returns a QuantityMatrix with J's own 2D unit structure (wrong).
     # Plain-array velocity is dimensionless, so numeric-only application is correct.
-    j_arr = J.value if isinstance(J, QuantityMatrix) else J
+    j_arr = J.value if isinstance(J, ul.QuantityMatrix) else J
     result = j_arr @ v_arr
     return {key: result[i] for i, key in enumerate(to_components)}
 

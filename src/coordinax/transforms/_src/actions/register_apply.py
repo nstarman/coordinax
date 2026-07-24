@@ -6,7 +6,7 @@ from jaxtyping import Array, ArrayLike
 from typing import Any, TypeAlias, cast
 
 import plum
-from unxts.linalg import QuantityMatrix
+import unxts.linalg as ul
 
 import unxt as u
 from unxt import AbstractQuantity as AbcQ
@@ -23,16 +23,18 @@ from coordinax.internal import pack_nonuniform_unit, pack_uniform_unit
 # `guess_chart` accepts all of these directly (JAX and NumPy arrays, Quantities,
 # QuantityMatrix, CDicts). A Python list is not an `ArrayLike`, so it never matches this
 # union at all (see test_act_rejects_python_list).
-PointLike: TypeAlias = ArrayLike | AbcQ | QuantityMatrix | CDict
+PointLike: TypeAlias = ArrayLike | AbcQ | ul.QuantityMatrix | CDict
 
 
 # ===================================================================
 # Per-input-type representation default
 #
 # When ``rep`` is omitted the default depends only on the INPUT TYPE, not the
-# operator: a bare array / QuantityMatrix carries no unit information to infer a role
-# from, so it defaults to ``point``; a Quantity / CDict carries units, so the
-# role is guessed from them.
+# operator: a bare array carries no unit information to infer a role from, so it
+# defaults to ``point``; a ``QuantityMatrix`` (a raw metric/Jacobian container,
+# even though it stores per-element units) has no semantic role to infer, so it
+# also defaults to ``point``; a Quantity / CDict carries units, so the role is
+# guessed from them.
 
 
 # NB: the return type is ``Any`` on purpose. plum performs runtime return-type
@@ -49,7 +51,7 @@ def _default_rep(x: ArrayLike, /) -> Any:
 
 
 @plum.dispatch
-def _default_rep(x: QuantityMatrix, /) -> Any:
+def _default_rep(x: ul.QuantityMatrix, /) -> Any:
     return cxr.point
 
 
@@ -232,12 +234,12 @@ def act(
 def act(
     op: AbstractTransform,
     tau: Any,
-    x: QuantityMatrix,
+    x: ul.QuantityMatrix,
     chart: cxc.AbstractChart,
     rep: cxr.Representation,
     /,
     **kw: Any,
-) -> QuantityMatrix:
+) -> ul.QuantityMatrix:
     """Apply an operator to a ``QuantityMatrix`` with explicit chart and rep.
 
     Routes through the CDict-based implementation, then repacks the result
@@ -248,10 +250,10 @@ def act(
     >>> import coordinax.charts as cxc
     >>> import coordinax.transforms as cxfm
     >>> import coordinax.representations as cxr
-    >>> from unxts.linalg import QuantityMatrix
+    >>> import unxts.linalg as ul
 
     >>> op = cxfm.Rotate.from_euler("z", u.Q(90, "deg"))
-    >>> qm = QuantityMatrix(
+    >>> qm = ul.QuantityMatrix(
     ...     jnp.array([1.0, 0.0, 0.0]),
     ...     unit=("km", "km", "km"),
     ... )
@@ -266,4 +268,4 @@ def act(
     nv = cxfmapi.act(op, tau, v, chart, rep, **kw)
     # Repack CDict → QuantityMatrix
     arr, units = pack_nonuniform_unit(nv, keys=chart.components)
-    return QuantityMatrix(arr, unit=units)
+    return ul.QuantityMatrix(arr, unit=units)

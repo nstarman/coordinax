@@ -4,7 +4,7 @@ __all__: tuple[str, ...] = ()
 
 import jax.numpy as jnp
 import pytest
-from unxts.linalg import QuantityMatrix
+import unxts.linalg as ul
 
 import unxt as u
 
@@ -77,7 +77,7 @@ def quantity_3d():
 @pytest.fixture
 def qmatrix_3d():
     """QuantityMatrix [1, 0, 0] with uniform km units."""
-    return QuantityMatrix(
+    return ul.QuantityMatrix(
         jnp.array([1, 0, 0]), unit=(u.unit("km"), u.unit("km"), u.unit("km"))
     )
 

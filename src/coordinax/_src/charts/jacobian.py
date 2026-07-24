@@ -47,7 +47,7 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 import plum
-from unxts.linalg import QuantityMatrix, UnitsMatrix
+import unxts.linalg as ul
 
 import quaxed.numpy as qnp
 import unxt as u
@@ -174,7 +174,7 @@ def jac_pt_map(
     return jac_pt_map_fn(at)  # Compute Jacobian as array
 
 
-def _repack_q_from_jac(jac_qq: QuantityMatrix, /) -> QuantityMatrix:
+def _repack_q_from_jac(jac_qq: ul.QuantityMatrix, /) -> ul.QuantityMatrix:
     r"""Rebuild a 2-D ``QuantityMatrix`` Jacobian from the raw ``jax.jacfwd`` output.
 
     When ``jax.jacfwd`` differentiates a function that maps a 1-D
@@ -189,8 +189,8 @@ def _repack_q_from_jac(jac_qq: QuantityMatrix, /) -> QuantityMatrix:
 
     """
     ufrom_, uto_ = jac_qq.value.unit, jac_qq.unit  # ty: ignore[unresolved-attribute]
-    units = UnitsMatrix(np.divide(uto_._units[:, None], ufrom_._units[None, :]))
-    return QuantityMatrix(jac_qq.value.value, units)  # ty: ignore[unresolved-attribute]
+    units = ul.UnitsMatrix(np.divide(uto_._units[:, None], ufrom_._units[None, :]))
+    return ul.QuantityMatrix(jac_qq.value.value, units)  # ty: ignore[unresolved-attribute]
 
 
 @plum.dispatch
@@ -201,7 +201,7 @@ def jac_pt_map(
     /,
     *,
     usys: OptUSys = None,
-) -> Array | QuantityMatrix:
+) -> Array | ul.QuantityMatrix:
     r"""Compute the Jacobian at a coordinate-dictionary base point.
 
     The primary dict-input dispatch.  Branches on whether the values of *at*
@@ -325,7 +325,7 @@ def jac_pt_map(
     /,
     *,
     usys: OptUSys = None,
-) -> QuantityMatrix:
+) -> ul.QuantityMatrix:
     r"""Compute the Jacobian of the transition function between two charts.
 
     $$
@@ -351,7 +351,7 @@ def jac_pt_map(
     # Astropy treats rad as dimensionless, so x2.unit == 1/m rather than
     # the correct rad/m.  Force the right unit explicitly.
     rad_per_len = u.unit("rad") / x.unit
-    return QuantityMatrix(
+    return ul.QuantityMatrix(
         jnp.array([[x0.value, x1.value], [x2.value, x3.value]]),
         unit=((x0.unit, x1.unit), (rad_per_len, rad_per_len)),
     )

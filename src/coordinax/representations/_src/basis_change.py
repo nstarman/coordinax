@@ -8,7 +8,7 @@ from typing import Any, TypeVar
 import jax
 import jax.scipy.linalg
 import plum
-from unxts.linalg import QuantityMatrix, UnitsMatrix
+import unxts.linalg as ul
 
 import quaxed.numpy as jnp
 import unxt as u
@@ -45,7 +45,9 @@ def _add_rad_unit(q: ArrayLike | u.AbstractQuantity) -> ArrayLike | u.AbstractQu
     return Quantity(q.value, unit=q.unit * _RAD) if is_any_quantity(q) else q
 
 
-def _qm_triangular_solve(E: QuantityMatrix, b: QuantityMatrix) -> QuantityMatrix:
+def _qm_triangular_solve(
+    E: ul.QuantityMatrix, b: ul.QuantityMatrix
+) -> ul.QuantityMatrix:
     """Solve upper-triangular system E @ x = b for x, respecting units.
 
     Uses the fact that E is upper-triangular (vielbein = L^T from Cholesky).
@@ -56,7 +58,7 @@ def _qm_triangular_solve(E: QuantityMatrix, b: QuantityMatrix) -> QuantityMatrix
     reattaches output units.
     """
     n = E.unit.shape[0]
-    x_units = UnitsMatrix(tuple(b.unit[i] / E.unit[i, i] for i in range(n)))
+    x_units = ul.UnitsMatrix(tuple(b.unit[i] / E.unit[i, i] for i in range(n)))
     # Scale b[i] → b_norm[i] = b.value[i] / E.value[i,i]  (dimensionless in
     # the sense that both numerator and denominator carry the same combined unit)
     # Since x[i] = b[i]/E[i,i] dimensionally, the raw solve gives the right
@@ -69,7 +71,7 @@ def _qm_triangular_solve(E: QuantityMatrix, b: QuantityMatrix) -> QuantityMatrix
     x_vals = jax.scipy.linalg.solve_triangular(
         E_norm, b_norm[..., None], lower=False
     ).squeeze(-1)
-    return QuantityMatrix(x_vals, unit=x_units)
+    return ul.QuantityMatrix(x_vals, unit=x_units)
 
 
 ##############################################################################
@@ -134,20 +136,22 @@ def change_basis(
     # General case: Cholesky vielbein E = L^T, hat_v = E @ v
     assert isinstance(mm, DenseMetric)  # noqa: S101
     mat = mm.matrix
-    if isinstance(mat, QuantityMatrix):
+    if isinstance(mat, ul.QuantityMatrix):
         L_val = jnp.linalg.cholesky(mat.value)
-        L_units = UnitsMatrix(mat.unit._units**0.5)
-        L = QuantityMatrix(L_val, unit=L_units)
+        L_units = ul.UnitsMatrix(mat.unit._units**0.5)
+        L = ul.QuantityMatrix(L_val, unit=L_units)
     else:
         L_raw = jnp.linalg.cholesky(mat)
         n = mat.shape[-1]
         _dmls = u.unit("")
-        L = QuantityMatrix(
+        L = ul.QuantityMatrix(
             L_raw,
-            unit=UnitsMatrix(tuple(tuple(_dmls for _ in range(n)) for _ in range(n))),
+            unit=ul.UnitsMatrix(
+                tuple(tuple(_dmls for _ in range(n)) for _ in range(n))
+            ),
         )
     E = jnp.transpose(L, axes=(-2, -1))  # E = L^T, upper-triangular vielbein
-    v_vec = QuantityMatrix.from_cdict(v, keys)
+    v_vec = ul.QuantityMatrix.from_cdict(v, keys)
     hat_v_vec = jnp.matmul(E, v_vec)
     return cxc.cdict(hat_v_vec, keys)  # ty: ignore[invalid-return-type]
 
@@ -209,20 +213,22 @@ def change_basis(
     # General case: Cholesky vielbein E = L^T, v = E^{-1} hat_v (triangular solve)
     assert isinstance(mm, DenseMetric)  # noqa: S101
     mat = mm.matrix
-    if isinstance(mat, QuantityMatrix):
+    if isinstance(mat, ul.QuantityMatrix):
         L_val = jnp.linalg.cholesky(mat.value)
-        L_units = UnitsMatrix(mat.unit._units**0.5)
-        L = QuantityMatrix(L_val, unit=L_units)
+        L_units = ul.UnitsMatrix(mat.unit._units**0.5)
+        L = ul.QuantityMatrix(L_val, unit=L_units)
     else:
         L_raw = jnp.linalg.cholesky(mat)
         n = mat.shape[-1]
         _dmls = u.unit("")
-        L = QuantityMatrix(
+        L = ul.QuantityMatrix(
             L_raw,
-            unit=UnitsMatrix(tuple(tuple(_dmls for _ in range(n)) for _ in range(n))),
+            unit=ul.UnitsMatrix(
+                tuple(tuple(_dmls for _ in range(n)) for _ in range(n))
+            ),
         )
     E = jnp.transpose(L, axes=(-2, -1))  # E = L^T, upper-triangular vielbein
-    hat_v_vec = QuantityMatrix.from_cdict(v, keys)
+    hat_v_vec = ul.QuantityMatrix.from_cdict(v, keys)
     v_vec = _qm_triangular_solve(E, hat_v_vec)
     return cxc.cdict(v_vec, keys)  # ty: ignore[invalid-return-type]
 

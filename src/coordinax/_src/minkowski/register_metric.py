@@ -16,7 +16,7 @@ __all__: tuple[str, ...] = ()
 
 import jax.numpy as jnp
 import plum
-from unxts.linalg import QuantityMatrix, UnitsMatrix
+import unxts.linalg as ul
 
 import unxt as u
 
@@ -138,7 +138,7 @@ def metric_matrix(
     cart_chart = chart.cartesian
     J = cxc.jac_pt_map(point, chart, cart_chart, usys=None)
     JT = J.T
-    eta = QuantityMatrix(
-        jnp.diag(jnp.array([-1.0, 1.0, 1.0, 1.0])), unit=UnitsMatrix(unit_tup)
+    eta = ul.QuantityMatrix(
+        jnp.diag(jnp.array([-1.0, 1.0, 1.0, 1.0])), unit=ul.UnitsMatrix(unit_tup)
     )
     return DenseMetric(JT @ eta @ J)

@@ -4,7 +4,7 @@ __all__: tuple[str, ...] = ()
 
 import jax.numpy as jnp
 import plum
-from unxts.linalg import QuantityMatrix, UnitsMatrix
+import unxts.linalg as ul
 
 import unxt as u
 
@@ -16,7 +16,7 @@ from coordinax._src.custom_types import CDict, OptUSys
 @plum.dispatch
 def scale_factors(
     metric: MinkowskiMetric, chart: MinkowskiCT, /, *, at: CDict, usys: OptUSys = None
-) -> QuantityMatrix:
+) -> ul.QuantityMatrix:
     r"""Return the Minkowski metric diagonal $\eta = \operatorname{diag}(-1,1,1,1)$.
 
     In the canonical `coordinax.charts.MinkowskiCT` chart the metric is
@@ -37,5 +37,5 @@ def scale_factors(
     del chart, at, usys
     n = metric.ndim
     value = jnp.array(list(metric.signature), dtype=float)
-    units = UnitsMatrix(tuple(u.unit("") for _ in range(n)))
-    return QuantityMatrix(value, unit=units)
+    units = ul.UnitsMatrix(tuple(u.unit("") for _ in range(n)))
+    return ul.QuantityMatrix(value, unit=units)

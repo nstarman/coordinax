@@ -983,11 +983,10 @@ These names are importable and supported for inter-package use, but they are **n
 
 Semi-public API:
 
-- `QuantityMatrix`: heterogeneous 1-D or 2-D quantity container with a per-element unit structure
-- `UnitsMatrix`: immutable, hashable wrapper around a numpy object array of `AbstractUnit` elements, aligned with a `QuantityMatrix`; supports tuple-style indexing, iteration, and `to_tuple()`/`to_string()`. **Not** a subclass of `astropy.StructuredUnit`; bidirectional converters to/from `astropy.StructuredUnit` live in `coordinaxs.interop.astropy`.
-- `cdict_units`: extract per-component units from a coordinate dictionary
 - `pack_uniform_unit`: stack component data into an array using a shared unit
 - `pack_nonuniform_unit`: stack component data into an array while preserving per-component units
+
+The heterogeneous-unit matrix machinery (`QuantityMatrix`, `UnitsMatrix`, `det`/`inv`, `matmul`/`matvec`/`vecdot`/`vecmat`, `cdict_units`) lives in `unxts.linalg` as of unxt v2.0 and is imported directly from there — it is **not** part of `coordinax.internal`. The `UnitsMatrix` ⇄ `astropy.StructuredUnit` converters still live in `coordinaxs.interop.astropy`.
 
 </br>
 

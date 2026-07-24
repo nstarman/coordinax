@@ -17,7 +17,7 @@ from typing import Any
 
 import jax.numpy as jnp
 import plum
-from unxts.linalg import QuantityMatrix, UnitsMatrix
+import unxts.linalg as ul
 
 import unxt as u
 
@@ -31,18 +31,18 @@ from coordinaxs.api.manifolds import metric_matrix, metric_representation
 # =====================================================================
 
 
-def _mm_to_qm(mm: DenseMetric | DiagonalMetric) -> QuantityMatrix:
+def _mm_to_qm(mm: DenseMetric | DiagonalMetric) -> ul.QuantityMatrix:
     """Convert an AbstractMetricMatrix to a QuantityMatrix."""
     if isinstance(mm, DiagonalMetric):
         dense = mm.to_dense()
         mat = dense.matrix
     else:
         mat = mm.matrix
-    if isinstance(mat, QuantityMatrix):
+    if isinstance(mat, ul.QuantityMatrix):
         return mat
     n = mat.shape[0]
     unit_tup = tuple(tuple(u.unit("") for _ in range(n)) for _ in range(n))
-    return QuantityMatrix(mat, unit=UnitsMatrix(unit_tup))
+    return ul.QuantityMatrix(mat, unit=ul.UnitsMatrix(unit_tup))
 
 
 # =====================================================================
@@ -151,5 +151,5 @@ def metric_matrix(
             units[i][j] = units[j][i] = sqrt_diag[i] * sqrt_diag[j]
 
     unit_tup = tuple(tuple(row) for row in units)
-    G = QuantityMatrix(value=value, unit=UnitsMatrix(unit_tup))
+    G = ul.QuantityMatrix(value=value, unit=ul.UnitsMatrix(unit_tup))
     return DenseMetric(G)

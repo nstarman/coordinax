@@ -18,18 +18,13 @@ from typing import Any, final
 import equinox as eqx
 import jax.numpy as jnp
 import quax
-from unxts.linalg import (
-    QuantityMatrix,
-    UnitsMatrix,
-    det as _det_primitive,
-    inv as _inv_primitive,
-)
+import unxts.linalg as ul
 
 import quaxed.numpy as qnp
 import unxt as u
 
-_det = quax.quaxify(_det_primitive)
-_inv = quax.quaxify(_inv_primitive)
+_det = quax.quaxify(ul.det)
+_inv = quax.quaxify(ul.inv)
 _matmul = quax.quaxify(jnp.matmul)
 
 # ---------------------------------------------------------------------------
@@ -153,7 +148,7 @@ class DiagonalMetric(AbstractMetricMatrix):
 
     """
 
-    diagonal: QuantityMatrix | Array
+    diagonal: ul.QuantityMatrix | Array
 
     @property
     def ndim(self) -> int:
@@ -187,8 +182,10 @@ class DiagonalMetric(AbstractMetricMatrix):
         QuantityMatrix diagonal — diagonal units are preserved and off-diagonal
         entries get the geometric-mean unit:
 
-        >>> from unxts.linalg import QuantityMatrix
-        >>> d = DiagonalMetric(QuantityMatrix(jnp.array([1.0, 4.0]), unit=("m2", "s2")))
+        >>> import unxts.linalg as ul
+        >>> d = DiagonalMetric(
+        ...     ul.QuantityMatrix(jnp.array([1.0, 4.0]), unit=("m2", "s2"))
+        ... )
         >>> d.to_dense().matrix.unit[0, 0]
         Unit("m2")
         >>> d.to_dense().matrix.unit[1, 1]
@@ -197,7 +194,7 @@ class DiagonalMetric(AbstractMetricMatrix):
         Unit("m s")
 
         """
-        if isinstance(self.diagonal, QuantityMatrix):
+        if isinstance(self.diagonal, ul.QuantityMatrix):
             # Off-diagonal entries are numerically zero, but their units must
             # be chosen so that  g[i,j] * v[j]  is unit-compatible with
             # g[i,i] * v[i]  for any tangent vector v.  The physically correct
@@ -216,12 +213,14 @@ class DiagonalMetric(AbstractMetricMatrix):
                 tuple(du[i] if i == j else (du[i] * du[j]) ** 0.5 for j in range(n))
                 for i in range(n)
             )
-            return DenseMetric(QuantityMatrix(dense_val, unit=UnitsMatrix(row_units)))
+            return DenseMetric(
+                ul.QuantityMatrix(dense_val, unit=ul.UnitsMatrix(row_units))
+            )
         return DenseMetric(jnp.diag(self.diagonal))
 
     def __matmul__(
-        self, other: "Array | QuantityMatrix | u.AbstractQuantity", /
-    ) -> "Array | QuantityMatrix | u.AbstractQuantity":
+        self, other: "Array | ul.QuantityMatrix | u.AbstractQuantity", /
+    ) -> "Array | ul.QuantityMatrix | u.AbstractQuantity":
         """Apply this diagonal metric to a vector — element-wise product.
 
         When either the diagonal or ``other`` carries units, the operation is
@@ -242,9 +241,11 @@ class DiagonalMetric(AbstractMetricMatrix):
 
         QuantityMatrix diagonal, plain array vector — result carries diagonal units:
 
-        >>> from unxts.linalg import QuantityMatrix
+        >>> import unxts.linalg as ul
         >>> d = DiagonalMetric(
-        ...     QuantityMatrix(jnp.array([2.0, 3.0]), unit=("m2 / rad2", "m2 / rad2"))
+        ...     ul.QuantityMatrix(
+        ...         jnp.array([2.0, 3.0]), unit=("m2 / rad2", "m2 / rad2")
+        ...     )
         ... )
         >>> w = d @ jnp.array([1.0, 1.0])
         >>> w.unit.to_string()
@@ -263,7 +264,7 @@ class DiagonalMetric(AbstractMetricMatrix):
 
         QuantityMatrix diagonal, QuantityMatrix vector — full unit tracking:
 
-        >>> v = QuantityMatrix(jnp.array([1.0, 1.0]), unit=("rad", "rad"))
+        >>> v = ul.QuantityMatrix(jnp.array([1.0, 1.0]), unit=("rad", "rad"))
         >>> w3 = d @ v
         >>> w3.unit.to_string()
         '(m2 / rad, m2 / rad)'
@@ -271,8 +272,8 @@ class DiagonalMetric(AbstractMetricMatrix):
         Array([2., 3.], dtype=float64)
 
         """
-        if isinstance(self.diagonal, QuantityMatrix) or isinstance(
-            other, (QuantityMatrix, u.AbstractQuantity)
+        if isinstance(self.diagonal, ul.QuantityMatrix) or isinstance(
+            other, (ul.QuantityMatrix, u.AbstractQuantity)
         ):
             # Route through the dense path for correct unit propagation.
             return self.to_dense().__matmul__(other)
@@ -293,10 +294,10 @@ class DiagonalMetric(AbstractMetricMatrix):
         Array([0.5 , 0.25], dtype=float64)
 
         """
-        if isinstance(self.diagonal, QuantityMatrix):
+        if isinstance(self.diagonal, ul.QuantityMatrix):
             inv_vals = 1.0 / self.diagonal.value
             return DiagonalMetric(
-                QuantityMatrix(inv_vals, unit=self.diagonal.unit.inverse())
+                ul.QuantityMatrix(inv_vals, unit=self.diagonal.unit.inverse())
             )
         return DiagonalMetric(1.0 / self.diagonal)
 
@@ -320,13 +321,15 @@ class DiagonalMetric(AbstractMetricMatrix):
         QuantityMatrix diagonal — returns a :class:`~unxt.Quantity`:
 
         >>> import unxt as u
-        >>> from unxts.linalg import QuantityMatrix
-        >>> d = DiagonalMetric(QuantityMatrix(jnp.array([2.0, 3.0]), unit=("m2", "s2")))
+        >>> import unxts.linalg as ul
+        >>> d = DiagonalMetric(
+        ...     ul.QuantityMatrix(jnp.array([2.0, 3.0]), unit=("m2", "s2"))
+        ... )
         >>> d.determinant
         Q(6., 'm2 s2')
 
         """
-        if isinstance(self.diagonal, QuantityMatrix):
+        if isinstance(self.diagonal, ul.QuantityMatrix):
             det_val = qnp.prod(self.diagonal.value)
             det_unit = ft.reduce(operator.mul, self.diagonal.unit)
             return u.Q(det_val, det_unit)
@@ -363,7 +366,7 @@ class DenseMetric(AbstractMetricMatrix):
 
     """
 
-    matrix: QuantityMatrix | Array
+    matrix: ul.QuantityMatrix | Array
 
     @property
     def ndim(self) -> int:
@@ -386,8 +389,8 @@ class DenseMetric(AbstractMetricMatrix):
         return self
 
     def __matmul__(
-        self, other: "Array | QuantityMatrix", /
-    ) -> "Array | QuantityMatrix":
+        self, other: "Array | ul.QuantityMatrix", /
+    ) -> "Array | ul.QuantityMatrix":
         """Apply this metric matrix to a vector via matrix-vector product.
 
         When the metric matrix is a :class:`~unxts.linalg.QuantityMatrix`,
@@ -407,11 +410,11 @@ class DenseMetric(AbstractMetricMatrix):
 
         QuantityMatrix metric, plain array vector — result carries metric units:
 
-        >>> from unxts.linalg import QuantityMatrix, UnitsMatrix
+        >>> import unxts.linalg as ul
         >>> g = DenseMetric(
-        ...     QuantityMatrix(
+        ...     ul.QuantityMatrix(
         ...         jnp.array([[2.0, 0.0], [0.0, 3.0]]),
-        ...         unit=UnitsMatrix((
+        ...         unit=ul.UnitsMatrix((
         ...             ("m2 / rad2", "m2 / rad2"),
         ...             ("m2 / rad2", "m2 / rad2"),
         ...         )),
@@ -425,7 +428,7 @@ class DenseMetric(AbstractMetricMatrix):
 
         QuantityMatrix metric, QuantityMatrix vector — full unit tracking:
 
-        >>> v = QuantityMatrix(jnp.array([1.0, 1.0]), unit=("rad / s", "rad / s"))
+        >>> v = ul.QuantityMatrix(jnp.array([1.0, 1.0]), unit=("rad / s", "rad / s"))
         >>> w2 = g @ v
         >>> w2.unit.to_string()
         '(m2 / (rad s), m2 / (rad s))'
@@ -458,11 +461,11 @@ class DenseMetric(AbstractMetricMatrix):
         QuantityMatrix — inverse carries reciprocal units:
 
         >>> import unxt as u
-        >>> from unxts.linalg import QuantityMatrix, UnitsMatrix
+        >>> import unxts.linalg as ul
         >>> g = DenseMetric(
-        ...     QuantityMatrix(
+        ...     ul.QuantityMatrix(
         ...         jnp.array([[4.0, 0.0], [0.0, 1.0]]),
-        ...         unit=UnitsMatrix((
+        ...         unit=ul.UnitsMatrix((
         ...             ("m2 / rad2", "m2 / rad2"),
         ...             ("m2 / rad2", "m2 / rad2"),
         ...         )),
@@ -499,8 +502,10 @@ class DenseMetric(AbstractMetricMatrix):
         QuantityMatrix — returns a :class:`~unxt.Quantity`:
 
         >>> import unxt as u
-        >>> from unxts.linalg import QuantityMatrix
-        >>> g = DenseMetric(QuantityMatrix(jnp.eye(2), unit=(("m2", ""), ("", "s2"))))
+        >>> import unxts.linalg as ul
+        >>> g = DenseMetric(
+        ...     ul.QuantityMatrix(jnp.eye(2), unit=(("m2", ""), ("", "s2")))
+        ... )
         >>> g.determinant
         Q(1., 'm2 s2')
 
