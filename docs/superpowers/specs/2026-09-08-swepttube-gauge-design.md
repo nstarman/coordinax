@@ -1,147 +1,139 @@
-# `SweptTube`: fixing the n-plane gauge of `rate_of_strain`
+# `SweptTube`: the n-plane gauge of `rate_of_strain`, and four defects beneath it
 
 **Date:** 2026-09-08 **Status:** approved design, not yet implemented **Closes:** #829. Follow-up to #828.
 
+## Summary
+
+`rate_of_strain` reports the drift of an arbitrary frame gauge as physical strain. The fix is **not** a better seed rule: four were tried and all four fail, for a reason that is now quantified rather than guessed. The n-plane gauge is Cosserat director data, absent from $r(\tau, t)$, so `SweptTube` requires the caller to supply it and refuses to guess.
+
+An independent audit of the surrounding package found three further defects, one of which (`nearest_tau` returning a local _maximum_) is a silently wrong answer through the public `pt_map` and is unrelated to the gauge work.
+
 ## Problem
 
-`rate_of_strain(chart_at_time, point, t)` computes $K_{ij} = \tfrac12\,\partial_t\gamma_{ij}$ by differentiating a family of `TubularChart`s across time. The documented idiom builds each slice independently:
+The documented idiom builds each slice independently:
 
 ```python
 lambda t: TubularChart(BishopBuilder(AtTime(curve, t), "km"), tau_bounds=...)
 ```
 
-`BishopBuilder` seeds its transport from `_auto_initial_normal(T0)`, which picks the world axis least aligned with the tangent (`argmin |T0|`) and Gram--Schmidts it. The seed is therefore anchored to the world frame, not to the curve. When the tangent at $\tau_0$ rotates with time, the labels $(n_1, n_2)$ denote a _different physical point_ on each slice, and $\partial_t\gamma_{ij}$ differentiates the frame's gauge along with the geometry.
+`BishopBuilder` seeds its transport from `_auto_initial_normal(T0)` (`argmin |T0|` over the world axes). The seed is anchored to the world frame, not the curve, so when the tangent at $\tau_0$ rotates with time the labels $(n_1, n_2)$ denote a _different physical point_ on each slice, and $\partial_t\gamma_{ij}$ differentiates the gauge along with the geometry.
 
 ### Measured
 
 A rigid rotation is an isometry, so $K_{ij}$ must vanish identically. It does not.
 
-| curve / motion | seed | $\vert K\vert_{\max}$ |
-| --- | --- | --- |
-| helix (pitch 0.4), rigid $\hat y$ rotation | world axis | `0.117767` |
-| helix (pitch 0.3), rigid $\hat y$ rotation | world axis | `0.099216` |
-| helix (pitch 0.3), rigid rotation about $(2,-1,3)$ | world axis | `0.002662` |
-| helix, rigid translation | world axis | `0.0` |
-| helix, rigid rotation about $\hat x$ or $\hat z$ | world axis | `0.0` |
+| curve / motion                                     | $\vert K\vert_{\max}$ |
+| -------------------------------------------------- | --------------------- |
+| helix (pitch 0.4), rigid $\hat y$ rotation         | `0.117767`            |
+| helix (pitch 0.3), rigid $\hat y$ rotation         | `0.099216`            |
+| helix (pitch 0.3), rigid rotation about $(2,-1,3)$ | `0.002662`            |
+| helix (pitch 0.3), rigid rotation about $\hat z$   | `0.019980`            |
+| helix, rigid rotation about $\hat x$               | `5.55e-17`            |
+| helix, rigid translation                           | `0.0`                 |
 
 Two consequences for testing:
 
-- **Translations are equivariant even when the seed is broken** ($T_0$ does not move, so its Gram--Schmidt against a world axis does not either). A rigid-translation test proves nothing.
-- **The bug is axis-dependent.** Rotations that fix $e_k$, or act within $\mathrm{span}(T_0, e_k)$, are exactly equivariant. Any regression test **must** use a generic axis.
+- **Translations are equivariant even when the seed is broken** — $T_0$ does not move, so its Gram--Schmidt against a world axis does not either. A rigid-translation test proves nothing.
+- **The bug is axis-dependent.** Only rotations that fix $e_k = \arg\min|T_0|$, or act within $\mathrm{span}(T_0, e_k)$, are equivariant — here that is $\hat x$ alone. $\hat z$ is **not** safe. Any regression test must use a generic axis.
 
-Localising it confirms the cause is the seed and nothing else:
+Localising it confirms the seed is the whole cause:
 
 | point | $\gamma_{\tau\tau}$ | $K_{\tau\tau}$ |
 | --- | --- | --- |
 | $n = (0,0)$ — on axis, gauge-free | 1.160000 | `-0.000000` |
-| $n = (0.2, 0.1)$ | 1.588498 | `-0.117767` |
+| $n = (0.2, 0.1)$ | 1.594483 | `-0.117767` |
 | $n = (0.2, 0.1)$, seed carried with the body | — | `6.7e-08` |
 
 ### Second failure mode: a discontinuous gauge
 
-`argmin` is a discrete choice, so the seed jumps when two tangent components cross. On the rigidly rotating helix, at $\theta = \pi/4$:
+`argmin` is a discrete choice, so the seed jumps when two tangent components cross. On the rigidly rotating helix at $\theta = \pi/4$, $\gamma_{\tau\tau}$ jumps `1.506062` -> `0.849303` between $t = 0.78$ and $t = 0.79$. The true $\partial_t\gamma_{\tau\tau}$ across that point is $\approx -66\,\mathrm{s^{-1}}$; `jacfwd` reports `-0.35`. Forward-mode AD differentiates the branch it landed in and never sees the jump.
 
-| t      | $\gamma_{\tau\tau}$ | reported $K_{\tau\tau}$ |
-| ------ | ------------------- | ----------------------- |
-| 0.7800 | 1.506062            | `-0.175294`             |
-| 0.7900 | 0.849303            | `-0.126384`             |
+## Why no automatic seed rule works
 
-$\gamma$ jumps by 0.66. The true $\partial_t\gamma_{\tau\tau}$ across that point is $\approx -66\,\mathrm{s}^{-1}$; `jacfwd` reports $-0.35$. Forward-mode AD differentiates the branch it landed in and never sees the jump, so the function returns a number that is not the derivative of anything, with no diagnostic.
+Four rules were tried against the real library. All four fail, and the failures share a structure.
 
-## Why this cannot be fixed by transporting the seed
+### 1. World axis (`argmin |T0|`, the status quo) — not equivariant, and discontinuous
 
-The obvious repair — transport the seed rotation-minimisingly in $t$ — does not work, and the reason is structural rather than a gap in the implementation.
+Both failures above.
 
-Decompose the angular velocity in the frame $\{T, U, V\}$ as $\omega = a\,T + b\,U + c\,V$. A material carry gives $\dot U = aV - cT$; rotation-minimising transport gives $\dot U = -cT$. They differ by $aV$, where $a = \omega\cdot T$ is the spin about the tangent. Measured on the rotating helix ($a = 0.928\ \mathrm{rad/s}$):
+### 2. RMF-in-$t$ — smooth, but not equivariant
 
-| seed                    | $K_{\tau\tau}$ |
-| ----------------------- | -------------- |
-| material carry          | `-0.000000`    |
-| RMF-in-$t$              | `-0.112967`    |
-| world axis (status quo) | `-0.117767`    |
+Decompose the angular velocity in $\{T, U, V\}$ (right-handed, $T \times U = V$) as $\omega = a\,T + b\,U + c\,V$. The frame angular velocity is pinned by $\Omega \times T =
+\dot{T}$ to $\Omega = b\,U + c\,V + \alpha\,T$; a material carry keeps $\alpha = a$, giving $\dot U = a\,V - c\,T$, while RMF sets $\alpha = 0$, giving $\dot U = -c\,T$. They differ by $aV$, where $a = \omega\cdot T$ is the spin about the tangent. Measured ($a = 0.928\ \mathrm{rad/s}$):
 
-RMF-in-$t$ buys determinism and continuity; it does not buy correctness.
+| seed           | $K_{\tau\tau}$ |
+| -------------- | -------------- |
+| material carry | `-0.000000`    |
+| RMF-in-$t$     | `-0.112967`    |
+| world axis     | `-0.117767`    |
 
-**The n-plane material labelling is not contained in $r(\tau, t)$.** A rod spinning about its own axis and one at rest trace the same curve. Rate of strain of a _tube_ is a property of a **framed** curve — a Cosserat/director structure — not of a curve. Any design that derives the gauge from the tangent alone is deriving data that is not there.
+### 3. Geometric (Frenet-normal) seed — equivariant, but flips through an inflection
 
-## Key lemma: where the seed does and does not matter
-
-In a **Bishop** frame the induced metric is exactly block-diagonal,
-
-$$\gamma = \mathrm{diag}\!\left(|r'|^2\,(1 - n_1k_1 - n_2k_2)^2,\; 1,\; 1\right),$$
-
-because $U_i' = -k_i T$ kills the cross terms (unlike Frenet, which carries a torsion term). The seed therefore enters $\gamma$ through exactly **one scalar**: the angle $\varphi$ of the curvature vector in the $(U_1, U_2)$ plane. Hence
-
-> $\gamma$ is seed-independent **iff** $\boldsymbol\kappa \cdot (n_1, n_2) = 0$.
-
-Verified numerically: on a tilted straight line, the full $3\times3$ metric is the identity to $5.4\times10^{-17}$ for five different seeds (auto, $e_y$, $e_z$, two random), with maximum inter-seed deviation $2.2\times10^{-16}$; under rigid rotation $\vert K\vert_{\max} \le
-1.1\times10^{-16}$ for all five.
-
-This lemma is what the whole design hinges on: it identifies the set on which a degenerate seed is provably harmless. Note the design still _raises_ on that set rather than falling back (see below) — what the lemma buys is the guarantee that raising there costs the caller only convenience, never correctness, because on that set any normal they supply is as good as any other.
-
-## Rejected: the geometric (Frenet-normal) seed
-
-Seeding from $\widehat{d\mathbf{T}/d\tau}$ is equivariant under rigid motion and essentially free (`_transport_start` already builds `dTangent_fn`). It gives $\vert K\vert = 1.4\times
-10^{-16}$ on the rotating helix. It was still rejected:
-
-**It flips sign through an inflection, and the flip locus is exactly $\kappa = 0$** — which a $\kappa > \varepsilon$ guard steps over. On $r(s,t) = (s,\ (t-0.5)s^2 + s^3/3,\ 0)$, with $\kappa(\tau_0) = 2\times10^{-3} \ggg \varepsilon$ at both sample times:
+$\widehat{d\mathbf{T}/d\tau}$ gives $\vert K\vert = 1.4\times10^{-16}$ under rigid rotation. But it sign-flips through an inflection, and the flip locus is exactly $\kappa = 0$. On $r(s,t) = (s,\ (t-0.5)s^2 + s^3/3,\ 0)$, with $\kappa(\tau_0) = 2\times10^{-3}$ at both times:
 
 | t     | seed       | $\gamma_{\tau\tau}$ |
 | ----- | ---------- | ------------------- |
 | 0.499 | `[0,-1,0]` | 4.395369            |
 | 0.501 | `[0,+1,0]` | 3.353607            |
 
-$\gamma$ jumps by 1.04 over $\Delta t = 0.002$; `rate_of_strain` returns a smooth-looking 4.2615 and 4.4714 where the true $\Delta\gamma/2\Delta t \approx -260$. **The world-axis seed is continuous there** — the geometric seed would be _worse_ than the status quo at inflections, reproducing exactly the failure mode above.
+evaluated at $(\tau, n_1, n_2) = (0.5, 0.2, 0)\,\mathrm{km}$, `tau_bounds` $= (0,1)\,\mathrm{km}$. $\gamma$ jumps by 1.04 over $\Delta t = 0.002$ where the true $\Delta\gamma/2\Delta t \approx
+-260$. **The world-axis seed is continuous there** — this rule is _worse_ than the status quo at inflections.
 
-Two further findings from the same review:
+### 4. Centroid seed — equivariant and inflection-continuous, but its own locus is worse
 
-- A `if kappa > eps` guard is **not implementable**: `kappa` is traced, so it raises `TracerBoolConversionError` under `jit` and `vmap`. It appears to work eagerly only because `jacfwd`'s JVPTracer leaks a concrete primal.
-- Conditioning near an inflection is _not_ a problem — `normalize` is homogeneous of degree zero, and equivariance stays exact ($\le 1.1\times10^{-16}$) down to $\varepsilon = 10^{-8}$. The sign flip is the real hazard.
+$w = P_{\perp T_0}(\langle r\rangle_{\tau} - r(\tau_0))$ is equivariant under rotation ($3.7\times10^{-16}$), translation ($5.4\times10^{-16}$) and reflection (exactly 0), and is continuous through an inflection. It still fails:
 
-## Rejected: the curvature-weighted mean seed
+- Its degeneracy locus is the _vector condition_ $\langle r\rangle - r(\tau_0) \parallel
+  T(\tau_0)$ — **codimension 1** for planar curves, not a symmetry. Counterexample: $r(s) = (s,\ s^2 - \tfrac43 s^3,\ 0)$ on $[0,1]$, $\tau_0 = 0$: curved ($\kappa = 2$), not odd-symmetric, $\tau_0$ at the lower bound, and degenerate.
+- Codimension 1 means ordinary time-dependent families **cross it transversally**: $\gamma_{\tau\tau}$ jumps `1.958321` -> `0.359281` across $\Delta t = 0.002$ where the true rate is $\approx -800\,\mathrm{s^{-1}}$, with $\kappa \approx 2$ throughout so nothing about curvature flags it. Near the locus $K$ diverges as $-0.399/\varepsilon$ (`-79.74` against a true `+0.84`), and **central differences confirm the wrong value to 5 digits**.
+- It depends on `tau_bounds` — 47.5° gauge rotation between bounds $(0,1)$ and $(0,8)$ — which is the objection used to reject the curvature-weighted mean. `tau_bounds` is documented in `chart.py` as a numerical scan range, so widening it for solver robustness would silently change $K$.
+- It is not a centroid: $\int r\,d\tau$ is parametrisation-dependent, so a time-dependent reparametrisation with fixed image rotates the seed and injects spurious $K$.
 
-Averaging the curvature direction over $\tau$ cancels on a helix, whose curvature vector rotates in the Bishop frame at the torsion rate. Conditioning ratio (weighted-mean magnitude over mean $|\kappa|$):
+### 5. Geometric seed plus a relative guard — no tolerance separates
 
-| $\tau$ range | 3.0   | 6.0   | 11.4  | 21.86      | 45.6  |
-| ------------ | ----- | ----- | ----- | ---------- | ----- |
-| ratio        | 0.967 | 0.881 | 0.609 | **0.0016** | 0.041 |
+The natural repair is to keep rule 3 and refuse near its locus, guarding on a _relative_ scale, $\rho = |d\mathbf{T}/d\tau(\tau_0)| \,/\, \langle |d\mathbf{T}/d\tau|\rangle_{\tau}$, via `eqx.error_if` (which, unlike a Python branch on a traced value, survives `jit`, `vmap` and `jacfwd` — verified). This does fix rule 3's specific hole: $\rho = 2.5\times10^{-3}$ on the family above, so a relative guard fires where an absolute $\varepsilon = 10^{-8}$ did not.
 
-The ratio oscillates rather than decaying — it passes through a null each torsion period — so the $L=45.6$ entry being above the $L=21.86$ one is expected, not an error. The first null is at $L = 21.8624$. Note the rotation rate is the torsion **per arc length** times $|r'|$: $0.275229 \times \sqrt{1.09} = 0.287348\ \mathrm{rad/km}$, so the period is $21.86$, not $22.83$. It also makes the seed depend on `tau_bounds`, so the same curve charted over a different $\tau$ extent would get different $(n_1, n_2)$ coordinates.
+It fails anyway. On the 3-D near-miss $r(s,t) = (s,\ (t-0.5)s^2 + s^3/3,\ \varepsilon s^2)$, where the seed sweeps ~180° continuously and $|d\mathbf{T}/d\tau| \ge 2\varepsilon$ never vanishes:
+
+| $\varepsilon$ | $\rho$ at $t = 0.5$ | guard fires? | $K$ (geometric) | $K$ (fixed director) | rel. err |
+| --- | --- | --- | --- | --- | --- |
+| 0.050 | 1.2624e-01 | no | -3.5519 | -0.0381 | 92.2 |
+| 0.020 | 5.0909e-02 | no | -9.3777 | -0.0382 | 244.5 |
+| 0.010 | 2.5494e-02 | no | -19.0809 | -0.0382 | 498.4 |
+| 0.005 | 1.2753e-02 | no | -38.4847 | -0.0382 | 1006.2 |
+
+The product `rel.err` $\times\ \rho$ is `11.6, 12.4, 12.7, 12.9` — constant. So
+
+$$
+\text{relative error} \;\approx\; \frac{12.7}{\rho}.
+$$
+
+The guard measures how flat $\tau_0$ is; the error scales as the **inverse** of that same quantity. Bounding the error at 100% needs $\rho_{\text{tol}} > 12.7$, but a circle sits at $\rho = 1.0$, a helix at $1.0$, a catenary at $2.04$. **No tolerance catches the bad cases without rejecting every ordinary curve.** This is not a tuning problem.
+
+### The structural result
+
+Generalising the four: any rule that derives the gauge from the curve has a degeneracy locus; error diverges as the locus is approached; and any guard sensitive enough to catch that divergence is also sensitive enough to reject ordinary curves. Separately, a transport-based rule (RMF-in-$t$) escapes the locus but is not equivariant. **Equivariance and smoothness are mutually exclusive for a curve-derived gauge.**
+
+The physical statement: a rod spinning about its own axis and one at rest trace the same curve. Rate of strain of a _tube_ is a property of a **framed** curve — a Cosserat director structure — not of a curve. The library cannot derive it and must not guess.
+
+## Key lemma
+
+In a **Bishop** frame the induced metric is exactly block-diagonal:
+
+$$
+\gamma = \mathrm{diag}\!\left(|r'|^2\,(1 - n_1k_1 - n_2k_2)^2,\; 1,\; 1\right),
+$$
+
+because $U_i' = -k_i T$ kills the cross terms (unlike Frenet, which carries a torsion term). This is exact, not generic — verified to $\le 2.9\times10^{-11}$ (ODE-solver residual) at offsets up to $|n| = 1.05$, inside and outside the focal distance.
+
+**$\gamma$ is seed-independent iff $|\kappa(\tau)| = 0$ or $n = 0$** — chart-wide, iff the curve is straight. It is _not_ enough that $\kappa\cdot(n_1,n_2) = 0$: rotating the seed by $\psi$ rotates $(k_1,k_2)$ by $-\psi$ while $(n_1,n_2)$ are held fixed, so $n\cdot\kappa$ sweeps a full cosine. At a point where $n\cdot\kappa = 1.4\times10^{-17}$ for one seed, $\gamma_{\tau\tau}$ across five seeds spans `1.0900 … 2.0368` — spread **1.600**.
+
+Two structural corollaries, neither previously stated:
+
+- $\gamma_{n_in_j} = \delta_{ij}$ for **every** builder, so $K_{n_in_j} \equiv 0$ always. The formalism cannot represent radial inflation or cross-sectional shear of the tube — only longitudinal stretch and (Frenet only) $\tau$–$n$ shear. This must be documented; "rate of strain of a tube" invites the opposite expectation.
+- $K = \tfrac12\partial_t(J^\mathsf{T}J)$ is symmetric by construction for both builders, so any test asserting $K = K^\mathsf{T}$ is vacuous.
 
 ## Design
-
-### The seed rule
-
-Any single continuous rotation-equivariant unit normal field over curve space must vanish somewhere, so no formula avoids a degeneracy locus. The design goal is therefore not to avoid degeneracy but to **align the degeneracy locus with the set where the lemma proves the seed does not matter**.
-
-The **centroid seed** does that:
-
-```
-w = P_perp_T0 ( mean_{tau in tau_bounds} r(tau)  -  r(tau_0) )
-```
-
-then through the existing `_orthonormalize`. Measured properties:
-
-- equivariant under rigid rotation: $\vert K\vert = 5.6\times10^{-17}$ (helix), $2.2\times10^{-16}$ (curve with $r''(\tau_0) = 0$);
-- **continuous through an inflection**: $\gamma_{\tau\tau} = 3.335749 \to 3.353607$, matching the world-axis seed exactly, where the geometric seed jumps;
-- well defined at $\kappa(\tau_0) = 0$, with no derivative-order selection;
-- no data-dependent Python branch, so it survives `jit` and `vmap`.
-
-**Degeneracy set — larger than "straight".** The centroid coincides with $r(\tau_0)$ for any curve odd-symmetric about $\tau_0$, not only straight ones:
-
-| case | $\vert w_\perp\vert$ | verdict |
-| --- | --- | --- |
-| cubic $s^3$, $\tau_0$ centred $[-1,1]$ | 1.42e-17 | degenerate (not straight) |
-| sine, $\tau_0$ centred $[-\pi,\pi]$ | 1.61e-16 | degenerate (not straight) |
-| cubic $s^3$, $\tau_0$ at end $[0,3]$ | 6.75 | ok |
-| helix, $\tau_0$ at end $[0,3]$ | 0.983 | ok |
-| straight line | 0.0 | degenerate |
-
-This is harmless in practice because `tau_0` defaults to the lower bound rather than the centre, but that is a property of the default, not a theorem. It must be documented as such.
-
-**Degeneracy is a raise, never a fallback.** A `jnp.where` blend to the world axis is rejected: its AD derivative is identically zero, so it would be silently wrong near the boundary. The rejection routes through `_orthonormalize`'s existing `eqx.error_if` (bishop.py:164), which is `jit`-safe and whose message already names `initial_normal`.
-
-> **Guard against NaN.** `normalize(0)` yields `[nan nan nan]` silently. The seed must be passed to `_orthonormalize` _unnormalised_ so the existing `error_if` fires, rather than pre-normalised.
 
 ### `SweptTube`
 
@@ -150,58 +142,109 @@ class SweptTube(eqx.Module):
     """One-parameter family of tubular slices: t -> TubularChart."""
 
     curve: Any  # two-argument gamma(tau, t)
+    director: Callable[[Any], Any]  # REQUIRED: t -> n-plane gauge vector
     tau_unit: ... = eqx.field(static=True)
-    tau_bounds: tuple[Any, Any]  # kw_only; the seed rule needs this
+    tau_bounds: tuple[Any, Any]  # kw_only
     builder: type = eqx.field(static=True, default=BishopBuilder)
-    director: Callable[[Any], Any] | None = None
     # solver / n_seed passthrough
 
     def __call__(self, t) -> TubularChart: ...
 ```
 
-- **The seed rule lives here, not on `BishopBuilder`** — forced, because it needs `tau_bounds`, which the builder does not own. `__call__` computes the centroid seed and passes it down as `initial_normal`.
-- **`builder` carries the choice.** `FrenetSerretBuilder` needs no seed and is _already_ equivariant ($\vert K\vert = 6.0\times10^{-8}$ vs Bishop's $2.7\times10^{-3}$ on the same generic-axis rigid rotation), because $\mathbf{N}$ and $\mathbf{B}$ are fixed pointwise by the curve with no transport. The gauge bug is Bishop-specific. Keeping Frenet preserves working behaviour and is required for the non-vacuous symmetry test below.
-- **`director` is a callable of $t$**, defaulting to the centroid seed. A fixed vector cannot express a materially spinning rod — the Cosserat case where the caller knows the gauge and the library provably cannot derive it.
+`director` is **required and has no default.** It is a callable of $t$, not a fixed vector, because a materially spinning rod needs a $t$-dependent frame. Omitting it raises, with a message stating that the gauge is director data the library cannot derive and pointing at the rejected-alternatives section.
+
+`builder` carries the choice because `FrenetSerretBuilder` needs no seed and is _already_ equivariant ($7.6\times10^{-17}$, and exactly `0.0` on axis-aligned rotations) — $\mathbf{N}$ and $\mathbf{B}$ are fixed pointwise by the curve. The gauge bug is Bishop-specific. Frenet is also required for the off-diagonal acceptance test.
 
 ### `rate_of_strain` narrows to `SweptTube`
 
-The raw-callable overload is removed. An opaque `Callable[[Any], Any]` cannot be inspected, so the gauge contract could only ever be advisory; taking a `SweptTube` makes it structural. `rate_of_strain` is new in #828 and unreleased, so there is no deprecation burden.
+The raw-callable overload is removed. An opaque `Callable[[Any], Any]` cannot be inspected, so the gauge contract could only ever be advisory. `rate_of_strain` is new in #828 and unreleased.
+
+It must additionally either invoke the reach guard or document that it is unvalidated outside the tube: at present, past the focal distance $\gamma_{\tau\tau} = 1.379\times10^{-3}$ with nothing raising, and the trace identity breaks by two orders _at_ the focal distance ($8.6\times10^{-2}$ vs $7.736$), because `metric_matrix`/`rate_of_strain` never call `TubularChart.check_data(values=True)`.
 
 ### `BishopBuilder` requires an explicit seed
 
-`_auto_initial_normal` is removed. A `BishopBuilder` with no `initial_normal` raises. This leaves no arbitrary gauge anywhere in the library.
+`_auto_initial_normal` is removed; a `BishopBuilder` with no `initial_normal` raises. By the lemma, a chart's $(n_1, n_2)$ coordinates genuinely depend on the seed whenever $\kappa \neq 0$ and $n \neq 0$, so an automatic seed makes the coordinates themselves arbitrary and undocumented. This is the same principle as `SweptTube`'s required `director`, one layer down.
 
-> **Scale, stated plainly.** This is a hard breaking change across ~258 references in 25+ files, including doctests. A measurement of a _different_ seed change produced 116 failures against 991 passes; this change touches every construction site rather than only those whose value moves, so it is larger. It was chosen deliberately over the non-breaking alternative (leave the bare default alone, since a single chart's gauge is arbitrary but harmless — the bug exists only when differencing two independently-seeded charts).
+> **Scale, stated plainly.** ~258 references across 25+ files, including doctests. A narrower seed change measured 116 failures against 991 passes; this touches every construction site, so it is larger. Chosen deliberately over leaving the bare default alone.
+
+## Other defects found
+
+Independent of the gauge work, from an audit of `curveframes`.
+
+### D1. `nearest_tau` can return a local _maximum_ (HIGH — silently wrong)
+
+`nearest.py:44-52` claims the bracket "cannot land on the maximum next door". False when the curve has structure finer than the seed spacing: the bracket holds three stationary points, the sign pair is $(-,+)$, `Bisection(flip="detect")` accepts it, and the solve reports success.
+
+With `n_seed=64` (the default) on `(t, 0.3 sin 20t, 0)` over $[0,10]$:
+
+|  |  |
+| --- | --- |
+| returned $\tau$ | 7.14220166655414 (second derivative **-17.82**: a maximum) |
+| true nearest $\tau$ | 7.1866 |
+| distance | 0.0997 km vs 0.0064 km — **15.6× too far** |
+
+`pt_map` returns the wrong labels with no error and **the round trip does not detect it** (the forward map reconstructs $x$ to 3e-15). The focal guard does not fire. In a 60-query sweep, 16/60 raised non-convergence and this was the worst _successful_ case.
+
+Fix: post-check that the accepted root is a minimum (`dist2(root) <= dist2(tau0)`), routing to the fallback otherwise. The docstring's "guaranteed within one spacing" is an assumption on `n_seed`, not a guarantee, and should say so.
+
+### D2. `FrenetSerretBuilder` returns an all-NaN frame at an inflection (MEDIUM)
+
+`_normalize` (`frenetserret.py:73-74`) has no zero-norm guard, unlike Bishop's `_orthonormalize` (`bishop.py:161`), and is fed the rejection of $\gamma''$, which vanishes wherever $\kappa = 0$. On $(t, t^3, 0)$ at $\tau = 0$, $\mathbf{N}$ and $\mathbf{B}$ are `[nan, nan, nan]`; on a straight line, everywhere. `check_data` catches it, but the builder accessors (`rotation_matrix`, `normal`, `binormal`, `__call__`, `frame_transition`) do not.
+
+### D3. `nearest_tau`'s tolerances are dimensionally overloaded (LOW–MED)
+
+`nearest.py:139-141` derives one scalar $\sqrt{\epsilon}$ and uses it as a tolerance in $\tau$ (Bisection), on a residual that is a **length** (Newton), and again at `nearest.py:171`. The same geometry converges differently in km and m: error `-3.6e-09` vs `+2.1e-12`, ratio tracking the unit scale exactly. The residual tolerance should be scaled by a length scale.
+
+### D4. `nearest_tau` uses `rotation_matrix()[0]` where `tangent()` suffices (LOW, perf)
+
+`nearest.py:132`. Value bit-identical (max abs diff `0.0`); measured **110×** slower (582.9 ms vs 5.3 ms). The residual is evaluated by bisection, Newton, two bracket probes and again under implicit differentiation — roughly 130 needless transport solves per inverse `pt_map`.
 
 ## Acceptance criteria
 
-| # | Check | Rationale |
-| --- | --- | --- |
-| 1 | Rigid rotation, **generic axis**, $\vert K\vert < 10^{-9}$ | The headline. Axis-aligned rotations pass even when broken |
-| 2 | $\gamma$ continuous through a $\kappa=0$ crossing; $K$ matches finite differences | The failure that killed the geometric seed |
-| 3 | Closed form: uniform stretch of a straight line, $K_{\tau\tau} = c(1+ct)$ | Analytic anchor; verified to 1.5e-8 |
-| 4 | $\gamma^{ij}K_{ij} = \partial_t\ln\sqrt{\det\gamma}$ | Independent invariant; verified exact |
-| 5 | Frenet family: off-diagonal $K \neq 0$ and $K = K^\mathsf{T}$ | Bishop's metric is always diagonal, so the existing symmetry test is vacuous |
-| 6 | Degenerate seed raises, naming `initial_normal` | Straight curve, and odd-symmetric-about-$\tau_0$ |
-| 7 | `jit` and `vmap` over scalar `t` both work | What killed the `if kappa > eps` rule |
-| 8 | Bishop-with-centroid and Frenet agree on-axis ($n = 0$) | Cross-builder check where the gauge cancels |
+The previous eight were audited: **four had provably zero power** over the gauge (#3 was on a straight line where $\kappa = 0$; #4 was an algebraic identity true for any $\gamma(t)$ and passes on the broken implementation; #5's symmetry half is vacuous for both builders; #8 was at $n = 0$ where the gauge cancels). The proposed implementation passed all eight and was wrong. Revised:
 
-Rigid _translation_ is worth one line but proves nothing alone.
+| # | Check | Power |
+| --- | --- | --- |
+| 1 | Rigid rotation, **generic axis**, materially correct director: $\vert K\vert < 10^{-9}$ | The headline |
+| 2 | Same rotation, deliberately _wrong_ (constant) director: $\vert K\vert \neq 0$ | Pins that the caller's gauge is reported faithfully, not silently corrected |
+| 3 | Breathing circle $R(t) = 1 + t/2$: $K_{\tau\tau} = (R + n_1)\dot R$ at $n_1 = 0, \pm0.3$ | Analytic, with $\kappa \neq 0$ so the gauge matters |
+| 4 | Frenet off-diagonals against closed form $\gamma_{\tau n_1} = -\lVert\gamma'\rVert\sigma n_2$, $\gamma_{\tau n_2} = +\lVert\gamma'\rVert\sigma n_1$ | Reference values; "$\neq 0$" passes on a sign error |
+| 5 | Missing `director` raises | The design's core contract |
+| 6 | `jit` and `vmap` over scalar `t` | Killed the earlier guard rule |
+| 7 | Past the focal distance: raises, or documented unvalidated | D-series gap |
+| 8 | $K_{n_in_j} \equiv 0$ pinned as a known structural limit | Documents rather than tests |
+| 9 | Uniform stretch of a straight line, $K_{\tau\tau} = c(1+ct)$ | Plumbing only — no gauge power; keep, labelled as such |
+| 10 | $\gamma^{ij}K_{ij} = \partial_t\ln\sqrt{\det\gamma}$ | Plumbing only — labelled as such |
 
 ## Sequencing
 
-**PR 1 — cleanup.** Stops the corrupted equation shipping immediately.
-
-- Fix `$$K*{ij}$$` / `\partial*t\gamma*{ij}` in `docs/curve-charts.md`. **Root cause proven:** the repo's own `prettier-markdown-no-wrap` hook, pinned at `v3.8.1` with `--prose-wrap=never`, rewrites `_` to `*` inside a single-line `$$…$$`. Reproduced byte-for-byte from clean input; prettier 3 latest does not do it, so it is specific to the pinned version. The author wrote correct LaTeX and the hook silently mangled it, which is why it shipped and why `nox -s docs` stayed green. **Verified fix:** put the `$$` delimiters on their own lines — that form round-trips through prettier 3.8.1 unchanged. Any other display math in the docs must use the same form or it will be re-corrupted on the next commit.
-- State the sign convention: this is Wald's $+$, opposite to Baumgarte--Shapiro and Alcubierre.
-- `strain.py:81` `.matrix.value` -> `ustrip(unit0)`; `strain.py:75` remove the dead `t.value if t_unit is not None else t` branch.
-
-**PR 2 — `SweptTube` and the gauge fix.** The type, the centroid seed, the `BishopBuilder` breaking change, and all eight acceptance tests. Closes #829.
-
-**PR 3 — documentation.** Rewrite the derivation as $K_{ij} = \tfrac12(\mathcal{L}_T\gamma)_{ij}$ with $T$ the tube's declared time flow, replacing "the Lie-drag term vanishes by construction". State that $K_{ij}$ is a slice 2-tensor only under _time-independent_ spatial relabelling, and that rate of strain of a tube is a property of a framed curve.
+1. **PR 1 — D1 alone.** The only HIGH: a silently 15.6×-wrong answer through the public `pt_map`, independent of everything else. Reproducer becomes the test.
+2. **PR 2 — D2, D3, D4.** Shared files (`frenetserret.py`, `nearest.py`).
+3. **PR 3 — cleanup.** Fix `$$K*{ij}$$` / `\partial*t\gamma*{ij}` at `packages/coordinaxs.curveframes/docs/curve-charts.md:340`. **Root cause proven:** the repo's own `prettier-markdown-no-wrap` hook, pinned at `v3.8.1` with `--prose-wrap=never`, rewrites `_` to `*` inside a single-line `$$…$$`; reproduced byte-for-byte from clean input, and prettier 3 latest does not do it. The author wrote correct LaTeX and the hook mangled it afterwards, which is why it shipped and why `nox -s docs` stayed green. **Verified fix:** put the `$$` delimiters on their own lines — that form round-trips unchanged. All display math in the docs must use that form. Also: state the sign convention; `strain.py:81` `.matrix.value` -> `ustrip(unit0)`; `strain.py:75` drop the dead branch.
+4. **PR 4 — `SweptTube`.** The type, the required director, the `BishopBuilder` breaking change, and criteria 1–10. Closes #829.
+5. **PR 5 — documentation.** $K_{ij} = \tfrac12(\mathcal{L}_T\gamma)_{ij}$ with $T$ the tube's declared time flow. Say **"by analogy with ADM"**, not "the lapse is 1": Galilean spacetime has no non-degenerate 4-metric, so lapse and shift are not defined — the repo's own `test_adm_structure.py` already says this. State that $K$ is a slice 2-tensor only under _time-independent_ spatial relabelling, that rate of strain of a tube is a property of a framed curve, and that $K_{n_in_j} \equiv 0$.
 
 ## Behaviour regressions to declare
 
-1. `BishopBuilder` without `initial_normal` now raises (~258 call sites).
+1. `BishopBuilder` without `initial_normal` raises (~258 call sites).
 2. `rate_of_strain` no longer accepts a raw callable.
-3. A `SweptTube` whose curve is straight, or odd-symmetric about $\tau_0$, raises and requires an explicit `director`.
+3. `SweptTube` requires a `director`; there is no automatic gauge.
+4. `nearest_tau` may route to the fallback (or raise) where it previously returned a confidently wrong maximum.
+
+## Sign convention
+
+$K_{ij} = +\tfrac{1}{2\alpha}(\partial_t\gamma_{ij} - \mathcal{L}_\beta\gamma_{ij})$ is Wald's sign ($K_{ab} = \nabla_a n_b$). Baumgarte--Shapiro (2.134) and Alcubierre (2.3.11) both write $\partial_t\gamma_{ij} = -2\alpha K_{ij} + D_i\beta_j + D_j\beta_i$, the opposite sign, following MTW. For a function named `rate_of_strain` the positive sign is right, but the convention must be stated or anyone assembling evolution equations from a numerical-relativity text inherits a sign error.
+
+> **Verify before shipping.** This attribution was made from memory of the standard texts and has not been checked against the books. PR 5 must confirm it against the actual editions.
+
+## Corrections to earlier drafts of this spec
+
+Recorded so they are not reintroduced:
+
+- "$\gamma$ is seed-independent iff $\kappa\cdot(n_1,n_2) = 0$" — only "if"; the true condition is $|\kappa| = 0$ or $n = 0$.
+- "the centroid seed degenerates exactly on {straight} $\cup$ {odd-symmetric}" — false; the locus is a codimension-1 vector condition.
+- "harmless because `tau_0` defaults to the lower bound" — `tau_0` defaults to `Q(0.0, tau_unit)` (`bishop.py:400`), _not_ `tau_bounds[0]`; on bounds like $(-3,3)$ it is the centre.
+- "rotations about $\hat x$ or $\hat z$ are exactly equivariant" — $\hat z$ gives $2.0\times10^{-2}$.
+- Torsion-period arithmetic: $21.8624 \to 21.8654$; and the rate is the torsion **per arc length** times $|r'|$, $0.275229\sqrt{1.09} = 0.287348\ \mathrm{rad/km}$.
+- "the seed must be passed unnormalised so `error_if` fires" — not a requirement; both the unnormalised zero and `normalize(0) = nan` raise, since `~(nan > tol)` is True.
+- Guard comparisons must use `~(x > tol)`, never `x <= tol` or `x < tol`: NaN is False for both, so a NaN would pass. `bishop.py:161` documents this; an earlier draft of the guard above walked into it anyway.
