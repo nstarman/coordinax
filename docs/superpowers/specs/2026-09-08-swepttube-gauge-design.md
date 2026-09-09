@@ -76,7 +76,7 @@ $\widehat{d\mathbf{T}/d\tau}$ gives $\vert K\vert = 1.4\times10^{-16}$ under rig
 | 0.499 | `[0,-1,0]` | 1.484697            |
 | 0.501 | `[0,+1,0]` | 0.709800            |
 
-evaluated at $(\tau, n_1, n_2) = (0.5, 0.2, 0)\,\mathrm{km}$, `tau_bounds` $= (0,1)\,\mathrm{km}$. confirmed analytically: $|r'|^2 = 1.0625$ and $\kappa = 0.913518$ at $s = 0.5$, so $\gamma_{\tau\tau} = 1.0625\,(1 \mp 0.2\kappa)^2$ gives exactly these. (An earlier draft recorded 4.395369 / 3.353607, unattainable at the stated point — that family never reaches $|r'| \approx 1.96$ in bounds.) $\gamma$ jumps by 0.775 across $\Delta t = 0.002$, a _spurious_ rate of $\approx -390$. **The world-axis seed is continuous there** — this rule is _worse_ than the status quo at inflections.
+evaluated at $(\tau, n_1, n_2) = (0.5, 0.2, 0)\,\mathrm{km}$, `tau_bounds` $= (0,1)\,\mathrm{km}$. measured through the library. The single-point cross-check an earlier draft gave does **not** derive them: at $s = 0.5$, $t = 0.5$ the curvature is $0.913076$, and $1.0625(1 \mp 0.2\kappa)^2$ yields 1.48599 / 0.70987. The quoted values need the _$t$-dependent_ pair — $(|r'|^2, \kappa) = (1.062001, 0.911893)$ at $t = 0.499$ and $(1.063001, 0.914255)$ at $t = 0.501$. (An earlier draft recorded 4.395369 / 3.353607, unattainable at the stated point — that family never reaches $|r'| \approx 1.96$ in bounds.) $\gamma$ jumps by 0.775 across $\Delta t = 0.002$, a _spurious_ rate of $\approx -390$. **The world-axis seed is continuous there** — this rule is _worse_ than the status quo at inflections.
 
 ### 4. Centroid seed — equivariant and inflection-continuous, but its own locus is worse
 
@@ -113,7 +113,18 @@ The guard measures how flat $\tau_0$ is; the error scales as the **inverse** of 
 
 ### The structural result
 
-Generalising the four: any rule that derives the gauge from the curve has a degeneracy locus; error diverges as the locus is approached; and any guard sensitive enough to catch that divergence is also sensitive enough to reject ordinary curves. Separately, a transport-based rule (RMF-in-$t$) escapes the locus but is not equivariant. **Equivariance and smoothness are mutually exclusive for a curve-derived gauge.**
+**The gauge is not a function of the curve at all.** Take a curve with _no_ $t$-dependence whatsoever — a static helix $(\cos s, \sin s, 0.4s)$ — and spin the director about $\mathbf{T}(\tau_0)$ at $a = \omega\cdot\mathbf{T} = 1/\sqrt{1.16}$. Measured at $(\tau, n_1, n_2) = (0.5, 0.2, 0.1)\,\mathrm{km}$, `tau_bounds` $= (-1,2)\,\mathrm{km}$:
+
+| director    | $K_{\tau\tau}$       |
+| ----------- | -------------------- |
+| fixed       | **0.000000** exactly |
+| spun at $a$ | **−0.067526**        |
+
+Same $r(\tau, t)$, two different correct answers. No function of the curve — however clever, however conditioned — can distinguish them, because the curve is identical in the two cases. That is an information-theoretic obstruction, and unlike the conditioning arguments above it is unconditional: no degeneracy locus, no tolerance, no family of counterexamples required.
+
+The four rejected rules are then evidence of a weaker but useful kind: that the plausible substitutes are _also_ individually broken, so nobody needs to re-derive them.
+
+> An earlier draft generalised this as **"equivariance and smoothness are mutually exclusive for a curve-derived gauge"**. That is **false as written**, and independent review falsified it: the Frenet-normal seed on a rigidly rotating 3-D helix gives $\vert K\vert_{\max} = 5.03\times10^{-17}$ against the material carry's $5.55\times10^{-17}$ — equivariant, smooth in $t$, well conditioned. Its locus $\kappa(\tau_0)=0$ is codimension 2 in 3-D, which is the standard §4 uses to _accept_; §3 condemns it only by choosing a planar family, where the same locus drops to codimension 1. The rule-3 rejection stands on its conditioning table and on the physics, not on that generalisation.
 
 The physical statement: a rod spinning about its own axis and one at rest trace the same curve. Rate of strain of a _tube_ is a property of a **framed** curve — a Cosserat director structure — not of a curve. The library cannot derive it and must not guess.
 
@@ -143,7 +154,7 @@ class SweptTube(eqx.Module):
     """One-parameter family of tubular slices: t -> TubularChart."""
 
     curve: Any  # two-argument gamma(tau, t)
-    director: Callable[[Any], Any]  # REQUIRED: t -> n-plane gauge vector
+    director: Callable[[Any], Any] | None = None  # required iff builder is Bishop
     tau_unit: ... = eqx.field(static=True)
     tau_bounds: tuple[Any, Any]  # kw_only
     builder: type = eqx.field(static=True, default=BishopBuilder)
@@ -153,6 +164,8 @@ class SweptTube(eqx.Module):
 ```
 
 `director` is **required and has no default.** It is a callable of $t$, not a fixed vector, because a materially spinning rod needs a $t$-dependent frame. Omitting it raises, with a message stating that the gauge is director data the library cannot derive and pointing at the rejected-alternatives section.
+
+> **Day-1 blocker, found by building the sketch.** A `Quantity`-valued director — the natural typing, and what the rest of this library uses — raises `TracerArrayConversionError` inside `rate_of_strain`'s `jacfwd`. `_float` at `bishop.py:132` calls `jnp.asarray(x)`, which invokes `__array__` on a traced `Quantity`, reached via `_transport_start`'s `_orthonormalize(_float(self.initial_normal), T0_val)`. A raw `jnp` array works. One line to fix (`ustrip` first), but it must land before or with this work.
 
 `director` is required **only on the Bishop path**. `FrenetSerretBuilder` takes no seed, so passing one is a caller error, rejected at construction rather than silently ignored — as written earlier ("omitting it raises", plus a selectable builder) the two rules contradicted each other.
 
@@ -168,7 +181,7 @@ It must additionally either invoke the reach guard or document that it is unvali
 
 `_auto_initial_normal` is removed; a `BishopBuilder` with no `initial_normal` raises. By the lemma, a chart's $(n_1, n_2)$ coordinates genuinely depend on the seed whenever $\kappa \neq 0$ and $n \neq 0$, so an automatic seed makes the coordinates themselves arbitrary and undocumented. This is the same principle as `SweptTube`'s required `director`, one layer down.
 
-> **Scale, measured not estimated.** **157 `BishopBuilder(` construction sites across 38 files**, of which 8 already pass `initial_normal` — so **~149 need a seed**. (An earlier draft said "~258 references across 25+ files"; 260 is the count of _references_, which is not the actionable number.)
+> **Scale, measured not estimated.** **156 `BishopBuilder(` construction sites across 28 files**, of which 11 already pass `initial_normal` — so **145 need a seed**. Counted by matching balanced parentheses and excluding this document. (Two earlier drafts got this wrong: "~258 references across 25+ files", which counted _references_ rather than construction sites, then "157 / 38 / 8", from a grep that counted this spec and miscounted files.)
 >
 > **The stated justification was wrong.** An earlier draft called the auto seed "arbitrary and undocumented". Arbitrary yes; undocumented no — it is described at `bishop.py:38-39` and in `_auto_initial_normal`'s own docstring. The honest case is that the gauge is arbitrary _and load-bearing_ for $(n_1, n_2)$ whenever $\kappa \neq 0$ and $n \neq 0$, so a caller who never chose it still depends on it.
 >
@@ -186,7 +199,7 @@ Two distinct defects, recorded together because the first fix was mistaken for a
 
 **D1b — the bracket was wide enough to hold two minima.** #841 did _not_ close the original finding, and an earlier draft of this spec asserted that it had. The bracket is `2 * spacing` wide; on the reproducer that is 0.31746 against a wiggle period of 0.31416, so it held minima at 8.34701 (distance 0.107) and 8.46367 (distance 0.011), and bisection returned the first. **Both of #841's guards pass on that answer** — it is a genuine minimum (second derivative +59.2) and it is closer than every scan seed.
 
-It is _not_ a wrong-basin failure, as #847 first claimed and I corrected: the argmin seed is within one spacing of the true minimiser and its basin ranks first of three, so searching additional local-minimum seeds would not have helped. Fixed by refining inside the coarse interval before bracketing (0.31746 → 0.01008, one minimum), plus counting the residual's turns inside the refined bracket and refusing if more than one remains. Tracked as #847.
+It is _not_ a wrong-basin failure, as #847 first claimed and I corrected: the argmin seed is within one spacing of the true minimiser and its basin ranks first of three, so searching additional local-minimum seeds would not have helped. Fixed by refining inside the coarse interval before bracketing: the refined interval is $2\,\text{spacing}/(n_{\text{seed}}-1) = 0.00504$ wide and holds one minimum. The refinement is on the **residual**, not on `dist2` — those coincide only when the tangent is the unit tangent of the parametrisation, and on a worldtube they do not. Every crossing with the minimum's orientation is a candidate and the lowest mean `dist2` wins. Tracked as #847, shipped in #848.
 
 Probe: `x = (8.45268, -0.10722, 0)` km on `(t, 0.3 sin 20t, 0)` over `(0, 10)` s at the default `n_seed = 64`. Result 9.62x → 1.01x at float32; at float64, 8.46367448 against Brent's 8.4636744833. The residual float32 gap is the solver's own `sqrt(eps)` tolerance.
 
@@ -232,11 +245,11 @@ On a trefoil over `tau_bounds=(0, 2*pi)`, `|T(0) - T(2*pi)| = 2.94e-16` — the 
 
 ### D9. Worldtube reach guard rejects the tube axis with the wrong diagnosis (MEDIUM)
 
-For a rigidly rotating rod (`sigma * (cos t, sin t, 0)`, `station=Q(1.3,'km')`), `jacobian_factor` is `0.0` at **every** point including `n1=n2=0` on the axis, and `check_data` raises "point lies outside the reach of the curve: the tubular coordinates are not locally injective there". Refusing is correct — the station's velocity lies in the normal plane, so `dx/dt` is in `span(U1,U2)` and the determinant really is zero — but the message names a focal/reach failure that did not happen. A transversely-moving worldtube has no `(t,n1,n2)` chart at _any_ offset, and nothing says so at construction. Its longitudinal sibling gives `jacobian_factor = 0.96317125` and passes.
+For a rigidly rotating rod (`sigma * (cos t, sin t, 0)`, `station=Q(1.3,'km')`), `jacobian_factor` is `0.0` on the **plane $n_2 = 0$** — including `n1=n2=0` on the axis — but not everywhere: it is `0.07692308` at $n=(0,0.1)$ and $(0.2,0.1)$, and `0.38461538` at $(0.5,0.5)$, and `check_data` passes off that plane. (An earlier draft said every point.) On the singular plane, `check_data` raises "point lies outside the reach of the curve: the tubular coordinates are not locally injective there". Refusing is correct — the station's velocity lies in the normal plane, so `dx/dt` is in `span(U1,U2)` and the determinant really is zero — but the message names a focal/reach failure that did not happen. A transversely-moving worldtube has no `(t,n1,n2)` chart at _any_ offset, and nothing says so at construction. Its longitudinal sibling gives `jacobian_factor = 0.96317125` and passes.
 
 Relatedly, `jacobian_factor`'s docstring claim that it "equals `1-k1*n1-k2*n2` at _any_ parametrisation" is false on this branch: at `n=0` it equals `cos(angle(velocity, spatial tangent))`.
 
-### D11. #841's post-check is not sound for worldtubes (LOW, latent)
+### D11. #841's post-check refused correct worldtube inversions (HIGH) — **shipped**
 
 The "no worse than the scan's argmin" check added in #841 assumes the answer minimises `dist2`. On a station-pinned worldtube the chart inverse is the perpendicular foot, whose distance can exceed the sampled minimum -- the builder's tangent is the curve's _spatial_ tangent while `tau` is a time, so the residual's root and `dist2`'s minimum part company.
 
@@ -258,15 +271,16 @@ The previous eight were audited: **four had provably zero power** over the gauge
 | # | Check | Power |
 | --- | --- | --- |
 | 1 | Rigid rotation, **generic axis**, materially correct director: $\vert K\vert < 10^{-9}$ | The headline |
-| 2 | Same rotation, constant director: assert $K_{\tau\tau}$ against its closed form $\vert r'\vert^2(1-n\cdot k)\,a\,(n\times k)_z$ — measured 0.108856 | Pins that the caller's gauge is reported faithfully. **Not** "$\neq 0$", which passes on 1e-14 solver noise — the exact vacuity this table replaced |
-| 3 | Breathing circle $R(t) = 1 + t/2$: $K_{\tau\tau} = (R + n_1)\dot R$ at $n_1 = 0, \pm0.3$, director stated as the outward radial at $\tau_0$ | Analytic. **Narrower than it looks**: $T(\tau_0)$ does not rotate in $t$, so the status-quo auto seed is constant and passes this. It discriminates against a rotated director, not against the seed-drift bug |
+| 2 | Same rotation, constant director $\perp \mathbf{T}(\tau_0)$: assert $K_{\tau\tau}$ against $\vert r'\vert^2(1-n\cdot k)\,a\,(n\times k)_z$ with $a = \boldsymbol\omega\cdot\mathbf{T}(\tau_0)$. **Both conditions are load-bearing**: $\mathbf{T}(\tau)$ instead of $\mathbf{T}(\tau_0)$ gives 0.814815 against 0.928477, a 14% error, and a non-perpendicular director breaks the identity (0.104803 vs 0.108417). State the configuration alongside the expected number — an earlier draft quoted 0.108856 with none, so it was unreproducible | Pins that the caller's gauge is reported faithfully. **Not** "$\neq 0$", which passes on 1e-14 solver noise — the exact vacuity this table replaced |
+| 3 | Breathing circle $R(t) = 1 + t/2$ **in the angle parametrisation** $r = R(t)(\cos\tau, \sin\tau)$: $K_{\tau\tau} = (R + n_1)\dot R$ at $n_1 = 0, \pm0.3$ — measured 0.500000 / 0.650000 / 0.350000 — director the outward radial at $\tau_0$. The formula is **wrong under arc length**, where the same criterion yields 0.000000 / −0.195 / +0.105 | Analytic. **Narrower than it looks**: $T(\tau_0)$ does not rotate in $t$, so the status-quo auto seed is constant and passes this. It discriminates against a rotated director, not against the seed-drift bug |
 | 4 | Frenet off-diagonals against closed form $\gamma_{\tau n_1} = -\lVert\gamma'\rVert\sigma n_2$, $\gamma_{\tau n_2} = +\lVert\gamma'\rVert\sigma n_1$ | Reference values; "$\neq 0$" passes on a sign error |
-| 5 | Missing `director` raises | The design's core contract |
+| 5 | Missing `director` raises **on the Bishop path**; supplying one with `builder=FrenetSerretBuilder` also raises | The design's core contract. A dataclass field cannot be "required iff builder is Bishop", so `SweptTube` needs its own conditional check — `FrenetSerretBuilder` rejects `initial_normal` with a `TypeError` one layer down, which is a different error and arrives too late |
 | 6 | `jit` and `vmap` over scalar `t` | Killed the earlier guard rule |
 | 7 | Past the focal distance it **raises** — the "or documented unvalidated" escape is deleted, since an implementation passed either way. Assert the singular set per builder — Bishop `1-k1n1-k2n2=0`, Frenet `1-kappa*n1=0` (independent of `n2`) | D-series gap |
 | 8 | $K_{n_in_j} \equiv 0$ pinned as a known structural limit | Documents rather than tests |
 | 9 | Uniform stretch of a straight line, $K_{\tau\tau} = c(1+ct)$ | Plumbing only — no gauge power; keep, labelled as such |
 | 10 | $\gamma^{ij}K_{ij} = \partial_t\ln\sqrt{\det\gamma}$ | Plumbing only — labelled as such |
+| 11 | **Static curve, spinning director.** Helix $(\cos s, \sin s, 0.4s)$ with no $t$-dependence, `tau_bounds` $=(-1,2)$ km, at $(\tau,n_1,n_2)=(0.5,0.2,0.1)$ km, director spun about $\mathbf{T}(\tau_0)$ at $a = 1/\sqrt{1.16}$: assert $K_{\tau\tau} = -0.067526$, against **exactly 0.0** for a fixed director | **The criterion the design exists for.** No curve-derived rule can pass it — the curve is identical in both cases. Without it the design rests on criterion 1 alone, a zero-truth $\vert K\vert < 10^{-9}$ check |
 
 ## Sequencing
 
@@ -285,7 +299,7 @@ Revised — several of these have shipped since the first draft.
 
 ## Behaviour regressions to declare
 
-1. `BishopBuilder` without `initial_normal` raises (~258 call sites).
+1. `BishopBuilder` without `initial_normal` raises (145 construction sites need a seed; see the scale note above).
 2. `rate_of_strain` no longer accepts a raw callable.
 3. `SweptTube` requires a `director`; there is no automatic gauge.
 4. `nearest_tau` may route to the fallback (or raise) where it previously returned a confidently wrong maximum.
