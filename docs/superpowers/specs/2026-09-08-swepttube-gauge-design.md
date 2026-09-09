@@ -199,7 +199,48 @@ Fix: post-check that the accepted root is a minimum (`dist2(root) <= dist2(tau0)
 
 `nearest.py:132`. Value bit-identical (max abs diff `0.0`); measured **110×** slower (582.9 ms vs 5.3 ms). The residual is evaluated by bisection, Newton, two bracket probes and again under implicit differentiation — roughly 130 needless transport solves per inverse `pt_map`.
 
+### D5. Zero-width `tau_bounds` hangs forever (HIGH)
+
+`nearest.py:127-128` computes `spacing = (hi-lo)/(n_seed-1)`; with `tau_bounds[0] == tau_bounds[1]` that is `0`, so `bracket_lo == bracket_hi == tau0`. `optx.Bisection(..., expand_if_necessary=True)` (`nearest.py:147-157`) grows a bracket by _doubling its width_ — doubling zero never grows it — and that expansion is **not** bounded by `max_steps=64`.
+
+Reproduced without coordinax, so the curve is ruled out: `lo,hi = 0.0,1.0` returns in 0.40 s and one residual evaluation; `lo,hi = 0.3,0.3` was killed at 120 s having never returned. Through the package, `nearest_tau(..., bounds=(Q(3,'s'), Q(3,'s')))` was killed at 200 s where the same call with `(Q(0,'s'), Q(2*pi,'s'))` returns `tau=1.000000` in 4.2 s.
+
+Publicly reachable: `TubularChart.__check_init__` (`chart.py:140-192`) validates bounds _dimensions_ only, so the chart constructs and every inverse `pt_map` then hangs.
+
+Fix: reject `hi == lo` at `chart.py:178`, or guard `spacing == 0` at `nearest.py:127`.
+
+### D6. `s_max` turns a documented graceful degradation into a hard error (HIGH)
+
+`chart.py:123-126` states that a point whose true nearest curve point lies outside `tau_bounds` "does not raise". With `ArcLength(..., s_max=...)` it does — and `s_max` set exactly as its own docstring instructs (`>= tau_bounds[1]`) is enough to trigger it: `s_max=None` returns `1.200000` (true 1.2); `s_max=Q(1.0,"km")` raises `EquinoxRuntimeError` / `_MSG_S_OUT_OF_DOMAIN`.
+
+Cause: the unconstrained Newton fallback (`nearest.py:163-164`) is **always evaluated**, whichever branch the `jnp.where` at `nearest.py:173` later selects, and it probes arbitrarily far — tripping `_eval_tau_dense`'s `error_if` at `arclength.py:217`. `_S_MAX_MARGIN = 0.05` (`arclength.py:186`) was sized against `nearest_tau`'s _bracket_ slack of one seed spacing; the margin comment does not account for the fallback.
+
+### D7. Closed curves: Bishop holonomy tears the chart at the seam (MEDIUM-HIGH)
+
+On a trefoil over `tau_bounds=(0, 2*pi)`, `|T(0) - T(2*pi)| = 2.94e-16` — the same point with the same tangent — but the Bishop normal rotates by **-2.225041 rad = -127.485 deg** over the period. So `pt_map({tau: 1e-7, n1: 0.2, n2: 0})` and `pt_map({tau: 2*pi - 1e-7, n1: 0.2, n2: 0})` are **0.3587 km apart** while naming the same station and the same normal offset.
+
+`tau_bounds`' docstring (`chart.py:119-121`) warns only about spanning _more_ than one period; it never says the frame fails to close on exactly one. Easy to miss, because a **planar** closed curve has zero holonomy — the obvious probe measures `0.000000 rad` and the seam points coincide.
+
+### D8. Station-pinned one-argument builder is rank-deficient, unrejected (MEDIUM)
+
+`BishopBuilder(circle, "s", station=Q(0.5,"s"))` inside a `TubularChart` builds cleanly: `is_time_dependent` is `False` for a one-argument curve, so `__check_init__`'s worldtube guards do not apply. The forward `pt_map` then **ignores its first coordinate** — `tau=1.0` and `tau=2.5` both give `(0.9653408180793798, 0.5273680924646786, 0.0)` — and `jacobian_factor` is `nan` (0/0 at `chart.py:327`). `check_data(values=True)` catches the NaN, but `pt_map` never calls it, so the map is silently non-injective and the inverse solve degenerate.
+
+### D9. Worldtube reach guard rejects the tube axis with the wrong diagnosis (MEDIUM)
+
+For a rigidly rotating rod (`sigma * (cos t, sin t, 0)`, `station=Q(1.3,'km')`), `jacobian_factor` is `0.0` at **every** point including `n1=n2=0` on the axis, and `check_data` raises "point lies outside the reach of the curve: the tubular coordinates are not locally injective there". Refusing is correct — the station's velocity lies in the normal plane, so `dx/dt` is in `span(U1,U2)` and the determinant really is zero — but the message names a focal/reach failure that did not happen. A transversely-moving worldtube has no `(t,n1,n2)` chart at _any_ offset, and nothing says so at construction. Its longitudinal sibling gives `jacobian_factor = 0.96317125` and passes.
+
+Relatedly, `jacobian_factor`'s docstring claim that it "equals `1-k1*n1-k2*n2` at _any_ parametrisation" is false on this branch: at `n=0` it equals `cos(angle(velocity, spatial tangent))`.
+
+### D10. Reversed `tau_bounds` silently accepted (LOW)
+
+`TubularChart(b, tau_bounds=(Q(2*pi,'s'), Q(0,'s')))` builds, and `nearest_tau` happens to return the right answer (`1.000000`, true 1.0). Undocumented, and `_solve_tau_dense` and `_S_MAX_MARGIN` both assume ascending bounds.
+
 ## Acceptance criteria
+
+### Corrections from the second pass
+
+- The reach guard fires at `1 - k1*n1 - k2*n2 = 0` **for Bishop only**. Frenet-Serret's factor is `1 - kappa*n1`, independent of `n2` (`n=(1.5,0)` and `n=(1.5,0.7)` both give `-0.29310345`). Still the correct singular set for that chart, but not the quoted formula — criterion 7 must not assert the Bishop form for both builders.
+- **A verification that lands where the truth is zero proves nothing.** The first audit's `_tau_of_s` t-direction check sat at `t=2.0`, where the true derivative is analytically exactly zero; AD and finite differences agreed to 3.4e-11 and confirmed nothing. Re-run at `t=1.0` and `t=3.0` it genuinely matches (7.1e-12, 1.4e-11). Every criterion in the table above must be checked for this: the same defect made four of the original eight vacuous.
 
 The previous eight were audited: **four had provably zero power** over the gauge (#3 was on a straight line where $\kappa = 0$; #4 was an algebraic identity true for any $\gamma(t)$ and passes on the broken implementation; #5's symmetry half is vacuous for both builders; #8 was at $n = 0$ where the gauge cancels). The proposed implementation passed all eight and was wrong. Revised:
 
@@ -211,7 +252,7 @@ The previous eight were audited: **four had provably zero power** over the gauge
 | 4 | Frenet off-diagonals against closed form $\gamma_{\tau n_1} = -\lVert\gamma'\rVert\sigma n_2$, $\gamma_{\tau n_2} = +\lVert\gamma'\rVert\sigma n_1$ | Reference values; "$\neq 0$" passes on a sign error |
 | 5 | Missing `director` raises | The design's core contract |
 | 6 | `jit` and `vmap` over scalar `t` | Killed the earlier guard rule |
-| 7 | Past the focal distance: raises, or documented unvalidated | D-series gap |
+| 7 | Past the focal distance: raises, or documented unvalidated. Assert the singular set per builder — Bishop `1-k1n1-k2n2=0`, Frenet `1-kappa*n1=0` (independent of `n2`) | D-series gap |
 | 8 | $K_{n_in_j} \equiv 0$ pinned as a known structural limit | Documents rather than tests |
 | 9 | Uniform stretch of a straight line, $K_{\tau\tau} = c(1+ct)$ | Plumbing only — no gauge power; keep, labelled as such |
 | 10 | $\gamma^{ij}K_{ij} = \partial_t\ln\sqrt{\det\gamma}$ | Plumbing only — labelled as such |
@@ -219,10 +260,11 @@ The previous eight were audited: **four had provably zero power** over the gauge
 ## Sequencing
 
 1. **PR 1 — D1 alone.** The only HIGH: a silently 15.6×-wrong answer through the public `pt_map`, independent of everything else. Reproducer becomes the test.
-2. **PR 2 — D2, D3, D4.** Shared files (`frenetserret.py`, `nearest.py`).
-3. **PR 3 — cleanup.** Fix `$$K*{ij}$$` / `\partial*t\gamma*{ij}` at `packages/coordinaxs.curveframes/docs/curve-charts.md:340`. **Root cause proven:** the repo's own `prettier-markdown-no-wrap` hook, pinned at `v3.8.1` with `--prose-wrap=never`, rewrites `_` to `*` inside a single-line `$$…$$`; reproduced byte-for-byte from clean input, and prettier 3 latest does not do it. The author wrote correct LaTeX and the hook mangled it afterwards, which is why it shipped and why `nox -s docs` stayed green. **Verified fix:** put the `$$` delimiters on their own lines — that form round-trips unchanged. All display math in the docs must use that form. Also: state the sign convention; `strain.py:81` `.matrix.value` -> `ustrip(unit0)`; `strain.py:75` drop the dead branch.
-4. **PR 4 — `SweptTube`.** The type, the required director, the `BishopBuilder` breaking change, and criteria 1–10. Closes #829.
-5. **PR 5 — documentation.** $K_{ij} = \tfrac12(\mathcal{L}_T\gamma)_{ij}$ with $T$ the tube's declared time flow. Say **"by analogy with ADM"**, not "the lapse is 1": Galilean spacetime has no non-degenerate 4-metric, so lapse and shift are not defined — the repo's own `test_adm_structure.py` already says this. State that $K$ is a slice 2-tensor only under _time-independent_ spatial relabelling, that rate of strain of a tube is a property of a framed curve, and that $K_{n_in_j} \equiv 0$.
+2. **PR 2 — D5 and D6.** Both HIGH: a public-API hang (zero-width `tau_bounds`) and a documented-behaviour regression (`s_max`). Both live in `nearest.py`/`arclength.py`.
+3. **PR 3 — D2, D3, D4, D7-D10.** The remaining guards, diagnoses and docs.
+4. **PR 4 — cleanup.** Fix `$$K*{ij}$$` / `\partial*t\gamma*{ij}` at `packages/coordinaxs.curveframes/docs/curve-charts.md:340`. **Root cause proven:** the repo's own `prettier-markdown-no-wrap` hook, pinned at `v3.8.1` with `--prose-wrap=never`, rewrites `_` to `*` inside a single-line `$$…$$`; reproduced byte-for-byte from clean input, and prettier 3 latest does not do it. The author wrote correct LaTeX and the hook mangled it afterwards, which is why it shipped and why `nox -s docs` stayed green. **Verified fix:** put the `$$` delimiters on their own lines — that form round-trips unchanged. All display math in the docs must use that form. Also: state the sign convention; `strain.py:81` `.matrix.value` -> `ustrip(unit0)`; `strain.py:75` drop the dead branch.
+5. **PR 5 — `SweptTube`.** The type, the required director, the `BishopBuilder` breaking change, and criteria 1–10. Closes #829.
+6. **PR 6 — documentation.** $K_{ij} = \tfrac12(\mathcal{L}_T\gamma)_{ij}$ with $T$ the tube's declared time flow. Say **"by analogy with ADM"**, not "the lapse is 1": Galilean spacetime has no non-degenerate 4-metric, so lapse and shift are not defined — the repo's own `test_adm_structure.py` already says this. State that $K$ is a slice 2-tensor only under _time-independent_ spatial relabelling, that rate of strain of a tube is a property of a framed curve, and that $K_{n_in_j} \equiv 0$.
 
 ## Behaviour regressions to declare
 
@@ -230,6 +272,7 @@ The previous eight were audited: **four had provably zero power** over the gauge
 2. `rate_of_strain` no longer accepts a raw callable.
 3. `SweptTube` requires a `director`; there is no automatic gauge.
 4. `nearest_tau` may route to the fallback (or raise) where it previously returned a confidently wrong maximum.
+5. `TubularChart` rejects zero-width (and, if we choose, reversed) `tau_bounds` that it previously accepted before hanging.
 
 ## Sign convention
 
@@ -248,3 +291,11 @@ Recorded so they are not reintroduced:
 - Torsion-period arithmetic: $21.8624 \to 21.8654$; and the rate is the torsion **per arc length** times $|r'|$, $0.275229\sqrt{1.09} = 0.287348\ \mathrm{rad/km}$.
 - "the seed must be passed unnormalised so `error_if` fires" — not a requirement; both the unnormalised zero and `normalize(0) = nan` raise, since `~(nan > tol)` is True.
 - Guard comparisons must use `~(x > tol)`, never `x <= tol` or `x < tol`: NaN is False for both, so a NaN would pass. `bishop.py:161` documents this; an earlier draft of the guard above walked into it anyway.
+
+## Second-pass verdicts on the first audit
+
+- `jacobian_factor` equals `det(J)/||gamma'||` at six points including `n2 != 0`, mixed signs, and past the focal distance — ratio `1.000000` for both builders.
+- AD through `nearest_tau`'s implicit differentiation is correct and **extends to second order**: against a `scipy.brentq` reference, `dtau*/da = -0.4290480985` (fwd and rev) vs `-0.4290481925`, and `d2tau*/da2 = -0.9999608376` vs `-0.99995952`. A naive central difference of the second derivative returns `-1.703`, which is amplified solver noise, not a defect.
+- `rate_of_strain` matches a central difference of the metric to 1.27e-11.
+- `rotation_matrices` batching agrees with per-tau to <= 2.6e-11 across sorted, unsorted, duplicated, batch-of-one and all-negative batches; `vmap`/`jit` agree with eager.
+- `ArcLength` and `AtTime` composed in either order agree to **0.0** once `t` is bound, and their `d/dt` to 1.4e-11 — corroborating #828's own measurement that the ordering hazard is not real for this quantity. `LagrangianArcLength` is the reading that genuinely differs.
