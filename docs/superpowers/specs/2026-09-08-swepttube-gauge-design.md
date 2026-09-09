@@ -73,11 +73,10 @@ $\widehat{d\mathbf{T}/d\tau}$ gives $\vert K\vert = 1.4\times10^{-16}$ under rig
 
 | t     | seed       | $\gamma_{\tau\tau}$ |
 | ----- | ---------- | ------------------- |
-| 0.499 | `[0,-1,0]` | 4.395369            |
-| 0.501 | `[0,+1,0]` | 3.353607            |
+| 0.499 | `[0,-1,0]` | 1.484697            |
+| 0.501 | `[0,+1,0]` | 0.709800            |
 
-evaluated at $(\tau, n_1, n_2) = (0.5, 0.2, 0)\,\mathrm{km}$, `tau_bounds` $= (0,1)\,\mathrm{km}$. $\gamma$ jumps by 1.04 over $\Delta t = 0.002$ where the true $\Delta\gamma/2\Delta t \approx
--260$. **The world-axis seed is continuous there** — this rule is _worse_ than the status quo at inflections.
+evaluated at $(\tau, n_1, n_2) = (0.5, 0.2, 0)\,\mathrm{km}$, `tau_bounds` $= (0,1)\,\mathrm{km}$. confirmed analytically: $|r'|^2 = 1.0625$ and $\kappa = 0.913518$ at $s = 0.5$, so $\gamma_{\tau\tau} = 1.0625\,(1 \mp 0.2\kappa)^2$ gives exactly these. (An earlier draft recorded 4.395369 / 3.353607, unattainable at the stated point — that family never reaches $|r'| \approx 1.96$ in bounds.) $\gamma$ jumps by 0.775 across $\Delta t = 0.002$, a _spurious_ rate of $\approx -390$. **The world-axis seed is continuous there** — this rule is _worse_ than the status quo at inflections.
 
 ### 4. Centroid seed — equivariant and inflection-continuous, but its own locus is worse
 
@@ -102,13 +101,15 @@ It fails anyway. On the 3-D near-miss $r(s,t) = (s,\ (t-0.5)s^2 + s^3/3,\ \varep
 | 0.010 | 2.5494e-02 | no | -19.0809 | -0.0382 | 498.4 |
 | 0.005 | 1.2753e-02 | no | -38.4847 | -0.0382 | 1006.2 |
 
-The product `rel.err` $\times\ \rho$ is `11.6, 12.4, 12.7, 12.9` — constant. So
+The product `rel.err` $\times\ \rho$ is `11.6, 12.4, 12.7, 12.9` — constant _for this family, this reference director and these bounds_. So
 
 $$
 \text{relative error} \;\approx\; \frac{12.7}{\rho}.
 $$
 
-The guard measures how flat $\tau_0$ is; the error scales as the **inverse** of that same quantity. Bounding the error at 100% needs $\rho_{\text{tol}} > 12.7$, but a circle sits at $\rho = 1.0$, a helix at $1.0$, a catenary at $2.04$. **No tolerance catches the bad cases without rejecting every ordinary curve.** This is not a tuning problem.
+The guard measures how flat $\tau_0$ is; the error scales as the **inverse** of that same quantity.
+
+**The exponent is the result; the coefficient is not.** Independent review reproduced $\rho$ and $K$ to every digit above, but measured the product as **1.88–1.96** with a different reference director and **3.94–4.10** with `tau_bounds` widened to $(0,4)$. So `12.7` is a property of one family, one director and one bounds choice. Do not read it as "$\rho_{\text{tol}} > 12.7$ would work": the coefficient is unbounded over families, so **no finite tolerance works at all** — the stronger statement. A circle sits at $\rho = 1.0$, a helix at $1.0$, a catenary at $2.04$, so any tolerance large enough to catch a bad case rejects ordinary curves. This is not a tuning problem.
 
 ### The structural result
 
@@ -153,11 +154,13 @@ class SweptTube(eqx.Module):
 
 `director` is **required and has no default.** It is a callable of $t$, not a fixed vector, because a materially spinning rod needs a $t$-dependent frame. Omitting it raises, with a message stating that the gauge is director data the library cannot derive and pointing at the rejected-alternatives section.
 
+`director` is required **only on the Bishop path**. `FrenetSerretBuilder` takes no seed, so passing one is a caller error, rejected at construction rather than silently ignored — as written earlier ("omitting it raises", plus a selectable builder) the two rules contradicted each other.
+
 `builder` carries the choice because `FrenetSerretBuilder` needs no seed and is _already_ equivariant ($7.6\times10^{-17}$, and exactly `0.0` on axis-aligned rotations) — $\mathbf{N}$ and $\mathbf{B}$ are fixed pointwise by the curve. The gauge bug is Bishop-specific. Frenet is also required for the off-diagonal acceptance test.
 
 ### `rate_of_strain` narrows to `SweptTube`
 
-The raw-callable overload is removed. An opaque `Callable[[Any], Any]` cannot be inspected, so the gauge contract could only ever be advisory. `rate_of_strain` is new in #828 and unreleased.
+The raw-callable overload is removed. Note what that does and does not buy: `director` is itself an opaque `Callable`, so the gauge is no more _inspectable_ than before. Narrowing buys exactly one thing — **omission raises** rather than silently defaulting, which is criterion 5. The earlier claim that it makes the contract "structural rather than advisory" overstated it. `rate_of_strain` is new in #828 and unreleased.
 
 It must additionally either invoke the reach guard or document that it is unvalidated outside the tube: at present, past the focal distance $\gamma_{\tau\tau} = 1.379\times10^{-3}$ with nothing raising, and the trace identity breaks by two orders _at_ the focal distance ($8.6\times10^{-2}$ vs $7.736$), because `metric_matrix`/`rate_of_strain` never call `TubularChart.check_data(values=True)`.
 
@@ -165,27 +168,29 @@ It must additionally either invoke the reach guard or document that it is unvali
 
 `_auto_initial_normal` is removed; a `BishopBuilder` with no `initial_normal` raises. By the lemma, a chart's $(n_1, n_2)$ coordinates genuinely depend on the seed whenever $\kappa \neq 0$ and $n \neq 0$, so an automatic seed makes the coordinates themselves arbitrary and undocumented. This is the same principle as `SweptTube`'s required `director`, one layer down.
 
-> **Scale, stated plainly.** ~258 references across 25+ files, including doctests. A narrower seed change measured 116 failures against 991 passes; this touches every construction site, so it is larger. Chosen deliberately over leaving the bare default alone.
+> **Scale, measured not estimated.** **157 `BishopBuilder(` construction sites across 38 files**, of which 8 already pass `initial_normal` — so **~149 need a seed**. (An earlier draft said "~258 references across 25+ files"; 260 is the count of _references_, which is not the actionable number.)
+>
+> **The stated justification was wrong.** An earlier draft called the auto seed "arbitrary and undocumented". Arbitrary yes; undocumented no — it is described at `bishop.py:38-39` and in `_auto_initial_normal`'s own docstring. The honest case is that the gauge is arbitrary _and load-bearing_ for $(n_1, n_2)$ whenever $\kappa \neq 0$ and $n \neq 0$, so a caller who never chose it still depends on it.
+>
+> **Independent of #829.** `SweptTube` works either way, so this must not ride in the same PR as the new type and the ten criteria — that PR would be unreviewable and unrevertable. Split out.
 
 ## Other defects found
 
 Independent of the gauge work, from an audit of `curveframes`.
 
-### D1. `nearest_tau` can return a local _maximum_ (HIGH — silently wrong)
+### D1. `nearest_tau` returned the wrong nearest point (HIGH) — **shipped**
 
-`nearest.py:44-52` claims the bracket "cannot land on the maximum next door". False when the curve has structure finer than the seed spacing: the bracket holds three stationary points, the sign pair is $(-,+)$, `Bisection(flip="detect")` accepts it, and the solve reports success.
+Two distinct defects, recorded together because the first fix was mistaken for a fix of the second.
 
-With `n_seed=64` (the default) on `(t, 0.3 sin 20t, 0)` over $[0,10]$:
+**D1a — bisection accepted a maximum.** The bracket test asked only whether the residual changed sign, and it crosses positive-to-negative across a minimum but negative-to-positive across a maximum, so `sign(r_lo) != sign(r_hi)` accepted both. Fixed in #841: require the minimum's orientation, plus a post-check that the answer is no worse than the scan's argmin.
 
-|  |  |
-| --- | --- |
-| returned $\tau$ | 7.14220166655414 (second derivative **-17.82**: a maximum) |
-| true nearest $\tau$ | 7.1866 |
-| distance | 0.0997 km vs 0.0064 km — **15.6× too far** |
+**D1b — the bracket was wide enough to hold two minima.** #841 did _not_ close the original finding, and an earlier draft of this spec asserted that it had. The bracket is `2 * spacing` wide; on the reproducer that is 0.31746 against a wiggle period of 0.31416, so it held minima at 8.34701 (distance 0.107) and 8.46367 (distance 0.011), and bisection returned the first. **Both of #841's guards pass on that answer** — it is a genuine minimum (second derivative +59.2) and it is closer than every scan seed.
 
-`pt_map` returns the wrong labels with no error and **the round trip does not detect it** (the forward map reconstructs $x$ to 3e-15). The focal guard does not fire. In a 60-query sweep, 16/60 raised non-convergence and this was the worst _successful_ case.
+It is _not_ a wrong-basin failure, as #847 first claimed and I corrected: the argmin seed is within one spacing of the true minimiser and its basin ranks first of three, so searching additional local-minimum seeds would not have helped. Fixed by refining inside the coarse interval before bracketing (0.31746 → 0.01008, one minimum), plus counting the residual's turns inside the refined bracket and refusing if more than one remains. Tracked as #847.
 
-Fix: post-check that the accepted root is a minimum (`dist2(root) <= dist2(tau0)`), routing to the fallback otherwise. The docstring's "guaranteed within one spacing" is an assumption on `n_seed`, not a guarantee, and should say so.
+Probe: `x = (8.45268, -0.10722, 0)` km on `(t, 0.3 sin 20t, 0)` over `(0, 10)` s at the default `n_seed = 64`. Result 9.62x → 1.01x at float32; at float64, 8.46367448 against Brent's 8.4636744833. The residual float32 gap is the solver's own `sqrt(eps)` tolerance.
+
+> **Lesson, and it generalises to this whole list.** A guard that inspects the _answer_ cannot detect a correct answer to the wrong question. Both of #841's checks are sound, and both passed on a 9.6x-wrong result.
 
 ### D2. `FrenetSerretBuilder` returns an all-NaN frame at an inflection (MEDIUM)
 
@@ -195,9 +200,9 @@ Fix: post-check that the accepted root is a minimum (`dist2(root) <= dist2(tau0)
 
 `nearest.py:139-141` derives one scalar $\sqrt{\epsilon}$ and uses it as a tolerance in $\tau$ (Bisection), on a residual that is a **length** (Newton), and again at `nearest.py:171`. The same geometry converges differently in km and m: error `-3.6e-09` vs `+2.1e-12`, ratio tracking the unit scale exactly. The residual tolerance should be scaled by a length scale.
 
-### D4. `nearest_tau` uses `rotation_matrix()[0]` where `tangent()` suffices (LOW, perf)
+### D4. `nearest_tau` used `rotation_matrix()[0]` where `tangent()` suffices — **shipped**
 
-`nearest.py:132`. Value bit-identical (max abs diff `0.0`); measured **110×** slower (582.9 ms vs 5.3 ms). The residual is evaluated by bisection, Newton, two bracket probes and again under implicit differentiation — roughly 130 needless transport solves per inverse `pt_map`.
+Bit-identical value, ~110x faster eagerly. Folded into the D1b fix rather than deferred: the turn-counting probe evaluates the residual on a grid, which was unaffordable at the old cost. Targeted tests went from 70 s to 12 s.
 
 ### D5. Zero-width `tau_bounds` hangs forever (HIGH)
 
@@ -231,6 +236,12 @@ For a rigidly rotating rod (`sigma * (cos t, sin t, 0)`, `station=Q(1.3,'km')`),
 
 Relatedly, `jacobian_factor`'s docstring claim that it "equals `1-k1*n1-k2*n2` at _any_ parametrisation" is false on this branch: at `n=0` it equals `cos(angle(velocity, spatial tangent))`.
 
+### D11. #841's post-check is not sound for worldtubes (LOW, latent)
+
+The "no worse than the scan's argmin" check added in #841 assumes the answer minimises `dist2`. On a station-pinned worldtube the chart inverse is the perpendicular foot, whose distance can exceed the sampled minimum -- the builder's tangent is the curve's _spatial_ tangent while `tau` is a time, so the residual's root and `dist2`'s minimum part company.
+
+Currently harmless: measured 0.000400 against a coarse `d_seed` of 0.000478, so it passes. A worldtube whose foot lies farther than the coarse minimum would be refused wrongly. Found while fixing D1b, where tightening `d_seed` with a finer grid made exactly this fire.
+
 ### D10. Reversed `tau_bounds` silently accepted (LOW)
 
 `TubularChart(b, tau_bounds=(Q(2*pi,'s'), Q(0,'s')))` builds, and `nearest_tau` happens to return the right answer (`1.000000`, true 1.0). Undocumented, and `_solve_tau_dense` and `_S_MAX_MARGIN` both assume ascending bounds.
@@ -247,24 +258,30 @@ The previous eight were audited: **four had provably zero power** over the gauge
 | # | Check | Power |
 | --- | --- | --- |
 | 1 | Rigid rotation, **generic axis**, materially correct director: $\vert K\vert < 10^{-9}$ | The headline |
-| 2 | Same rotation, deliberately _wrong_ (constant) director: $\vert K\vert \neq 0$ | Pins that the caller's gauge is reported faithfully, not silently corrected |
-| 3 | Breathing circle $R(t) = 1 + t/2$: $K_{\tau\tau} = (R + n_1)\dot R$ at $n_1 = 0, \pm0.3$ | Analytic, with $\kappa \neq 0$ so the gauge matters |
+| 2 | Same rotation, constant director: assert $K_{\tau\tau}$ against its closed form $\vert r'\vert^2(1-n\cdot k)\,a\,(n\times k)_z$ — measured 0.108856 | Pins that the caller's gauge is reported faithfully. **Not** "$\neq 0$", which passes on 1e-14 solver noise — the exact vacuity this table replaced |
+| 3 | Breathing circle $R(t) = 1 + t/2$: $K_{\tau\tau} = (R + n_1)\dot R$ at $n_1 = 0, \pm0.3$, director stated as the outward radial at $\tau_0$ | Analytic. **Narrower than it looks**: $T(\tau_0)$ does not rotate in $t$, so the status-quo auto seed is constant and passes this. It discriminates against a rotated director, not against the seed-drift bug |
 | 4 | Frenet off-diagonals against closed form $\gamma_{\tau n_1} = -\lVert\gamma'\rVert\sigma n_2$, $\gamma_{\tau n_2} = +\lVert\gamma'\rVert\sigma n_1$ | Reference values; "$\neq 0$" passes on a sign error |
 | 5 | Missing `director` raises | The design's core contract |
 | 6 | `jit` and `vmap` over scalar `t` | Killed the earlier guard rule |
-| 7 | Past the focal distance: raises, or documented unvalidated. Assert the singular set per builder — Bishop `1-k1n1-k2n2=0`, Frenet `1-kappa*n1=0` (independent of `n2`) | D-series gap |
+| 7 | Past the focal distance it **raises** — the "or documented unvalidated" escape is deleted, since an implementation passed either way. Assert the singular set per builder — Bishop `1-k1n1-k2n2=0`, Frenet `1-kappa*n1=0` (independent of `n2`) | D-series gap |
 | 8 | $K_{n_in_j} \equiv 0$ pinned as a known structural limit | Documents rather than tests |
 | 9 | Uniform stretch of a straight line, $K_{\tau\tau} = c(1+ct)$ | Plumbing only — no gauge power; keep, labelled as such |
 | 10 | $\gamma^{ij}K_{ij} = \partial_t\ln\sqrt{\det\gamma}$ | Plumbing only — labelled as such |
 
 ## Sequencing
 
-1. **PR 1 — D1 alone.** The only HIGH: a silently 15.6×-wrong answer through the public `pt_map`, independent of everything else. Reproducer becomes the test.
-2. **PR 2 — D5 and D6.** Both HIGH: a public-API hang (zero-width `tau_bounds`) and a documented-behaviour regression (`s_max`). Both live in `nearest.py`/`arclength.py`.
-3. **PR 3 — D2, D3, D4, D7-D10.** The remaining guards, diagnoses and docs.
-4. **PR 4 — cleanup.** Fix `$$K*{ij}$$` / `\partial*t\gamma*{ij}` at `packages/coordinaxs.curveframes/docs/curve-charts.md:340`. **Root cause proven:** the repo's own `prettier-markdown-no-wrap` hook, pinned at `v3.8.1` with `--prose-wrap=never`, rewrites `_` to `*` inside a single-line `$$…$$`; reproduced byte-for-byte from clean input, and prettier 3 latest does not do it. The author wrote correct LaTeX and the hook mangled it afterwards, which is why it shipped and why `nox -s docs` stayed green. **Verified fix:** put the `$$` delimiters on their own lines — that form round-trips unchanged. All display math in the docs must use that form. Also: state the sign convention; `strain.py:81` `.matrix.value` -> `ustrip(unit0)`; `strain.py:75` drop the dead branch.
-5. **PR 5 — `SweptTube`.** The type, the required director, the `BishopBuilder` breaking change, and criteria 1–10. Closes #829.
-6. **PR 6 — documentation.** $K_{ij} = \tfrac12(\mathcal{L}_T\gamma)_{ij}$ with $T$ the tube's declared time flow. Say **"by analogy with ADM"**, not "the lapse is 1": Galilean spacetime has no non-degenerate 4-metric, so lapse and shift are not defined — the repo's own `test_adm_structure.py` already says this. State that $K$ is a slice 2-tensor only under _time-independent_ spatial relabelling, that rate of strain of a tube is a property of a framed curve, and that $K_{n_in_j} \equiv 0$.
+Revised — several of these have shipped since the first draft.
+
+1. ~~**PR 1 — D1 alone.**~~ **Done.** D1a shipped as #841; D1b, which #841 did not fix, is #847, and carries D4 with it.
+2. **#844 — D5 and D6.** Open. The zero-width hang (code) and the `s_max` documentation.
+3. **#845 / #846 — unrelated core defects** found by the same audit: `angle_between` collapsing to zero at float32, and the prolate metric NaN on the `nu = 0` plane.
+4. **Next — D2, D3, D7–D10.** The remaining guards, diagnoses and docs.
+5. **Then — cleanup.** Fix `$$K*{ij}$$` / `\partial*t\gamma*{ij}` at `packages/coordinaxs.curveframes/docs/curve-charts.md:340`. **Root cause proven:** the repo's own `prettier-markdown-no-wrap` hook, pinned at `v3.8.1` with `--prose-wrap=never`, rewrites `_` to `*` inside a single-line `$$…$$`; reproduced byte-for-byte from clean input, and prettier 3 latest does not do it. **Verified fix:** put the `$$` delimiters on their own lines. Also: state the sign convention; `strain.py` `.matrix.value` -> `ustrip(unit0)` and the dead `t.value` branch.
+6. **Then — the `BishopBuilder` breaking change, on its own.** ~149 construction sites. Split out deliberately: it is independent of #829, and bundling it with the new type would make that PR unreviewable and unrevertable.
+7. **Then — `SweptTube`.** The type, the required director, and criteria 1–10. Closes #829.
+8. **Finally — documentation.** $K_{ij} = \tfrac12(\mathcal{L}_T\gamma)_{ij}$ with $T$ the tube's declared time flow. Say **"by analogy with ADM"**, not "the lapse is 1": Galilean spacetime has no non-degenerate 4-metric, so lapse and shift are not defined. State that $K$ is a slice 2-tensor only under _time-independent_ spatial relabelling, that rate of strain of a tube is a property of a framed curve, and that $K_{n_in_j} \equiv 0$.
+
+> **Line numbers in the D-series are 2–5 low** relative to `main` after #841 and #847. Re-anchor each before writing its PR rather than trusting the number here.
 
 ## Behaviour regressions to declare
 
