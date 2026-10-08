@@ -46,8 +46,9 @@ def _gram_values(g: AbstractMetricMatrix) -> jnp.ndarray:
     Cartesian ambient coordinates share a single unit, so the ambient metric in
     that chart is dimensionless and its bare values carry the whole content —
     which is what the caller's ``cart_unit^2 / (chart_unit_i * chart_unit_j)``
-    result unit assumes. ``AllowValue`` passes a bare matrix through and strips
-    a dimensionless one; a unitful one raises rather than losing its unit.
+    result unit assumes. ``AllowValue`` passes a bare matrix through and
+    converts a dimensionless one to plain numbers (so ``%`` scales by 0.01);
+    any other unit, angles included, raises rather than being dropped.
     """
     # `cast`: `ustrip` is typed to return `object`.
     return cast("jnp.ndarray", u.ustrip(AllowValue, "", g.to_dense().matrix))
